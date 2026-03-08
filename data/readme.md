@@ -1,11 +1,13 @@
 # source data
 
-- https://huggingface.co/datasets/m-a-p/COIG-CQIA/tree/main/ruozhiba
-- https://github.com/Leymore/ruozhiba
-- original tieba
+- from paper: COIG-CQIA
+  - https://huggingface.co/datasets/m-a-p/COIG-CQIA/tree/main/ruozhiba
+- from github:
+  - https://github.com/Leymore/ruozhiba
+- extracted from original tieba
   - https://tieba.baidu.com/p/10354221105
   - https://tieba.baidu.com/p/10130417881
-- ref
+- other refs
   - https://github.com/nick7nlp/evol-ruozhiba
   - https://zhuanlan.zhihu.com/p/698564550
 
