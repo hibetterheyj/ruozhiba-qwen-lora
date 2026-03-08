@@ -6,6 +6,8 @@
 - best306_2021_2H.json 整理自 [弱智吧2021年度306佳贴](https://tieba.baidu.com/p/7708339765) (下半年)
 - best295_2021_1H.json 整理自 [弱智吧2021年度306佳贴](https://tieba.baidu.com/p/7708339765) (上半年)
 - best365_2020.json 整理自 [弱智吧2020年度365佳贴](https://tieba.baidu.com/p/7339397421)
+- best336_2019.json 整理自 [ruozhiba-post-annual.json](https://github.com/Leymore/ruozhiba/blob/main/data/ruozhiba-post-annual.json)
+- best176_2018.json 整理自 [ruozhiba-post-annual.json](https://github.com/Leymore/ruozhiba/blob/main/data/ruozhiba-post-annual.json)
 
 
 ```
@@ -50,4 +52,16 @@
 - 匹配到 353条 帖子
 - 缺失编号： [4, 5, 17, 24, 32, 33, 42, 76, 188, 224, 269, 282, 336]
 - 已保存到 data/tieba/best365_2020.json
+
+2019年数据 ：
+
+- 匹配到 333条 帖子
+- 缺失编号： [10, 162, 285]
+- 已保存到 data/tieba/best336_2019.json
+
+2018年数据 ：
+
+- 匹配到 170条 帖子
+- 缺失编号： [18, 63, 65, 84, 129, 142, 148]
+- 已保存到 data/tieba/best176_2018.json
 ```

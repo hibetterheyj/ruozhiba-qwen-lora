@@ -17,6 +17,13 @@ Processes raw ruozhiba annual post data. Extracts post number and text content f
 ### filter_duplicates.py
 Finds and removes duplicate content between ruozhiba and tieba datasets. Performs exact matching and fuzzy matching (threshold=0.5) using SequenceMatcher. Outputs filtered ruozhiba data and match records.
 
+### extract_annual_data.py
+Extracts annual post data from filtered ruozhiba dataset and saves to tieba format. Filters by creation time ranges:
+- 2018 data: ctime <= "2019-01-01 13:37" → `best176_2018.json`
+- 2019 data: "2019-12-15 23:00" <= ctime <= "2020-01-04 19:32" → `best336_2019.json`
+
+Input: `data/ruozhiba/data/ruozhiba-post-annual-processed_filtered.json`, Output: `data/tieba/best176_2018.json`, `data/tieba/best336_2019.json`. Data source: https://github.com/Leymore/ruozhiba/blob/main/data/ruozhiba-post-annual.json
+
 ## Configuration Files
 
 ### classify_config.yaml
