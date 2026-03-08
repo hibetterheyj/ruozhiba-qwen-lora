@@ -64,13 +64,23 @@ system_prompt: |
   }
 
 files_to_process:
-  - input: best365_2024.json
-    output: best365_2024_classified.json
-  - input: best365_2023.json
-    output: best365_2023_classified.json
+  # - input: best365_2025.json
+  #   output: best365_2025_classified.json
+  # - input: best365_2024.json
+  #   output: best365_2024_classified.json
+  # - input: best365_2023.json
+  #   output: best365_2023_classified.json
+  # - input: best365_2022.json
+  #   output: best365_2022_classified.json
+  - input: best295_2021_1H.json
+    output: best295_2021_1H_classified.json
+  - input: best306_2021_2H.json
+    output: best306_2021_2H_classified.json
+  - input: best365_2020.json
+    output: best365_2020_classified.json
 
 processing:
-  num_processes: 5
+  num_processes: 4
   sleep_time: 0.5
   temperature: 0.3
   max_tokens: 1000
