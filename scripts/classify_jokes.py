@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Tuple
 import yaml
 from openai import OpenAI
 from dotenv import load_dotenv
+from tenacity import retry, stop_after_attempt, wait_exponential
+from tqdm import tqdm
 
 
 load_dotenv()
@@ -30,48 +32,49 @@ def get_client() -> Tuple[OpenAI, str]:
     return OpenAI(api_key=api_key, base_url=base_url), model_id
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def classify_text(
     client: OpenAI, model_id: str, text: str, system_prompt: str, temperature: float, max_tokens: int
 ) -> Dict[str, Any]:
+    response = client.chat.completions.create(
+        model=model_id,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text}
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        response_format={"type": "json_object"}
+    )
+
+    content = response.choices[0].message.content
+
+    if content.strip().startswith("```"):
+        lines = content.strip().split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        content = "\n".join(lines)
+
     try:
-        response = client.chat.completions.create(
-            model=model_id,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": text}
-            ],
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
-
-        content = response.choices[0].message.content
-
-        json_start = content.find("{")
-        json_end = content.rfind("}") + 1
-        if json_start != -1 and json_end > json_start:
-            json_str = content[json_start:json_end]
-            return json.loads(json_str)
-        else:
-            return {"error": "No JSON found in response", "raw_response": content}
-
+        return json.loads(content)
     except json.JSONDecodeError as e:
-        return {"error": f"JSON decode error: {str(e)}", "raw_response": content if 'content' in dir() else None}
-    except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"JSON decode error: {str(e)}", "raw_response": content}
 
 
 def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) -> Dict[str, Any]:
     item, model_id, system_prompt, temperature, max_tokens, sleep_time, index = args
     client, _ = get_client()
 
-    print(f"Processing item {index + 1}: {item['text'][:30]}...")
-
-    classification = classify_text(client, model_id, item["text"], system_prompt, temperature, max_tokens)
+    try:
+        classification = classify_text(client, model_id, item.get("text", ""), system_prompt, temperature, max_tokens)
+    except Exception as e:
+        classification = {"error": f"API Request failed after retries: {str(e)}"}
 
     result = {
-        "no": item["no"],
-        "text": item["text"],
-        "score": item["score"],
+        "no": item.get("no", index),
+        "text": item.get("text", ""),
         "classification": classification
     }
 
@@ -99,11 +102,18 @@ def process_file(
         for i, item in enumerate(data)
     ]
 
+    results: List[Dict[str, Any]] = []
     with Pool(processes=num_processes) as pool:
-        results: List[Dict[str, Any]] = pool.map(process_item, args_list)
+        for result in tqdm(
+            pool.imap_unordered(process_item, args_list),
+            total=len(args_list),
+            desc="Classifying"
+        ):
+            results.append(result)
 
-    results.sort(key=lambda x: x["no"])
+    results.sort(key=lambda x: x.get("no", 0))
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
