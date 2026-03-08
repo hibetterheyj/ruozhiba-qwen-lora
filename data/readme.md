@@ -10,6 +10,12 @@
 - other refs
   - https://github.com/nick7nlp/evol-ruozhiba
   - https://zhuanlan.zhihu.com/p/698564550
+  - https://github.com/KMnO4-zx/extract-dialogue
+  - https://github.com/KMnO4-zx/huanhuan-chat
+  - qwen3-llama-factory: https://qwen.readthedocs.io/en/latest/training/llama_factory.html
+  - https://github.com/QwenLM/Qwen3/blob/main/examples/llama-factory/finetune-zh.md
+  - https://help.aliyun.com/zh/pai/use-cases/fine-tune-a-llama-3-model-with-llama-factory
+  - https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory
 
 * [m-a-p/COIG-CQIA · Datasets at Hugging Face](https://link.zhihu.com/?target=https%3A//huggingface.co/datasets/m-a-p/COIG-CQIA)
 
