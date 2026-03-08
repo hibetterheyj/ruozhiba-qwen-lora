@@ -1,17 +1,10 @@
-"""
-Process ruozhiba-post-annual.json to extract no and text fields from content.
-"""
-
 import json
 import re
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Dict, List, Any, Tuple
 
 
-def extract_no_and_text(content: str) -> tuple:
-    """
-    Extract number and text from content string.
-    Pattern: 1-3 digits followed by '.' or '、'
-    """
+def extract_no_and_text(content: str) -> Tuple[int, str]:
     pattern = r'^(\d{1,3})[.、](.+)$'
     match = re.match(pattern, content.strip())
     if match:
@@ -21,10 +14,7 @@ def extract_no_and_text(content: str) -> tuple:
     return None, content.strip()
 
 
-def process_ruozhiba_data(input_path: str, output_path: str) -> None:
-    """
-    Process ruozhiba data file and extract structured fields.
-    """
+def process_ruozhiba_data(input_path: Path, output_path: Path) -> None:
     with open(input_path, 'r', encoding='utf-8') as f:
         data: List[Dict[str, Any]] = json.load(f)
 
@@ -44,6 +34,7 @@ def process_ruozhiba_data(input_path: str, output_path: str) -> None:
 
     result.sort(key=lambda x: x.get('ctime', ''))
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
@@ -52,7 +43,8 @@ def process_ruozhiba_data(input_path: str, output_path: str) -> None:
 
 
 if __name__ == '__main__':
-    input_file = '../data/ruozhiba/data/ruozhiba-post-annual.json'
-    output_file = '../data/ruozhiba/data/ruozhiba-post-annual-processed.json'
+    script_dir = Path(__file__).parent
+    input_file = script_dir.parent / 'data' / 'ruozhiba' / 'data' / 'ruozhiba-post-annual.json'
+    output_file = script_dir.parent / 'data' / 'ruozhiba' / 'data' / 'ruozhiba-post-annual-processed.json'
 
     process_ruozhiba_data(input_file, output_file)
