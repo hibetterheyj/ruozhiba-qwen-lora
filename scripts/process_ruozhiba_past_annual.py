@@ -42,6 +42,8 @@ def process_ruozhiba_data(input_path: str, output_path: str) -> None:
         }
         result.append(new_item)
 
+    result.sort(key=lambda x: x.get('ctime', ''))
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
