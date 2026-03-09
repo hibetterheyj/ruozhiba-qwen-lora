@@ -141,6 +141,9 @@ def classify_text(
         response_format={"type": "json_object"}
     )
 
+    if not response.choices or not response.choices[0].message.content:
+        return {"error": "API returned empty content or triggered safety filters."}
+
     content = response.choices[0].message.content
 
     result = extract_json_from_response(content)
@@ -234,19 +237,23 @@ def process_file(
             for future in tqdm(as_completed(futures), total=len(args_list), desc="Classifying"):
                 results.append(future.result())
     except KeyboardInterrupt:
-        print("\n  [Warn] Task interrupted by user! Saving progress...")
+        tqdm.write("\n  [Warn] Task interrupted by user! Saving progress...")
     except Exception as e:
-        print(f"\n  [Error] Unexpected error: {e}. Saving progress...")
+        tqdm.write(f"\n  [Error] Unexpected error: {e}. Saving progress...")
     finally:
         if results:
             all_results = list(existing_results.values()) + results
             all_results.sort(key=lambda x: x.get("no", 0))
 
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, "w", encoding="utf-8") as f:
+            tmp_output_path = output_path.with_suffix('.json.tmp')
+
+            with open(tmp_output_path, "w", encoding="utf-8") as f:
                 json.dump(all_results, f, ensure_ascii=False, indent=2)
 
-            print(f"  Progress saved. Total completed: {len(all_results)}")
+            tmp_output_path.replace(output_path)
+
+            tqdm.write(f"  Progress saved. Total completed: {len(all_results)}")
 
 
 def main():

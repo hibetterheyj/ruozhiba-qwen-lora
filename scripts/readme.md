@@ -5,6 +5,29 @@
 ### classify_jokes.py
 Classifies tieba joke data using LLM API. Reads input files specified in `classify_config.yaml`, sends text to LLM for multi-label classification (8 categories including 古典弱智, 奇怪提问, 弱智科学家, etc.), and outputs classification results with confidence scores.
 
+**Optimization History (for report reference):**
+
+1. **JSON Parsing Robustness** - Addressed LLM-generated JSON format errors:
+   - `fix_double_escaped_quotes()`: Fixes `\\"` → `"` double-escaped quotes
+   - `fix_unescaped_quotes()`: Fixes unescaped quotes inside JSON string values
+   - `extract_json_from_response()`: Multi-layer fallback extraction (Markdown stripping → direct parse → quote fixes → regex pattern matching)
+   - Preserves all original data fields using `{**item, ...}` unpacking
+
+2. **Concurrency Optimization** - Improved I/O-bound task performance:
+   - Replaced `multiprocessing.Pool` with `ThreadPoolExecutor` (better suited for API calls)
+   - Reused single OpenAI client instance across all threads (avoided 10000x redundant instantiation)
+
+3. **Checkpoint & Resume** - Prevented data loss on crash/interruption:
+   - `load_existing_results()`: Skips already-processed items by `no` field
+   - `try-except-finally`: Ensures progress saved on `KeyboardInterrupt` or exceptions
+   - Pre-assigned global `no` indices to prevent ID conflicts
+
+4. **Edge Case Handling** - Production-grade reliability:
+   - Atomic write: Write to `.json.tmp` then `replace()` to prevent file corruption
+   - Defensive API response extraction: Checks for empty `choices` or `content` (Content Filter cases)
+   - `tqdm.write()` instead of `print()`: Preserves progress bar rendering
+   - Renamed `num_processes` → `max_workers` for semantic accuracy
+
 ### classify_cqia.py
 Classifies CQIA dataset using LLM API. Similar to `classify_jokes.py` but processes CQIA format data with instruction/output pairs. Configuration in `classify_cqia_config.yaml`.
 
