@@ -1,8 +1,9 @@
 import json
+import re
 import time
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 from openai import OpenAI
@@ -32,6 +33,99 @@ def get_client() -> Tuple[OpenAI, str]:
     return OpenAI(api_key=api_key, base_url=base_url), model_id
 
 
+def fix_double_escaped_quotes(s: str) -> str:
+    while '\\"' in s:
+        s = s.replace('\\"', '"')
+    return s
+
+
+def fix_unescaped_quotes(s: str) -> str:
+    result = []
+    in_string = False
+    escape_next = False
+
+    for i, char in enumerate(s):
+        if escape_next:
+            result.append(char)
+            escape_next = False
+            continue
+
+        if char == "\\":
+            escape_next = True
+            result.append(char)
+            continue
+
+        if char == '"':
+            if not in_string:
+                in_string = True
+                result.append(char)
+            else:
+                if i + 1 < len(s) and s[i + 1] in [",", "}", "]", ":", " ", "\n", "\t"]:
+                    in_string = False
+                    result.append(char)
+                else:
+                    result.append('\\"')
+        else:
+            result.append(char)
+
+    return "".join(result)
+
+
+def extract_json_from_response(content: str) -> Optional[Dict[str, Any]]:
+    if not content:
+        return None
+
+    content = content.strip()
+
+    if content.startswith("```"):
+        lines = content.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        content = "\n".join(lines).strip()
+
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    try:
+        fixed = fix_double_escaped_quotes(content)
+        return json.loads(fixed)
+    except json.JSONDecodeError:
+        pass
+
+    try:
+        fixed = fix_unescaped_quotes(content)
+        return json.loads(fixed)
+    except json.JSONDecodeError:
+        pass
+
+    json_patterns = [
+        r'\{[\s\S]*"thought_process"[\s\S]*"top3_categories"[\s\S]*\}',
+        r'\{[\s\S]*\}',
+    ]
+
+    for pattern in json_patterns:
+        matches = re.findall(pattern, content)
+        for match in matches:
+            try:
+                return json.loads(match)
+            except json.JSONDecodeError:
+                try:
+                    fixed = fix_double_escaped_quotes(match)
+                    return json.loads(fixed)
+                except json.JSONDecodeError:
+                    try:
+                        fixed = fix_unescaped_quotes(match)
+                        return json.loads(fixed)
+                    except json.JSONDecodeError:
+                        continue
+
+    return None
+
+
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def classify_text(
     client: OpenAI, model_id: str, text: str, system_prompt: str, temperature: float, max_tokens: int
@@ -49,18 +143,11 @@ def classify_text(
 
     content = response.choices[0].message.content
 
-    if content.strip().startswith("```"):
-        lines = content.strip().split("\n")
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        content = "\n".join(lines)
+    result = extract_json_from_response(content)
+    if result:
+        return result
 
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError as e:
-        return {"error": f"JSON decode error: {str(e)}", "raw_response": content}
+    return {"error": "JSON decode error: Failed to parse response", "raw_response": content}
 
 
 def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) -> Dict[str, Any]:
@@ -73,6 +160,7 @@ def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) 
         classification = {"error": f"API Request failed after retries: {str(e)}"}
 
     result = {
+        **item,
         "no": item.get("no", index),
         "text": item.get("text", ""),
         "classification": classification

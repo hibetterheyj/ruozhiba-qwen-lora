@@ -72,12 +72,16 @@ files_to_process:
   #   output: best365_2023_classified.json
   # - input: best365_2022.json
   #   output: best365_2022_classified.json
-  - input: best295_2021_1H.json
-    output: best295_2021_1H_classified.json
+  # - input: best295_2021_1H.json
+  #   output: best295_2021_1H_classified.json
   - input: best306_2021_2H.json
     output: best306_2021_2H_classified.json
   - input: best365_2020.json
     output: best365_2020_classified.json
+  - input: best336_2019.json
+    output: best336_2019_classified.json
+  - input: best176_2018.json
+    output: best176_2018_classified.json
 
 processing:
   num_processes: 2
