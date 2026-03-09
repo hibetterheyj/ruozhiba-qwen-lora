@@ -1,7 +1,7 @@
 import json
 import re
 import time
-from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -150,9 +150,10 @@ def classify_text(
     return {"error": "JSON decode error: Failed to parse response", "raw_response": content}
 
 
-def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) -> Dict[str, Any]:
-    item, model_id, system_prompt, temperature, max_tokens, sleep_time, index = args
-    client, _ = get_client()
+def process_item(
+    args: Tuple[OpenAI, Dict[str, Any], str, str, float, int, float]
+) -> Dict[str, Any]:
+    client, item, model_id, system_prompt, temperature, max_tokens, sleep_time = args
 
     try:
         classification = classify_text(client, model_id, item.get("text", ""), system_prompt, temperature, max_tokens)
@@ -161,7 +162,7 @@ def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) 
 
     result = {
         **item,
-        "no": item.get("no", index),
+        "no": item.get("no"),
         "text": item.get("text", ""),
         "classification": classification
     }
@@ -171,11 +172,23 @@ def process_item(args: Tuple[Dict[str, Any], str, str, float, int, float, int]) 
     return result
 
 
+def load_existing_results(output_path: Path) -> Dict[int, Dict[str, Any]]:
+    if not output_path.exists():
+        return {}
+
+    try:
+        with open(output_path, "r", encoding="utf-8") as f:
+            existing_data: List[Dict[str, Any]] = json.load(f)
+        return {item.get("no"): item for item in existing_data if "no" in item}
+    except (json.JSONDecodeError, Exception):
+        return {}
+
+
 def process_file(
     input_path: Path,
     output_path: Path,
     system_prompt: str,
-    num_processes: int,
+    max_workers: int,
     temperature: float,
     max_tokens: int,
     sleep_time: float
@@ -183,29 +196,57 @@ def process_file(
     with open(input_path, "r", encoding="utf-8") as f:
         data: List[Dict[str, Any]] = json.load(f)
 
-    _, model_id = get_client()
+    for i, item in enumerate(data):
+        if "no" not in item:
+            item["no"] = i
+
+    existing_results = load_existing_results(output_path)
+    processed_nos = set(existing_results.keys())
+
+    items_to_process = [
+        item for item in data
+        if item.get("no") not in processed_nos
+    ]
+
+    total_items = len(data)
+    already_processed = len(processed_nos)
+    remaining = len(items_to_process)
+
+    print(f"  Total: {total_items}, Already processed: {already_processed}, Remaining: {remaining}")
+
+    if remaining == 0:
+        print(f"  All items already processed. Skipping.")
+        return
+
+    client, model_id = get_client()
 
     args_list = [
-        (item, model_id, system_prompt, temperature, max_tokens, sleep_time, i)
-        for i, item in enumerate(data)
+        (client, item, model_id, system_prompt, temperature, max_tokens, sleep_time)
+        for item in items_to_process
     ]
 
     results: List[Dict[str, Any]] = []
-    with Pool(processes=num_processes) as pool:
-        for result in tqdm(
-            pool.imap_unordered(process_item, args_list),
-            total=len(args_list),
-            desc="Classifying"
-        ):
-            results.append(result)
 
-    results.sort(key=lambda x: x.get("no", 0))
+    try:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(process_item, args): args for args in args_list}
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+            for future in tqdm(as_completed(futures), total=len(args_list), desc="Classifying"):
+                results.append(future.result())
+    except KeyboardInterrupt:
+        print("\n  [Warn] Task interrupted by user! Saving progress...")
+    except Exception as e:
+        print(f"\n  [Error] Unexpected error: {e}. Saving progress...")
+    finally:
+        if results:
+            all_results = list(existing_results.values()) + results
+            all_results.sort(key=lambda x: x.get("no", 0))
 
-    print(f"Classification completed. Results saved to: {output_path}")
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(all_results, f, ensure_ascii=False, indent=2)
+
+            print(f"  Progress saved. Total completed: {len(all_results)}")
 
 
 def main():
@@ -229,7 +270,7 @@ def main():
                 input_path=input_path,
                 output_path=output_path,
                 system_prompt=system_prompt,
-                num_processes=processing["num_processes"],
+                max_workers=processing["num_processes"],
                 temperature=processing["temperature"],
                 max_tokens=processing["max_tokens"],
                 sleep_time=processing["sleep_time"]
