@@ -1,3 +1,4 @@
+import glob
 import json
 import re
 import time
@@ -264,6 +265,13 @@ def update_file(file_path: Path, repaired_items: List[Dict[str, Any]]) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def get_classified_files(data_dir: Path) -> List[str]:
+    """Find all files ending with classified.json in the data directory."""
+    pattern = str(data_dir / "*classified.json")
+    files = glob.glob(pattern)
+    return sorted([Path(f).name for f in files])
+
+
 def main():
     script_dir = Path(__file__).parent
     config_path = script_dir / "classify_config.yaml"
@@ -274,13 +282,7 @@ def main():
     system_prompt = config["system_prompt"]
     processing = config["processing"]
 
-    files_to_check = [
-        "best365_2025_classified.json",
-        "best365_2024_classified.json",
-        "best365_2023_classified.json",
-        "best365_2022_classified.json",
-        "best295_2021_1H_classified.json",
-    ]
+    files_to_check = get_classified_files(data_dir)
 
     print("=" * 60)
     print("Classification File Check Report")
