@@ -176,12 +176,17 @@ def process_item(
 
 
 def load_existing_results(output_path: Path) -> Dict[int, Dict[str, Any]]:
-    if not output_path.exists():
+    jsonl_path = output_path.with_suffix('.jsonl')
+    if not jsonl_path.exists():
         return {}
 
     try:
-        with open(output_path, "r", encoding="utf-8") as f:
-            existing_data: List[Dict[str, Any]] = json.load(f)
+        existing_data: List[Dict[str, Any]] = []
+        with open(jsonl_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    existing_data.append(json.loads(line))
         return {item.get("no"): item for item in existing_data if "no" in item}
     except (json.JSONDecodeError, Exception):
         return {}
@@ -229,13 +234,17 @@ def process_file(
     ]
 
     results: List[Dict[str, Any]] = []
+    jsonl_path = output_path.with_suffix('.jsonl')
 
     try:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(process_item, args): args for args in args_list}
 
             for future in tqdm(as_completed(futures), total=len(args_list), desc="Classifying"):
-                results.append(future.result())
+                result = future.result()
+                results.append(result)
+                with open(jsonl_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(result, ensure_ascii=False) + "\n")
     except KeyboardInterrupt:
         tqdm.write("\n  [Warn] Task interrupted by user! Saving progress...")
     except Exception as e:
@@ -246,14 +255,13 @@ def process_file(
             all_results.sort(key=lambda x: x.get("no", 0))
 
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            tmp_output_path = output_path.with_suffix('.json.tmp')
 
-            with open(tmp_output_path, "w", encoding="utf-8") as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(all_results, f, ensure_ascii=False, indent=2)
 
-            tmp_output_path.replace(output_path)
-
             tqdm.write(f"  Progress saved. Total completed: {len(all_results)}")
+            tqdm.write(f"  JSONL: {jsonl_path}")
+            tqdm.write(f"  JSON: {output_path}")
 
 
 def main():
