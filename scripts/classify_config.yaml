@@ -80,7 +80,7 @@ files_to_process:
     output: best365_2020_classified.json
 
 processing:
-  num_processes: 4
-  sleep_time: 0.5
+  num_processes: 2
+  sleep_time: 1
   temperature: 0.3
-  max_tokens: 1000
+  max_tokens: 1500
