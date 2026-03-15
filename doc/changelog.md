@@ -1,5 +1,35 @@
 # Changelog
 
+## 2025-03-15 — Phase 2.4 显存水位探测 — Batch Size 动态压测
+
+### 概述
+
+通过小步快跑压测法（`max_steps: 15`），在 L20Z 80GB 单卡上逐级上探 `per_device_train_batch_size`，确定正式训练的安全临界值。
+
+### 新增
+- `scripts/probe_batch_size.sh` — Batch Size 动态压测脚本（自动激活 venv，自动清理临时文件）
+
+### 压测结果 (GPU 1, Qwen3-4B + LoRA rank=8, cutoff_len=2048)
+
+| Batch Size | 结果 | 备注 |
+|-----------|------|------|
+| 16 | ✅ Pass | |
+| 24 | ✅ Pass | |
+| 32 | ✅ Pass | 最大安全值 |
+| 48 | ❌ OOM | `torch.OutOfMemoryError`: 需分配 21.74 GiB，仅剩 18.03 GiB |
+
+### 结论
+
+- **最大安全 Batch Size: 32**（跳至 48 时 OOM，中间值 36/40 无需额外探测，32 已为 2 的幂次最优选）
+- MVP 阶段 BS=8 时峰值 53.5GB (65.6%)，BS=32 时模型+优化器+梯度刚好占满 ~61 GiB
+- 推荐正式训练配置: `per_device_train_batch_size: 32`, `gradient_accumulation_steps: 1`
+
+### 备注
+- 压测使用 GPU 1（GPU 0 被 MVP 训练产物占用），结果可复现至任意 L20Z 卡
+- 两次独立运行结果一致，BS=32 稳定通过
+
+---
+
 ## 2025-03-15 — Phase 2.3 MVP 最小可行链路
 
 ### 概述
