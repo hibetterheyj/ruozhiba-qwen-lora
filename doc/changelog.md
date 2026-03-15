@@ -1,5 +1,74 @@
 # Changelog
 
+## 2025-03-15 — Phase 2.3 MVP 最小可行链路
+
+### 概述
+
+创建 MVP 训练配置并完成首次 LoRA SFT 训练，验证数据 → 训练全链路通畅。Phase 2.2（数据集注册）已在 2.1 中完成，跳过。
+
+### 新增
+- `configs/qwen3_4b_mvp.yaml` — MVP 训练配置（rank=8, epoch=3, lora_alpha=16, 单卡）
+
+### 产出
+- `LLaMA-Factory/saves/qwen3-4b/lora/mvp_r8_e3/` — 适配器权重 + 3 个 epoch checkpoint
+  - `adapter_model.safetensors` (64MB), `adapter_config.json`
+  - `checkpoint-{331,662,993}/` — 每 epoch 自动保存
+  - `training_loss.png`, `training_eval_loss.png` — Loss 曲线图
+
+### 训练参数
+
+| 参数 | 值 |
+|------|-----|
+| 模型 | Qwen3-4B-Instruct-2507 |
+| 方法 | LoRA (rank=8, alpha=16, target=all) |
+| 模板 | qwen3_nothink |
+| 数据集 | ruozhiba_all (2,645 train / 140 eval, 5% split) |
+| Batch Size | 8 |
+| Epochs | 3 |
+| LR | 1e-4 (cosine, warmup=0.1) |
+| 可训练参数 | 16,515,072 (LoRA) |
+| GPU | 单卡 L20Z 80GB (峰值 53.5GB, 65.6%) |
+
+### 训练结果
+
+| 指标 | 值 |
+|------|-----|
+| 总步数 | 993 |
+| 训练时长 | 12m 51s |
+| 最终 train_loss | 0.9594 |
+| 最终 eval_loss | 0.8820 |
+| 吞吐量 | 10.28 samples/s, 1.29 steps/s |
+
+### Eval Loss 轨迹
+
+| Step | Epoch | Eval Loss |
+|------|-------|-----------|
+| 100 | 0.30 | 1.1137 |
+| 200 | 0.60 | 0.9822 |
+| 300 | 0.91 | 0.9427 |
+| 400 | 1.21 | 0.9184 |
+| 500 | 1.51 | 0.9053 |
+| 600 | 1.81 | 0.8938 |
+| 700 | 2.11 | 0.8886 |
+| 800 | 2.42 | 0.8854 |
+| 900 | 2.72 | 0.8824 |
+
+### MVP 验证清单
+
+- [x] 训练正常完成，loss 呈持续下降趋势
+- [x] `saves/qwen3-4b/lora/mvp_r8_e3/` 下生成 adapter 文件 (64MB safetensors)
+- [x] 3 个 epoch checkpoint 完整保存 (331/662/993)
+- [x] Loss 曲线图正确生成 (`training_loss.png`, `training_eval_loss.png`)
+- [x] 显存峰值 53.5GB (65.6%)，远未触及 OOM
+
+### 备注
+
+- Phase 2.2（数据集注册）已在 Phase 2.1 中同步完成（`dataset_info.json` 已包含 `ruozhiba_last3` 和 `ruozhiba_all`），无需额外操作
+- Eval loss 在 epoch 1.5 后趋于平缓（0.905→0.882），未见过拟合迹象，正式训练可安全扩展至 5-7 epochs
+- 推理评估脚本 (`inference_eval.py`, `eval_metrics.py`) 将在 Phase 3 中实现
+
+---
+
 ## 2025-03-15 — Phase 2.1 ShareGPT 格式化
 
 ### 新增
