@@ -1,5 +1,49 @@
 # Changelog
 
+## 2026-03-15 — 增加分析，Token 长度 EDA & cutoff_len 分析
+
+### 概述
+
+使用 Qwen3-4B-Instruct-2507 tokenizer 对训练集和测试集进行 token 长度分析，评估当前 `cutoff_len: 2048` 是否合理。
+
+### 新增
+- `doc/train_test_eda.md` — 训练集/测试集 Token 长度 EDA 探索报告
+
+### 分析方法
+
+- Tokenizer: `Qwen3-4B-Instruct-2507`（vocab_size = 151,643）
+- 长度计算: `apply_chat_template` 后的完整序列长度（含 special tokens）
+- 训练集: `LLaMA-Factory/data/ruozhiba_all.json`（2,785 条 ShareGPT 对话）
+- 测试集: `data/CQIA/ruozhiba_cqia_classified_v2.json`（240 条）
+
+### 关键发现
+
+| 数据集 | Min | Max | Mean | Median | P95 | P99 |
+|--------|-----|-----|------|--------|-----|-----|
+| 训练集 | 454 | 974 | 583.8 | 579 | 672 | 723 |
+| 测试集 | 497 | 996 | 618.1 | 615 | 700 | 757 |
+
+- **100% 样本 ≤ 1024 tokens**（训练集最大 974，测试集最大 996）
+- 82.2% 训练样本集中在 513–640 tokens 区间
+- `cutoff_len: 2048` 存在约 50% 的冗余序列空间
+
+### cutoff_len 截断影响
+
+| cutoff_len | 训练集截断率 | 测试集截断率 |
+|------------|-------------|-------------|
+| 512 | 94.0% | 97.9% |
+| 768 | 0.6% | 0.8% |
+| 1024 | 0.0% | 0.0% |
+| 2048 | 0.0% | 0.0% |
+
+### 结论
+
+- `cutoff_len: 1024` 即可覆盖全部样本，零截断 => 训练集最大 974，测试集最大 996 但是我希望留点余量给训练后的模型到2048的输出，毕竟训练后模型可能会生成更长的文本
+- ~~从 2048 降至 1024 可减少 attention 计算量至 ~1/4，释放显存用于增大 batch_size~~
+- ~~Phase 2.4 的 batch size 压测结果（BS=32 @ cutoff_len=2048）在降低 cutoff_len 后可进一步上探~~
+
+---
+
 ## 2025-03-15 — Phase 2.4 显存水位探测 — Batch Size 动态压测
 
 ### 概述
