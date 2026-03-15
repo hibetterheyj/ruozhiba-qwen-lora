@@ -650,9 +650,29 @@
   {
     "no": 25,
     "text": "當我們擦肩而過的時候你绝不会想到其貌不揚的我竟然是豪华黄钻",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "```json\n{\n  \"thought_process\": \"这句话的核心结构是一个经典的'反转式自我介绍'——前半句营造出一种都市偶像剧般的浪漫擦肩而过场景，暗示'我'有某种隐藏的惊人身份（富二代、明星等），但反转揭晓的身份却是'豪华黄钻'——QQ会员体系中的一个虚拟等级。这个落差制造了核心笑点：把一个毫无实际社会地位的虚拟头衔当作了不起的隐藏身份来炫耀。这体现了一种极其清奇的自嘲式骄傲，用互联网时代的廉价虚拟特权来填充现实中的平庸，属于典型的'人生态度'类——用荒谬的乐观主义解读自身的普通。同时，它也带有'古典弱智'的气质，因为把QQ黄钻等级视为值得隐藏的惊天秘密，这种因果关系和价值判断本身就是荒诞的。此外，整句话的叙事语气模仿了文艺小说或偶像剧旁白，有一种刻意的'文艺感'被用来包装一个极度无厘头的内核，沾了一点'文艺弱智'的边。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"人生态度\",\n      \"confidence_score\": 0.65,\n      \"reason\": \"核心笑点在于用一种极度自信的姿态炫耀一个毫无含金量的虚拟身份，体现了'精神富翁'式的荒谬乐观和自嘲。把QQ豪华黄钻当作隐藏王牌，是对现实平庸的一种清奇解读，完美契合'用荒谬角度解读生活日常'的特征。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.25,\n      \"reason\": \"将"
+      "thought_process": "这句话的核心结构是一个经典的'反转式自我介绍'——前半句营造了一个浪漫、文艺的擦肩而过场景，暗示接下来会揭示某种隐藏的高贵身份（如富二代、隐世高手），但反转揭晓的身份却是QQ'豪华黄钻'会员。这个笑点建立在多层错位上：1）将QQ黄钻这种廉价的虚拟身份等级当作值得炫耀的隐藏身份，体现了一种自嘲式的'精神贵族'心态；2）语言风格模仿了网络小说或偶像剧的深情旁白，与'黄钻会员'这个极其接地气的结尾形成巨大的文体落差；3）'其貌不扬'与'豪华黄钻'之间的反差，解构了'人不可貌相'这个叙事套路。整体来看，核心笑点在于用一种摆烂式的自嘲来解构浪漫叙事，属于典型的人生态度类；同时前半段的文艺腔调与荒诞结尾的碰撞带有文艺弱智的气质；而将QQ黄钻视为某种了不起的成就，也有古典弱智式的荒谬因果。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "人生态度",
+          "confidence_score": 0.65,
+          "reason": "核心笑点在于将QQ豪华黄钻这种廉价虚拟身份当作人生隐藏成就来炫耀，体现了一种极其清奇的自嘲式精神胜利法，用荒谬的乐观主义重新定义了'深藏不露'。"
+        },
+        {
+          "rank": 2,
+          "category": "文艺弱智",
+          "confidence_score": 0.25,
+          "reason": "前半句'擦肩而过''其貌不扬'营造了偶像剧般的文艺画面感和诗意氛围，与'豪华黄钻'的荒诞落点形成强烈的文体错位，兼具诗意与无厘头，是典型的文艺外壳包裹荒诞内核。"
+        },
+        {
+          "rank": 3,
+          "category": "古典弱智",
+          "confidence_score": 0.1,
+          "reason": "将QQ黄钻等级视为需要隐藏的惊人秘密，这种对虚拟身份的机械式郑重对待，带有一丝'精神病人思路广'的荒谬感，但并非文本的主要驱动力。"
+        }
+      ]
     }
   },
   {
@@ -820,9 +840,29 @@
   {
     "no": 32,
     "text": "法官最终将被告人的老婆判给了自己。",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "```json\n{\n  \"thought_process\": \"这句话的核心笑点在于「自己」这个词的指代歧义。按正常理解，「判给了自己」中的「自己」应该指代被告人（即把老婆判回给被告人自己），但换一种断句/指代方式，「自己」也可以理解为法官本人——法官把被告人的老婆判给了法官自己。这是一个典型的语法结构歧义制造的笑点，属于【文字游戏】的核心手法。同时，法官利用职权给自己判老婆这个画面本身带有一种荒诞的、不合常理的行为逻辑，具有【古典弱智】的荒谬感。此外，这句话隐含对司法公正的黑色讽刺，但冒犯性不强，不构成典型的地狱笑话，勉强可以归入第三。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"文字游戏\",\n      \"confidence_score\": 0.80,\n      \"reason\": \"笑点完全建立在「自己」这个代词的指代歧义上。「判给了自己」既可以指代被告人，也可以指代法官，利用中文代词指代模糊的特性制造了语义错位，是非常典型的文字游戏。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.13,\n      \"reason\": \"法官把别人老婆判给自己这个画面本身就很荒诞，呈现出一种不合常理的行为和离谱的因果关系，带有「精神病人思路广」的气质。\"\n    },\n    {\n      \"rank\": 3,\n      \"category\": \"人生态度\",\n      \"confidence_score\": 0.07,\n      \"reason\": \""
+      "thought_process": "这句话的核心笑点在于\"自己\"这个词的指代歧义。按正常理解，\"判给了自己\"应该是指判给了被告人自己（即被告人获得了妻子的抚养/归属权），但读者会自然地将\"自己\"误读为法官本人，从而产生了\"法官趁机把别人老婆判给自己\"的荒诞画面。这是一个典型的语法结构歧义制造的笑点——\"自己\"的回指对象不明确，既可以指代主语\"法官\"，也可以指代宾语\"被告人\"。核心机制是文字游戏（断句/指代歧义）。同时，这个场景本身带有一种荒诞的、不合常理的行为逻辑（法官公然徇私），具有古典弱智的荒谬感。此外，法官滥用职权抢人老婆的画面也隐含一丝对权力的黑色讽刺，但冒犯性不强，地狱笑话属性较弱。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "文字游戏",
+          "confidence_score": 0.8,
+          "reason": "笑点完全建立在\"自己\"这个代词的指代歧义上。中文里\"自己\"的回指对象可以是句中多个名词，这种语法层面的结构性歧义是典型的文字游戏手法。"
+        },
+        {
+          "rank": 2,
+          "category": "古典弱智",
+          "confidence_score": 0.13,
+          "reason": "如果按\"法官把被告老婆判给法官自己\"这层荒诞理解来看，整个场景呈现出一种不合常理、精神病人思路广的荒谬行为逻辑，符合古典弱智的气质。"
+        },
+        {
+          "rank": 3,
+          "category": "地狱笑话",
+          "confidence_score": 0.07,
+          "reason": "隐含对司法腐败/权力滥用的讽刺，有一点点冒犯性，但整体冒犯程度不高，地狱笑话属性只是勉强沾边。"
+        }
+      ]
     }
   },
   {
@@ -2340,9 +2380,29 @@
   {
     "no": 92,
     "text": "“你们谁也别想活着出去！”歹徒冲进停尸房大喊道。",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "```json\n{\n  \"thought_process\": \"这句话的核心笑点在于场景的荒诞错位：歹徒冲进停尸房喊'"
+      "thought_process": "这句话的核心笑点在于场景的荒诞错位：歹徒冲进停尸房喊'谁也别想活着出去'——停尸房里的人本来就已经死了，根本不可能'活着出去'。歹徒的威胁在这个语境下变成了一句废话，甚至可以理解为一种对死者的'多余承诺'。这是一个典型的'字面意思成立但语境完全错位'的笑话。同时，整个场景建立在死亡/尸体这一禁忌话题之上，带有黑色幽默的底色。歹徒一本正经地对着尸体发出威胁，这种'精神病人思路广'的行为也符合古典弱智的气质。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "古典弱智",
+          "confidence_score": 0.55,
+          "reason": "歹徒对着一屋子尸体发出'别想活着出去'的威胁，这种行为本身就是荒诞到极致的——对字面意思的机械执行（劫持=喊威胁语），完全无视语境（对象已经是死人），呈现出经典的'精神病人思路广'式荒谬感。"
+        },
+        {
+          "rank": 2,
+          "category": "地狱笑话",
+          "confidence_score": 0.3,
+          "reason": "笑点建立在停尸房、尸体、死亡这些禁忌元素之上。'活着出去'与'已经死了'之间的反差构成了黑色幽默，笑完之后会有一丝'我不该笑'的罪恶感，符合地狱笑话的冒犯性特征。"
+        },
+        {
+          "rank": 3,
+          "category": "文字游戏",
+          "confidence_score": 0.15,
+          "reason": "'活着出去'这个短语在劫持语境中是威胁，在停尸房语境中却变成了对事实的陈述（他们确实不会活着出去）。笑点部分依赖于同一句话在不同语境下语义的翻转，带有一定的文字游戏色彩。"
+        }
+      ]
     }
   },
   {
@@ -3050,9 +3110,29 @@
   {
     "no": 119,
     "text": "王老汉想要一个称手的武器，于是抢走了卖猪蹄小贩的秤。",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "```json\n{\n  \"thought_process\": \"这句话的核心笑点在于'称手'的双关：日常用"
+      "thought_process": "这句话的核心笑点在于'称手'的双关：日常用语中'称手'意为'顺手、好用'，但王老汉将其机械地拆解为'称（秤）+手'，于是去抢了一杆'秤'来当武器。这是一个典型的文字游戏，利用了'称手'这个词的字面意义与惯用义之间的错位。同时，'卖猪蹄小贩的秤'这个细节增加了一层荒诞感——他不去找刀枪棍棒，偏偏盯上了卖猪蹄的秤，这种行为逻辑本身带有古典弱智的荒谬因果链。谐音层面，'称手'与'秤'读音高度相关，但严格来说笑点更多来自词义拆解而非纯粹的谐音替换，所以谐音梗作为第三属性存在。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "文字游戏",
+          "confidence_score": 0.75,
+          "reason": "核心笑点在于将'称手'这个形容词拆解为字面意义，把'称'理解为'秤'，从而做出了去抢秤的行为。这是典型的词义错位和断词歧义制造的笑点。"
+        },
+        {
+          "rank": 2,
+          "category": "古典弱智",
+          "confidence_score": 0.15,
+          "reason": "王老汉'想要称手的武器→去抢秤'这条因果链本身就是对字面意思的机械执行，呈现出一种不合常理的荒诞行为逻辑，符合古典弱智的特征。"
+        },
+        {
+          "rank": 3,
+          "category": "谐音梗",
+          "confidence_score": 0.1,
+          "reason": "'称手'中的'称'与'秤'同音，笑点部分依赖于这层语音关联，但本质上更偏向词义拆解而非纯谐音替换，因此排在第三。"
+        }
+      ]
     }
   },
   {
@@ -3166,9 +3246,29 @@
   {
     "no": 124,
     "text": "其实张飞刘备关羽是一个人，他精神分裂饰演3人连吴冠中都被骗了",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "```json\n{\n  \"thought_process\": \"这条言论的核心笑点有多层：1）用一个荒诞的'阴谋论'式口吻，一本正经地提出'张飞刘备关羽其实是一个人精神分裂扮演的'，这是典型的【弱智科学家】式胡说八道——套用了历史考证/精神医学的严肃外壳，得出极度荒谬的结论。2）最后的点睛之笔在于'连吴冠中都被骗了'——吴冠中是著名画家，而这里应该用的是'吴官正'或其他人名，但更关键的是，真正该出现的名字是写《三国演义》的罗贯中。'吴冠中'与'吴贯中'谐音相近，实际上是在玩'罗贯中→贯中→吴冠中'的错位替换，把画家吴冠中和《三国演义》作者罗贯中混淆，制造了一个巧妙的人名错位梗。3）整体叙事风格——用精神分裂解释历史人物的存在——属于经典的荒诞因果逻辑，带有【古典弱智】的气质。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"弱智科学家\",\n      \"confidence_score\": 0.55,\n      \"reason\": \"整"
+      "thought_process": "这条言论的核心笑点有多层：1）用一个荒诞的'阴谋论'式口吻，一本正经地提出'张飞刘备关羽其实是一个人精神分裂扮演的'，这是典型的【弱智科学家】式胡说八道——套用了历史考证/精神医学的严肃外壳，得出极度荒谬的结论。2）最精妙的一击在最后：'连吴冠中都被骗了'。吴冠中是著名画家，这里应该说的是吴宇森或罗贯中（《三国演义》作者），但偏偏用了'吴冠中'，这个错位本身就是一个名人张冠李戴的笑点，带有文字游戏/古典弱智的荒诞感——仿佛说话者自己也是'弱智'，连罗贯中都记不清。3）整体呈现出一种'民间历史发明家'的气质，信誓旦旦地胡扯，属于古典弱智的荒谬因果链。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "弱智科学家",
+          "confidence_score": 0.6,
+          "reason": "一本正经地用'精神分裂'这一医学/心理学概念来'论证'三国三兄弟其实是同一人，完美符合'套用严谨外壳得出荒谬结论'的特征。语气笃定，仿佛在做学术揭秘。"
+        },
+        {
+          "rank": 2,
+          "category": "古典弱智",
+          "confidence_score": 0.25,
+          "reason": "'连吴冠中都被骗了'是点睛之笔——罗贯中被替换成了画家吴冠中，这种张冠李戴本身就散发着浓郁的'精神病人思路广'气息。整个言论的荒诞因果链（一人分饰三角→骗过作者）也是古典弱智的典型结构。"
+        },
+        {
+          "rank": 3,
+          "category": "文字游戏",
+          "confidence_score": 0.15,
+          "reason": "'吴冠中'与'罗贯中'共享一个'冠中/贯中'的音近结构，存在一定的谐音/形近替换成分，属于名字层面的文字错位游戏，但并非核心笑点驱动力，故排第三。"
+        }
+      ]
     }
   },
   {
@@ -4011,17 +4111,57 @@
   {
     "no": 159,
     "text": "听力考试刚开始王老汉连放八十八个连环响屁一考场学生都交了白卷",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "Let me analyze this joke carefully.\n\nThe text says: \"听力考试刚开始王老汉连放八十八个连环响屁一考场学生都交了白卷\"\n\nTranslation: \"As soon as the listening exam started, Old Man Wang let out 88 consecutive loud farts, and all the students in the exam room handed in blank papers.\"\n\nThe core humor mechanism here:\n\n1. \"听力考试\" (listening exam) - students need to listen carefully to audio\n2. Wang老汉 lets out 88 loud farts - this is absurd and disruptive\n3. All students handed in blank papers - because they couldn't hear the exam audio over the farts\n\n\n4. The joke relies on an outrageous, exaggerated scenario with a ridiculous cause-and-effect chain where the farts completely sabotage the listening exam, which is a hallmark of 古典弱智 humor - the kind of absurdist comedy that doesn't aim for cleverness but rather shock value through sheer ridiculousness. confidence) - the \"听力\" wordplay is subtle\n\nThe core of this joke is definitely the absurd logic—farts disrupting a listening exam so thoroughly that everyone fails. That's the main appeal, with just a hint of clever wordplay in how \"listening\" takes on a literal meaning. I'm settling on 古典弱智 as the primary category.```json\n{\n  \"thought_process\": \"这个段子讲的是听力考试时，王老汉连放88个响屁，导致全考场学生交白卷。核心笑点在于一个极度荒诞且夸张的因果链：听力考试→需要用耳朵听→屁声盖过了听力音频→全员白卷。这是非常典型的'精神病人思路广'式荒诞幽默——场景离谱（谁会在考场放88个屁？）、数字夸张（88个连环响屁）、因果关系虽然荒谬但又有一种'歪理自洽'的逻辑闭环。此外，'听力考试'这个设定并非随意选择，恰好扣住了'听'这个字——学生需要'听'的是考试内容，结果'听'到的全是屁声，在'听什么'上形成了一层轻微的语义错位，带有一点文字游戏的影子。整体而言粗俗搞笑但不涉及真正的禁忌话题，地狱笑话属性极弱。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.88,\n      \"reason\": \"极度荒诞的场景设定（考场放88个连环响屁）、夸张的数字、不合常理的行为、以及歪理自洽的因果逻辑链，完美符合'精神病人思路广'的古典弱智范式。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"文字游戏\",\n      \"confidence_score\": 0.08,\n      \"reason\": \"'听力考试'的'听'字被巧妙利用——考试要求学生'听'音频内容，结果学生'听'到的全是屁声。'听'的对象发生了错位，有一层轻微的语义双关，但并非核心笑点驱动。\"\n    },\n    {\n      \"rank\": 3,\n      \"category\": \"弱智科学家\",\n      \"confidence_score\": 0.04,\n      \"reason\": \"'88个'这种精确数字和'连环响屁'的严肃描述方式，有一丝一本正经胡说八道的学术叙"
+      "thought_process": "这条言论的核心笑点在于'听力考试'的语义错位。'听力考试'本指英语等语言的听力测试，学生需要听录音答题。但文本将'听力'偷换为字面意义上的'听的能力'——王老汉放了88个响屁，声音盖过了听力音频，导致全场学生什么都听不到，只能交白卷。这是一个典型的荒诞场景：一个不相干的老汉出现在考场，用连环屁摧毁了一场考试。'八十八个连环响屁'这个细节极其夸张且画面感强烈，属于经典的弱智吧式荒诞叙事。同时，'听力考试'与'响屁'之间构成了一层文字游戏——考的是'听力'，听到的却是屁声，'听'这个字被荒谬地满足了。整体而言，荒诞叙事是主体，文字游戏是辅助机制。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "古典弱智",
+          "confidence_score": 0.7,
+          "reason": "王老汉在听力考场连放88个响屁导致全员白卷，这个场景完全符合'精神病人思路广'的荒诞因果链：一个莫名其妙的人物、一个离谱的行为、一个看似合理实则荒谬的结果。叙事结构是典型的古典弱智。"
+        },
+        {
+          "rank": 2,
+          "category": "文字游戏",
+          "confidence_score": 0.2,
+          "reason": "'听力考试'本义是语言听力测试，但在这里被偷换成了字面上的'听声音的能力'——学生确实在'听'，只不过听到的是屁声而非录音。笑点部分依赖于'听力'一词的语义错位。"
+        },
+        {
+          "rank": 3,
+          "category": "弱智科学家",
+          "confidence_score": 0.1,
+          "reason": "'八十八个'这个精确数字赋予了一种伪纪实感，仿佛在一本正经地记录一个荒谬事件的具体参数，带有一点弱智科学家式的严肃荒诞气质，但整体并未套用学术框架，关联较弱。"
+        }
+      ]
     }
   },
   {
     "no": 160,
     "text": "金条无铜，盗之无用",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "Let me analyze this \"弱智吧\" style statement: \"金条无铜，盗之无用\"\n\nThis is a brilliant wordplay. Let me break it down:\n\nThe phrase mimics the style of classical Chinese proverbs/couplets. It sounds like an ancient wisdom saying, but the humor lies in multiple layers:\n\n1. **文字游戏 (Word Play)**: The core joke is a pun/wordplay on \"铜\" (copper) and \"偷\" (steal). \"金条无铜\" literally means \"gold bars contain no copper\" but sounds like \"金条无用\" isn't quite right... Let me reconsider.\n   \nActually, the joke works through absurd logic: gold bars don't contain copper (which is literally true), therefore stealing them is useless. The humor comes from this ridiculous non-sequitur—the absence of copper has nothing to do with whether gold bars are worth stealing, making the \"logical conclusion\" completely absurd. of copper content. But the real joke seems to be the absurd logic: gold bars are worthless for stealing because they lack copper, inverting the actual value hierarchy in a deadpan way that mimics the structure of classical Chinese aphorisms. I've considered whether there's a homophone layer with \"无铜\" sounding like the parasol tree, but that doesn't quite land, so I think the primary humor is this inverted logic wrapped in a formal, wise-sounding structure. 字游戏**: The classical Chinese parallel structure creates a false sense of wisdom/logic. The absurd causal link between \"no copper\" and \"useless to steal\" is the core joke.\n2. **古典弱智**: The荒诞 logic - gold is one of the most valuable things, but because it lacks copper (much less valuable), it's \"useless\" to steal.\n3. **弱智科学家**: It presents a quasi-logical, matter-of-fact analysis of gold's composition to reach an absurd conclusion.\n\nI'm checking if there's a homophone angle here - \"盗\" and \"到\" sound the same, or maybe \"铜\" and \"同\" - but these don't really strengthen the joke. The real humor comes from the classical aphorism format lending false authority to a completely backwards logical deduction: gold is worthless because it lacks copper, which is absurd. So the joke works on multiple levels - the literary style makes it sound profound while the reasoning is hilariously stupid, combining the word-play structure with the logical fallacy and the classical aesthetic.```json\n{\n  \"thought_process\": \"这句话模仿了古典汉语格言/对仗的形式，如'X无X，X之无X'，读起来铿锵有力、古朴庄严，仿佛是流传千年的至理名言。然而其核心逻辑是极度荒谬的：金条（极其贵重之物）因为'无铜'（不含铜这种远不如金值钱的金属），就被判定为'盗之无用'（不值得偷）。这是一个价值体系的完全倒置——仿佛在小偷眼里铜才是终极追求，黄金反而因为不含铜而一文不值。整句话用文言文的庄重外壳包裹了一个极其弱智的因果推论，形成了强烈的'一本正经的胡说八道'效果。核心笑点在于文言对仗结构制造的'伪格言'感与荒诞逻辑之间的巨大反差。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"文字游戏\",\n      \"confidence_score\": 0.55,\n      \"reason\": \"核心笑点在于利用文言文对仗结构（金条无铜/盗之无用）制造'伪古训'的庄严感。"
+      "thought_process": "这句话模仿了古文/成语的句式结构，表面上像是一句正经的古训格言。核心笑点在于谐音：'铜'谐音'用'（不对），实际上更精妙的是——'盗之无用'表面意思是'偷它没有用'，但真正的梗在于'金条无铜'。'铜'谐音'同'或直接取字面意思，整句话的逻辑是：金条里面没有铜（废话，金条当然是金的），所以偷了也没用——这构成了一个荒谬的因果链。但再细品，'金条无铜，盗之无用'实际上是谐音梗：谐音自'今朝无同，到之无用'？不，最精准的解读是：这句话模仿了'金刚经'或古文箴言的庄重格式，用一本正经的语气说了一句废话级别的荒诞逻辑——金条里没有铜，所以偷了没用。笑点在于：金条本身就是贵重物品，'没有铜'反而是它值钱的原因，但文本却用这个理由得出'不值得偷'的荒谬结论。这是一种古典弱智式的逻辑倒错，同时披着文言文/格言的文艺外壳，兼具文字游戏的特征（铜/用的材质偷换概念）。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "文字游戏",
+          "confidence_score": 0.55,
+          "reason": "核心笑点在于利用'铜'的字面意思制造逻辑错位。金条没有铜本是常识（金条是金的），但文本将'无铜'偷换为'无价值'，从而得出'盗之无用'的荒谬结论。整个句子的幽默建立在对'铜'这个字的语义操控上，属于典型的字意错位。"
+        },
+        {
+          "rank": 2,
+          "category": "古典弱智",
+          "confidence_score": 0.3,
+          "reason": "荒诞的因果逻辑是这句话的第二大笑点来源。金条恰恰因为是纯金（无铜）才值钱，但说话者却用'无铜'作为'不值得偷'的理由，因果关系完全倒错，呈现出经典的'精神病人思路广'式荒谬感。"
+        },
+        {
+          "rank": 3,
+          "category": "文艺弱智",
+          "confidence_score": 0.15,
+          "reason": "句式工整对仗，模仿古文箴言/格言体（四字+四字），读起来铿锵有力、颇具古风韵味，仿佛出自某部经典典籍。这层庄重的文言外壳与荒诞内核之间的反差，赋予了它一丝文艺弱智的气质。"
+        }
+      ]
     }
   },
   {
@@ -4054,9 +4194,29 @@
   {
     "no": 162,
     "text": "为了降低房价我市引进天罡地煞破坏学区房风水",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "This is a brilliant piece of \"弱智吧\" humor. Let me analyze it.\n\nThe joke: \"为了降低房价我市引进天罡地煞破坏学区房风水\" (To lower housing prices, our city has introduced the 108 outlaws of the Water Margin to destroy the feng shui of school district housing)\n\nCore humor mechanism:\n1. It addresses a real social issue (high housing prices, especially school district housing) with an absurd solution\n2. \"天罡地煞\" refers to the 108 heroes/outlaws from Water Margin (水浒传), which are also terms used in feng shui/Taoist cosmology for malevolent celestial forces\n\n\n3. The joke builds a pseudo-logical chain: expensive school district housing relies on good feng shui, so introducing evil supernatural forces would destroy that advantage and crash prices\n4. There's a dual meaning in \"天罡地煞\" that works both as a literary reference and a feng shui concept\n\nThis fits the \"弱智科学家\" category perfectly—it presents an absurd policy solution with pseudo-logical reasoning, using the formal tone of municipal governance (\"我市引进\") to propose something completely ridiculous and supernatural, creating humor through the contrast between bureaucratic seriousness and the absurdity of the actual proposal. I'm settling on 古典弱智 as the primary category since the absurdist logic is really the dominant feature here—the governmental framing is just window dressing. The other categories (弱智科学家 for the bureaucratic tone, 人生态度 for the housing price commentary) are secondary layers, but the core appeal is the sheer ridiculousness of the causal chain.```json\n{\n  \"thought_process\": \"这条言论的幽默内核极为丰富。首先，它套用了政府市政通告的严肃口吻（'我市引进'），却提出了一个荒谬绝伦的政策方案：用风水玄学手段来解决房价问题。其次，它巧妙地将'学区房价格高'这一现实社会问题与'风水好'建立了伪因果关系，然后顺着这条荒诞逻辑链推演出'引进天罡地煞（凶煞之气）来破坏风水→房价下降'的解决方案。整个表述一本正经，逻辑链条完整但每一环都是荒谬的。'天罡地煞'一词本身也具有双关性——既是风水/道教中的凶星煞气概念，又让人联想到《水浒传》一百零八将，仿佛政府'引进人才'一般引进了一群土匪来搞破坏，增添了画面感上的荒诞。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"弱智科学家\",\n      \"confidence_score\": 0.55,\n      \"reason\": \"最核心的笑点在于用市政公告/政策研究的严肃框架包裹了一套完全基于玄学迷信的'解决方案'。'我市引进'四个字赋予了整句话一种官方文件的庄重感，与'天罡地煞破坏风水'的荒谬内容形成了巨大的语域反差，完美符合'一本正经地胡说八道'的核心特征。伪因果逻辑链（风水差→房价降）也是该类别的典型标志。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.30,\n      \"reason\": \"荒诞的因果推理是本句的骨架：房价高→因为学区房风水好→引入凶煞破坏风水→房价下降。这种'精神病人思路广'式的因果链条，以及把降房价这种经济"
+      "thought_process": "这句话的核心结构是：用一个荒诞但内在自洽的'政策方案'来解决现实问题（高房价）。它套用了政府公文式的严肃口吻（'我市引进'），却将解决方案指向了封建迷信领域——用《水浒传》里的'天罡地煞'（108个魔星）来破坏学区房的风水，从而降低房价。这是一个典型的'一本正经地胡说八道'结构：前提是真实的社会痛点（学区房价格高），归因却是玄学的（房价高是因为风水好），解决方案更是荒诞的（引进妖魔鬼怪破坏风水）。整个逻辑链条在荒谬的框架内竟然是'通顺'的，这正是弱智科学家式幽默的精髓。同时，它也带有古典弱智的荒诞因果关系特征，以及对现实社会问题（房价、学区房）的解构式调侃，略带人生态度的影子。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "弱智科学家",
+          "confidence_score": 0.7,
+          "reason": "完美符合'一本正经地胡说八道'的核心特征。句式模仿政府政策通告的严肃语气（'我市引进'），却将玄学/神话元素当作正经的政策工具，构建了一套荒谬但内部自洽的因果链：学区房贵→风水好→引进天罡地煞破坏风水→房价下降。这种用严谨外壳包裹荒诞结论的手法是该类别的标志性特征。"
+        },
+        {
+          "rank": 2,
+          "category": "古典弱智",
+          "confidence_score": 0.2,
+          "reason": "将'天罡地煞'这种神话概念与'学区房风水'这种民间迷信嫁接到现代城市房价调控政策中，呈现出一种'精神病人思路广'的荒谬因果关系。把降房价的手段从经济政策偷换成了驱魔破风水，这种不合常理的行为逻辑带有浓厚的古典弱智色彩。"
+        },
+        {
+          "rank": 3,
+          "category": "人生态度",
+          "confidence_score": 0.1,
+          "reason": "底层隐含着对高房价、学区房焦虑等社会现实的无奈调侃——正经办法都不管用了，不如请妖怪来帮忙吧。这种'摆烂式解决方案'带有一丝荒谬乐观主义的人生态度，但并非该文本的核心笑点驱动力。"
+        }
+      ]
     }
   },
   {
@@ -4143,9 +4303,29 @@
   {
     "no": 166,
     "text": "奉劝屋内的人赶紧投降，不投降我们就下班不包围你了。",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "This is a classic \"弱智吧\" style humor. Let me analyze it.\n\nThe joke is about a siege/hostage situation where the police/military are surrounding a building and telling the person inside to surrender. But the threat is inverted - instead of threatening to storm the building, they threaten to \"stop surrounding\" and \"go home.\" This is absurd because normally being surrounded is the threat, but here the removal of the siege is framed as the punishment.\n\nThis creates a hilarious inversion of power dynamics - the besiegers are acting like the siege is a favor they're doing for the person inside, and threatening to withdraw it as punishment.\n\nLet me classify:\n\n\nThe core humor is that inverted logic - threatening to stop doing something threatening, which flips the entire power dynamic on its head. There's also a layer of workplace laziness here, with the surrounding forces just wanting to clock out and go home, adding that relatable \"摆烂\" attitude to an otherwise tense situation. 艺弱智 does have that absurdist philosophical edge, though it's borderline. The scenario's dark undertone with the police siege doesn't quite push it into 地狱笑话 territory since there's no real harm. I'll settle on 古典弱智 as the dominant category, with 人生态度 capturing that 摆烂 attitude, and leave the third slot open or go with something that better fits the overall tone.\n\nActually, 文字游戏 works better than I initially thought—the semantic inversion of \"投降\" becoming favorable and \"不包围\" as punishment does play with the expected meaning of these words, so I'll lock in those three categories with 古典弱智 at 0.82, 人生态度 at 0.12, and 文字游戏 at 0.06.```json\n{\n  \"thought_process\": \"这句话构建了一个经典的'包围劝降'场景，但威胁逻辑被完全倒置：正常逻辑下，'被包围'是对嫌疑人的威胁，'不投降就强攻'才是合理的施压。然而这里的威胁变成了'不投降我们就不包围你了'——把包围当成一种恩赐，把撤退当成惩罚，因果关系彻底荒谬化。同时，'下班'一词精准注入了当代打工人摆烂心态，将紧张的对峙场景降格为一群只想按时下班的社畜在走流程，产生了强烈的反差喜感。核心笑点在于逻辑倒置（威胁变恩惠），次要笑点在于打工人摆烂态度的投射。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.82,\n      \"reason\": \"核心笑点是荒诞的因果倒置——'不包围你'作为威胁完全不合常理，呈现出典型的'精神病人思路广'式荒谬感。包围方把自己的包围行为当成对被包围者的服务，撤围反而成了惩罚，逻辑关系彻底错位。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"人生态度\",\n      \"confidence_score\": 0.13,\n      \"reason\": \"'下班'一词将严肃的军警包围场景降格为日常打工，传递出一种'摆烂式执法'的荒诞人生态度。包围者不是尽忠职守的执法者，而是到点就想走人的社畜，这层打工人心态赋予了文本额外的共鸣感和喜感。\"\n    },\n    {\n      \"rank\": 3,\n      \"category\": \"文字游戏\",\n      \"confidence_score\": 0.05,\n      \"reason\": \"勉强相关：'投降'和'包围'的语义预期被巧妙翻转——'投降'从"
+      "thought_process": "这句话模拟了警察/特警包围嫌疑人时的喊话场景。正常逻辑是'你不投降我们就强攻'，但这里的威胁变成了'我们就下班不包围你了'——把'不再包围'当作一种惩罚，完全颠倒了包围者与被包围者的权力关系。核心笑点在于荒谬的因果倒置：被包围本是坏事，不被包围反而成了威胁，呈现出一种'精神病人思路广'的经典弱智式荒诞逻辑。同时，这句话也带有一种摆烂、消极怠工的精神状态——执法人员不想加班，把工作当成负担，隐含了一层'人生态度'式的摆烂幽默。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "古典弱智",
+          "confidence_score": 0.8,
+          "reason": "核心笑点是荒谬的因果倒置——'不包围你'被当作威胁，完全不合常理，是典型的弱智式逻辑错位。句式结构模仿严肃场景却得出荒诞结论，精准命中'精神病人思路广'的特征。"
+        },
+        {
+          "rank": 2,
+          "category": "人生态度",
+          "confidence_score": 0.12,
+          "reason": "隐含了一层'到点下班、消极怠工'的摆烂精神，执法人员把包围当成上班打卡，流露出当代打工人式的躺平态度，具有自嘲和摆烂的次要属性。"
+        },
+        {
+          "rank": 3,
+          "category": "文字游戏",
+          "confidence_score": 0.05,
+          "reason": "勉强相关：'投降'与'下班'、'包围'与'不包围'之间形成了语义对仗和反转，但笑点并非依赖字词本身的多义性，文字游戏属性很弱。"
+        }
+      ]
     }
   },
   {
@@ -4367,9 +4547,29 @@
   {
     "no": 175,
     "text": "鬼门关开放第一天游客达2亿人次，地府旅游局提醒请勿随意骚扰女鬼",
+    "score": null,
     "classification": {
-      "error": "JSON decode error: Failed to parse response",
-      "raw_response": "Let me analyze this \"弱智吧\" style statement carefully.\n\nThe text says: \"鬼门关开放第一天游客达2亿人次，地府旅游局提醒请勿随意骚扰女鬼\"\n\nTranslation: \"On the first day of Ghost Gate opening, visitors reached 200 million. The Underworld Tourism Bureau reminds visitors not to harass female ghosts.\"\n\nLet me break down the humor mechanics:\n\n1. This takes the format of a real-world news announcement about a tourist attraction opening — specifically the kind of news we see during Chinese holidays like Golden Week (黄金周), where tourist numbers are reported and authorities issue reminders. It perfectly mimics the structure: \"[景点]开放第一天游客达X人次，[管理部门]提醒[注意事项]\".\n\n\n2. The absurdity lies in transplanting this mundane bureaucratic tourism framework onto 鬼门关 (Ghost Gate), the supernatural boundary between the living and dead from Chinese folk religion that opens during Ghost Month. The 200 million \"visitors\" is a darkly comedic way of saying that many people have died, with a subtle 地狱笑话 undertone.\n3. \"地府旅游局\" (Underworld Tourism Bureau) is the punchline — it's a ridiculous bureaucratic invention that applies the structure of Chinese government administration to the afterlife itself.\n4. The warning against harassing female ghosts mirrors real public safety announcements about not harassing women, but absurdly extends this concern to the supernatural realm, suggesting even the underworld has to deal with sexual harassment issues.\n5. This is quintessential 古典弱智 — it takes a completely nonsensical premise and treats it with deadpan bureaucratic seriousness, applying real-world tourism reporting conventions to the afterlife in that characteristic \"精神病人思路广\" style. The formal, authoritative tone of a government announcement combined with supernatural absurdity is exactly what makes this work.\n6. There's also a morbid layer here — the 200 million \"tourists\" are implicitly dead people, and the literal connection to death (鬼门关, 地府, 鬼) adds dark humor, though the primary mechanism is the absurd framing rather than shock value.```json\n{\n  \"thought_process\": \"这条文本完美模仿了中国黄金周/中元节期间的旅游新闻通稿格式：'[景点]开放第一天游客达X人次，[管理部门]提醒[注意事项]'。核心笑点在于将鬼门关（阴阳交界的超自然概念）当作普通旅游景区来运营，并配备了'地府旅游局'这样的官僚机构，最后还一本正经地发布了'请勿骚扰女鬼'的文明旅游提示——把现实中防性骚扰的公共安全告示照搬到阴间。'2亿人次'这个数字暗示有两亿人死亡涌入鬼门关，带有黑色幽默的死亡暗示。整体呈现'精神病人思路广'的经典荒诞感，同时因为套用了官方新闻通稿的严肃外壳，也具备'一本正经胡说八道'的弱智科学家气质，而题材本身涉及死亡和鬼魂，字面意义上就是'地狱笑话'。\",\n  \"top3_categories\": [\n    {\n      \"rank\": 1,\n      \"category\": \"古典弱智\",\n      \"confidence_score\": 0.50,\n      \"reason\": \"将鬼门关当景区、地府设旅游局、对女鬼发布文明旅游提醒——整个逻辑链条呈现出典型的'荒诞因果+机械执行现实逻辑到不合常理的场景'，是标准的古典弱智荒诞感。把人间旅游景区的一整套运营模式（客流统计、管理部门、游客须知）原封不动搬到阴间，精神病人思路广的味道拉满。\"\n    },\n    {\n      \"rank\": 2,\n      \"category\": \"弱智科学家\",\n      \"confidence_score\": 0.28,\n      \"reason\": \"文本高度模仿官方新闻通稿/政府公告的严肃口吻，使用了精确数据'2亿人次'和正式机构名称'地府旅游局'，呈现出"
+      "thought_process": "这条言论模仿了官方新闻通稿的语气（'游客达2亿人次'、'旅游局提醒'），套用了现实中景区黄金周的报道模板，但主体被替换成了'鬼门关'和'地府旅游局'。核心笑点在于：1）将阴间地府完全按照阳间旅游景区的行政逻辑来运营，形成荒诞的错位感；2）'请勿随意骚扰女鬼'这句官方提醒，既暗讽了现实中景区的不文明行为公告，又把'女鬼'当作需要被保护的弱势群体，进一步加深了荒谬感。整体结构是用一本正经的官方口吻讲述一个完全不存在的荒诞场景，属于典型的'古典弱智'式荒诞幽默。同时，涉及鬼魂、阴间、死亡等元素，带有轻微的地狱笑话色彩，但冒犯性不强，更偏向戏谑。'2亿人次'这个数字也暗示每天死亡人数巨大，有一点黑色幽默的底色。此外，套用官方新闻体的严肃外壳来包装荒诞内容，也略带'弱智科学家'式的一本正经胡说八道的气质。",
+      "top3_categories": [
+        {
+          "rank": 1,
+          "category": "古典弱智",
+          "confidence_score": 0.7,
+          "reason": "核心笑点是将阴间鬼门关完全套用现实景区黄金周的运营逻辑，形成荒诞的因果错位。'地府旅游局'这种机构的存在本身就是典型的古典弱智式荒谬，把不合常理的事物用极其正常的方式呈现。"
+        },
+        {
+          "rank": 2,
+          "category": "地狱笑话",
+          "confidence_score": 0.18,
+          "reason": "题材直接涉及死亡、鬼魂、阴间，'2亿人次游客'暗示大量死者涌入地府，建立在死亡话题之上。虽然冒犯性较低，但'地狱'元素是字面意义上的地狱笑话。"
+        },
+        {
+          "rank": 3,
+          "category": "弱智科学家",
+          "confidence_score": 0.12,
+          "reason": "采用了官方新闻通稿的严肃文体，精确到'2亿人次'的数据，以及'旅游局提醒'的行政口吻，具备一本正经胡说八道的形式特征，只是外壳不是科学研究而是官方公告。"
+        }
+      ]
     }
   },
   {

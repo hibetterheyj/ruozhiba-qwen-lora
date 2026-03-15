@@ -3215,9 +3215,10 @@
   {
     "no": 120,
     "text": "弱智吧今日看点 ·",
+    "score": null,
     "classification": {
       "error": "JSON decode error: Failed to parse response",
-      "raw_response": "看起来你只发了一个标题，还没有给出具体的\"弱智吧\"言论内容。把那条语料贴过来，我来给你做深度分类分析。"
+      "raw_response": "看起来你只发了一个标题\"弱智吧今日看点 ·\"，后面没有跟具体的言论内容。\n\n把你想分类的那条弱智吧语录发过来，我来给你拆解。"
     }
   },
   {
