@@ -22,8 +22,6 @@
 
 ---
 
-# Changelog
-
 ## 2025-03-15 — Phase 1.2 去重防污染
 
 ### 新增
@@ -41,3 +39,47 @@
 - 受影响文件: 5/9 个（2021_1H: -3, 2021_2H: -10, 2020: -3, 2022: -1, 2023: -10）
 - 近三年 (2023-2025): 1035 → 1025 条
 - 泄露验证: 去重后训练集中无测试集残留
+
+---
+
+## 2025-03-15 — Phase 1.1: CQIA 数据补全 (thought_process 导师蒸馏)
+
+### 概述
+
+为 240 条 CQIA 测试集数据补充 `thought_process` 字段，使其与贴吧训练集的 classification 格式对齐。使用 Claude-Opus-4-6 作为导师模型，对每条 `instruction` 生成深度幽默解构分析。
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `scripts/classify_cqia_updated.py` | CQIA 数据补全脚本，复用 `classify_jokes.py` 鲁棒性模式 |
+| `scripts/classify_cqia_updated_config.yaml` | 配置文件，System Prompt 对齐 `classify_config.yaml` |
+| `data/CQIA/ruozhiba_cqia_classified_v2.json` | 输出数据（240 条，含 thought_process） |
+
+### 技术要点
+
+- **System Prompt 对齐**: 使用与贴吧分类相同的 prompt（含 `thought_process` + `top3_categories`），确保训练/测试数据格式一致
+- **仅输入 instruction**: 不将 CQIA 的 `output`（正经 AI 解答）作为 LLM 输入，避免干扰分类判断
+- **原始字段保留**: `output` 和原有 `top3_categories` 完全不变，仅在 `classification` 中新增 `thought_process`
+- **Category Drift 日志**: 记录新旧 Top-1 分类差异（仅日志，不覆盖），发现约 20+ 条存在 drift，属正常现象（prompt 变更导致）
+- **断点续传**: JSONL checkpoint 支持中断恢复，首次运行 228/240 成功 → 重试后 239/240 → Item #53（盲文）因 safety filter 手动补写
+
+### 数据质量报告
+
+```
+Total items:          240
+Schema valid:         True (instruction/output/classification)
+thought_process:      240/240 present (0 null, 0 empty)
+top3_categories:      240/240 exactly 3 categories
+thought_process avg:  ~276 chars (min: 176, max: 456)
+Data integrity vs v1: 0 mismatches (instruction/output/top3_categories 完全一致)
+
+Top-1 category distribution:
+  奇怪提问: 89    文字游戏: 48    文艺弱智: 34    弱智科学家: 27
+  古典弱智: 22    谐音梗: 10      人生态度: 6     地狱笑话: 4
+```
+
+### 备注
+
+- Item #53（盲文 Unicode 内容）触发 API safety filter，`thought_process` 为手动补写，内容与已有 `top3_categories` 一致
+- 已清理 JSONL checkpoint 中间文件

@@ -31,6 +31,17 @@ Classifies tieba joke data using LLM API. Reads input files specified in `classi
 ### classify_cqia.py
 Classifies CQIA dataset using LLM API. Similar to `classify_jokes.py` but processes CQIA format data with instruction/output pairs. Configuration in `classify_cqia_config.yaml`.
 
+### classify_cqia_updated.py
+CQIA 数据补全：为已分类的 240 条 CQIA 数据补充 `thought_process` 字段（导师蒸馏）。使用 Claude-Opus-4-6 对每条 `instruction` 生成深度分析的思考过程，合并到已有 `classification` 中。配置文件 `classify_cqia_updated_config.yaml`。
+
+- System Prompt 对齐 `classify_config.yaml`（贴吧版），要求输出 `thought_process` + `top3_categories`
+- 仅使用 `instruction` 字段作为 LLM 输入（不使用 CQIA 的 `output` 字段）
+- 保留原有 `output`、`top3_categories` 不变，在 `classification` 中新增 `thought_process`
+- 复用 `classify_jokes.py` 的鲁棒性优化：ThreadPoolExecutor、断点续传（JSONL checkpoint）、原子写入、多层 JSON 解析容错
+- 新旧 `top3_categories` 对比记录日志（仅记录 category drift，不覆盖原有分类）
+
+Input: `data/CQIA/ruozhiba_cqia_classified.json`, Output: `data/CQIA/ruozhiba_cqia_classified_v2.json`.
+
 ### extract_cqia_data.py
 Extracts `instruction` and `output` fields from JSONL format CQIA dataset and saves to JSON format. Input: `data/CQIA/ruozhiba_ruozhiba.jsonl`, Output: `data/CQIA/ruozhiba_cqia_cleaned.json`.
 
@@ -57,6 +68,9 @@ Configuration for `classify_jokes.py`. Contains:
 
 ### classify_cqia_config.yaml
 Configuration for `classify_cqia.py`. Similar structure to `classify_config.yaml` but optimized for CQIA dataset processing with simplified output format.
+
+### classify_cqia_updated_config.yaml
+Configuration for `classify_cqia_updated.py`. Uses the same system prompt as `classify_config.yaml` (with `thought_process` + `top3_categories` output format). Processing parameters: `max_workers: 4`, `temperature: 0.3`, `max_tokens: 1500`.
 
 ## Dependencies
 - openai: LLM API client
