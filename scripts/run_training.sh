@@ -1,9 +1,9 @@
 #!/bin/bash
 # Checkpoint-Based Training: 每个 Rank 训练 7 epochs, 自动保存所有 epoch checkpoint
 # 用法:
-#   bash scripts/run_training.sh 0 8                          # GPU 0, rank=8, 默认配置
-#   bash scripts/run_training.sh 1 16                         # GPU 1, rank=16, 默认配置
-#   bash scripts/run_training.sh 0 8 configs/qwen3_4b_base_last3.yaml  # 指定配置文件
+#   bash scripts/run_training.sh 0 8                                        # GPU 0, rank=8, 默认配置
+#   bash scripts/run_training.sh 1 16                                       # GPU 1, rank=16, 默认配置
+#   bash scripts/run_training.sh 0 8 configs/qwen3_4b_base_last3.yaml last3 # 指定配置+标签
 #
 # 并行调度 (两个 tmux pane):
 #   终端 1: bash scripts/run_training.sh 0 8
@@ -13,11 +13,16 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-GPU_ID=${1:?"用法: $0 <GPU_ID> <RANK> [CONFIG]  例: $0 0 8"}
-RANK=${2:?"用法: $0 <GPU_ID> <RANK> [CONFIG]  例: $0 1 16"}
+GPU_ID=${1:?"用法: $0 <GPU_ID> <RANK> [CONFIG] [TAG]  例: $0 0 8"}
+RANK=${2:?"用法: $0 <GPU_ID> <RANK> [CONFIG] [TAG]  例: $0 1 16"}
 CONFIG_FILE="${3:-${PROJECT_ROOT}/configs/qwen3_4b_base.yaml}"
+TAG="${4:-}"
 ALPHA=$((RANK * 2))
-OUTPUT_DIR="saves/qwen3-4b/lora/r${RANK}"
+if [ -n "${TAG}" ]; then
+    OUTPUT_DIR="saves/qwen3-4b/lora/r${RANK}_${TAG}"
+else
+    OUTPUT_DIR="saves/qwen3-4b/lora/r${RANK}"
+fi
 
 # 激活虚拟环境
 if [ -z "${VIRTUAL_ENV:-}" ]; then

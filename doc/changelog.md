@@ -4,27 +4,28 @@
 
 ### 概述
 
-`run_training.sh` 新增可选第 3 参数 `CONFIG_FILE`，支持指定训练配置文件路径。不传则默认使用 `configs/qwen3_4b_base.yaml`，向后兼容。
+`run_training.sh` 新增可选第 3、4 参数：`CONFIG` 指定配置文件（默认 `qwen3_4b_base.yaml`），`TAG` 生成独立输出目录（如 `r8_last3`），避免覆盖已有训练产物。
 
 ### 修改文件
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/run_training.sh` | 新增 `CONFIG_FILE` 参数（第 3 位，可选，默认 `qwen3_4b_base.yaml`） |
-| `doc/training_execution.md` | 更新 ruozhiba_last3 训练章节，说明新参数用法 |
+| `scripts/run_training.sh` | 新增 `CONFIG`（第 3 位）和 `TAG`（第 4 位）可选参数 |
+| `doc/training_execution.md` | 更新 ruozhiba_last3 训练章节，说明 TAG 参数和输出目录隔离 |
 
 ### 用法示例
 
 ```bash
-# 默认配置 (qwen3_4b_base.yaml)
+# 默认配置 (qwen3_4b_base.yaml) → saves/qwen3-4b/lora/r8
 bash scripts/run_training.sh 0 8
 
-# 指定 last3 配置
-bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml
+# 指定 last3 配置 + TAG → saves/qwen3-4b/lora/r8_last3
+bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3
 ```
 
 ### 备注
-- 向后兼容：原有双参数调用方式不受影响
+- 向后兼容：原有双参数调用方式不受影响，输出路径不变
+- TAG 参数避免不同数据集训练产物互相覆盖（`r8` vs `r8_last3`）
 - `qwen3_4b_base_last3.yaml` 与 `qwen3_4b_base.yaml` 仅 `dataset` 字段不同（`ruozhiba_last3` vs `ruozhiba_all`）
 
 ---

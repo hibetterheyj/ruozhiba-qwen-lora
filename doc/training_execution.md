@@ -70,15 +70,22 @@ tmux attach -t train
 
 ## 使用 ruozhiba_last3 配置文件进行训练
 
-`run_training.sh` 支持可选的第 3 个参数指定配置文件（默认 `configs/qwen3_4b_base.yaml`）:
+`run_training.sh` 支持可选的第 3、4 个参数：`CONFIG` 指定配置文件，`TAG` 生成独立输出目录，避免覆盖已有产物。
 
 ```bash
-# GPU 0, rank=8, 近三年数据集
-bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml 2>&1 | tee logs/run_a_r8_last3.log
+# GPU 0, rank=8, 近三年数据集 → saves/qwen3-4b/lora/r8_last3
+bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_a_r8_last3.log
 
-# GPU 1, rank=16, 近三年数据集
-bash scripts/run_training.sh 1 16 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml 2>&1 | tee logs/run_b_r16_last3.log
+# GPU 1, rank=16, 近三年数据集 → saves/qwen3-4b/lora/r16_last3
+bash scripts/run_training.sh 1 16 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_b_r16_last3.log
 ```
+
+**产出目录对比:**
+
+| 配置 | Output Dir |
+|------|------------|
+| `qwen3_4b_base.yaml` (默认) | `saves/qwen3-4b/lora/r8`, `saves/qwen3-4b/lora/r16` |
+| `qwen3_4b_base_last3.yaml` + TAG=last3 | `saves/qwen3-4b/lora/r8_last3`, `saves/qwen3-4b/lora/r16_last3` |
 
 ---
 
