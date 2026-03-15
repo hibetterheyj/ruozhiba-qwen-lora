@@ -1,80 +1,128 @@
-# Scripts Documentation
+# 脚本说明文档
 
-## Python Scripts
+> 本目录包含项目全流程中的数据处理、LLM 分类、SFT 数据构建、去重防污染、训练启动等脚本。
 
-### classify_jokes.py
-Classifies tieba joke data using LLM API. Reads input files specified in `classify_config.yaml`, sends text to LLM for multi-label classification (8 categories including 古典弱智, 奇怪提问, 弱智科学家, etc.), and outputs classification results with confidence scores.
+---
 
-**Optimization History (for report reference):**
+## 数据处理流水线脚本
 
-1. **JSON Parsing Robustness** - Addressed LLM-generated JSON format errors:
-   - `fix_double_escaped_quotes()`: Fixes `\\"` → `"` double-escaped quotes
-   - `fix_unescaped_quotes()`: Fixes unescaped quotes inside JSON string values
-   - `extract_json_from_response()`: Multi-layer fallback extraction (Markdown stripping → direct parse → quote fixes → regex pattern matching)
-   - Preserves all original data fields using `{**item, ...}` unpacking
+以下脚本按项目实际执行顺序排列：
 
-2. **Concurrency Optimization** - Improved I/O-bound task performance:
-   - Replaced `multiprocessing.Pool` with `ThreadPoolExecutor` (better suited for API calls)
-   - Reused single OpenAI client instance across all threads (avoided 10000x redundant instantiation)
+### 1. 数据提取与预处理
 
-3. **Checkpoint & Resume** - Prevented data loss on crash/interruption:
-   - `load_existing_results()`: Skips already-processed items by `no` field
-   - `try-except-finally`: Ensures progress saved on `KeyboardInterrupt` or exceptions
-   - Pre-assigned global `no` indices to prevent ID conflicts
+| 脚本 | 功能 | 输入 | 输出 |
+|------|------|------|------|
+| `extract_cqia_data.py` | 从 CQIA 原始 JSONL 中提取 `instruction` 和 `output` 字段 | `data/CQIA/ruozhiba_ruozhiba.jsonl` | `data/CQIA/ruozhiba_cqia_cleaned.json` |
+| `process_ruozhiba_past_annual.py` | GitHub 弱智吧年度精选数据预处理：提取序号和正文，附加元数据 (`l_num`, `ctime`)，按时间排序 | `data/ruozhiba/data/ruozhiba-post-annual.json` | `data/ruozhiba/data/ruozhiba-post-annual-processed.json` |
+| `filter_duplicates.py` | GitHub 语料与贴吧数据交叉去重（精确匹配 + 模糊匹配，SequenceMatcher 阈值 0.5） | 处理后的 GitHub 语料 + 贴吧数据 | `ruozhiba-post-annual-processed_filtered.json` + 匹配记录 |
+| `extract_annual_data.py` | 从去重后的 GitHub 语料中按时间段提取 2018/2019 年度数据，转换为贴吧格式 | `ruozhiba-post-annual-processed_filtered.json` | `data/tieba/best176_2018.json`, `data/tieba/best336_2019.json` |
 
-4. **Edge Case Handling** - Production-grade reliability:
-   - Atomic write: Write to `.json.tmp` then `replace()` to prevent file corruption
-   - Defensive API response extraction: Checks for empty `choices` or `content` (Content Filter cases)
-   - `tqdm.write()` instead of `print()`: Preserves progress bar rendering
-   - Renamed `num_processes` → `max_workers` for semantic accuracy
+### 2. LLM 分类标注
 
-### classify_cqia.py
-Classifies CQIA dataset using LLM API. Similar to `classify_jokes.py` but processes CQIA format data with instruction/output pairs. Configuration in `classify_cqia_config.yaml`.
+| 脚本 | 功能 | 配置文件 | 说明 |
+|------|------|----------|------|
+| `classify_jokes.py` | 贴吧段子 LLM 批量分类（8 类 Top-3 + 思考过程） | `classify_config.yaml` | 多线程、断点续传、原子写入 |
+| `classify_cqia.py` | CQIA 数据集 LLM 分类 | `classify_cqia_config.yaml` | 处理 instruction/output 对 |
+| `classify_cqia_updated.py` | CQIA 数据补全：为 240 条已分类数据补充 `thought_process` 字段（导师蒸馏） | `classify_cqia_updated_config.yaml` | 使用 Claude-Opus-4-6 生成深度分析 |
 
-### classify_cqia_updated.py
-CQIA 数据补全：为已分类的 240 条 CQIA 数据补充 `thought_process` 字段（导师蒸馏）。使用 Claude-Opus-4-6 对每条 `instruction` 生成深度分析的思考过程，合并到已有 `classification` 中。配置文件 `classify_cqia_updated_config.yaml`。
+#### `classify_jokes.py` 工程优化历史（供报告参考）
 
-- System Prompt 对齐 `classify_config.yaml`（贴吧版），要求输出 `thought_process` + `top3_categories`
+1. **JSON 解析鲁棒性** — 应对 LLM 生成的非标准 JSON：
+   - `fix_double_escaped_quotes()`: 修复 `\\"` → `"` 双重转义
+   - `fix_unescaped_quotes()`: 修复字符串内未转义引号
+   - `extract_json_from_response()`: 多层回退提取（Markdown 剥离 → 直接解析 → 引号修复 → 正则匹配）
+   - 使用 `{**item, ...}` 展开保留所有原始字段
+
+2. **并发优化** — 提升 I/O 密集型任务性能：
+   - `multiprocessing.Pool` → `ThreadPoolExecutor`（更适合 API 调用场景）
+   - 全线程共享单一 OpenAI 客户端实例（避免万次级冗余初始化）
+
+3. **断点续传** — 防止崩溃/中断导致数据丢失：
+   - `load_existing_results()`: 按 `no` 字段跳过已处理条目
+   - `try-except-finally`: 确保 `KeyboardInterrupt` 或异常时保存进度
+   - 全局预分配 `no` 索引，防止 ID 冲突
+
+4. **边界情况处理** — 生产级可靠性：
+   - 原子写入：先写 `.json.tmp` 再 `replace()`，防止文件损坏
+   - 防御性 API 响应提取：检查空 `choices` 或 `content`（Content Filter 情况）
+   - `tqdm.write()` 替代 `print()`：保持进度条渲染完整
+   - `num_processes` → `max_workers` 语义重命名
+
+#### `classify_cqia_updated.py` 设计要点
+
+- System Prompt 与 `classify_config.yaml`（贴吧版）对齐，要求输出 `thought_process` + `top3_categories`
 - 仅使用 `instruction` 字段作为 LLM 输入（不使用 CQIA 的 `output` 字段）
 - 保留原有 `output`、`top3_categories` 不变，在 `classification` 中新增 `thought_process`
 - 复用 `classify_jokes.py` 的鲁棒性优化：ThreadPoolExecutor、断点续传（JSONL checkpoint）、原子写入、多层 JSON 解析容错
 - 新旧 `top3_categories` 对比记录日志（仅记录 category drift，不覆盖原有分类）
 
-Input: `data/CQIA/ruozhiba_cqia_classified.json`, Output: `data/CQIA/ruozhiba_cqia_classified_v2.json`.
+### 3. 数据质量校验与修复
 
-### extract_cqia_data.py
-Extracts `instruction` and `output` fields from JSONL format CQIA dataset and saves to JSON format. Input: `data/CQIA/ruozhiba_ruozhiba.jsonl`, Output: `data/CQIA/ruozhiba_cqia_cleaned.json`.
+| 脚本 | 功能 |
+|------|------|
+| `check_and_repair.py` | 贴吧分类数据完整性校验与修复（检查 `thought_process` + `top3_categories` 字段完整性） |
+| `check_and_repair_cqia.py` | CQIA 数据 schema 校验与修复 |
+| `check_escape.py` | JSON 转义字符检查 |
+| `fix_quotes.py` | 引号修复（处理 LLM 输出中的引号异常） |
+| `fix_double_escapes.py` | 双重转义修复 |
+| `debug_quotes.py` | 引号问题调试辅助 |
 
-### process_ruozhiba_past_annual.py
-Processes raw ruozhiba annual post data. Extracts post number and text content from raw content field, adds metadata (l_num, ctime), and sorts by creation time. Input: `data/ruozhiba/data/ruozhiba-post-annual.json`, Output: `data/ruozhiba/data/ruozhiba-post-annual-processed.json`.
+### 4. 去重防污染
 
-### filter_duplicates.py
-Finds and removes duplicate content between ruozhiba and tieba datasets. Performs exact matching and fuzzy matching (threshold=0.5) using SequenceMatcher. Outputs filtered ruozhiba data and match records.
+| 脚本 | 功能 | 产出 |
+|------|------|------|
+| `dedup_test_vs_train.py` | CQIA 测试集 vs 贴吧训练集去重（MD5 精确匹配 + SequenceMatcher ≥ 0.9 模糊匹配） | `data/dedup_report.json` + 9 个 `*_classified_dedup.json` |
 
-### extract_annual_data.py
-Extracts annual post data from filtered ruozhiba dataset and saves to tieba format. Filters by creation time ranges:
-- 2018 data: ctime <= "2019-01-01 13:37" → `best176_2018.json`
-- 2019 data: "2019-12-15 23:00" <= ctime <= "2020-01-04 19:32" → `best336_2019.json`
+去重结果：2813 → **2786** 条（移除 27 条重复：精确 18 条 + 模糊 9 条）
 
-Input: `data/ruozhiba/data/ruozhiba-post-annual-processed_filtered.json`, Output: `data/tieba/best176_2018.json`, `data/tieba/best336_2019.json`. Data source: https://github.com/Leymore/ruozhiba/blob/main/data/ruozhiba-post-annual.json
+### 5. SFT 训练数据构建
 
-## Configuration Files
+| 脚本 | 功能 | 产出 |
+|------|------|------|
+| `build_sft_data.py` | 将去重后贴吧分类数据转换为 LLaMA-Factory ShareGPT 格式（system/human/gpt 三轮对话） | `LLaMA-Factory/data/ruozhiba_all.json` (2785 条), `ruozhiba_last3.json` (1025 条) |
 
-### classify_config.yaml
-Configuration for `classify_jokes.py`. Contains:
-- `system_prompt`: LLM classification prompt with 8 category definitions
-- `files_to_process`: Input/output file mappings for tieba data
-- `processing`: API parameters (num_processes, temperature, max_tokens, sleep_time)
+### 6. 训练与压测
 
-### classify_cqia_config.yaml
-Configuration for `classify_cqia.py`. Similar structure to `classify_config.yaml` but optimized for CQIA dataset processing with simplified output format.
+| 脚本 | 功能 | 说明 |
+|------|------|------|
+| `run_training.sh` | 训练启动脚本 | 通过 CLI 参数注入 `CUDA_VISIBLE_DEVICES`、`lora_rank`、`lora_alpha`、`output_dir` |
+| `probe_batch_size.sh` | Batch Size 动态压测 | `max_steps: 15` 小步快跑，自动激活 venv，自动清理临时文件 |
 
-### classify_cqia_updated_config.yaml
-Configuration for `classify_cqia_updated.py`. Uses the same system prompt as `classify_config.yaml` (with `thought_process` + `top3_categories` output format). Processing parameters: `max_workers: 4`, `temperature: 0.3`, `max_tokens: 1500`.
+**`run_training.sh` 使用方式:**
 
-## Dependencies
-- openai: LLM API client
-- tenacity: Retry mechanism
-- tqdm: Progress bar
-- PyYAML: Config parsing
-- python-dotenv: Environment variables
+```bash
+# 用法: bash scripts/run_training.sh <GPU_ID> <RANK>
+bash scripts/run_training.sh 0 8    # GPU 0, LoRA rank=8, alpha=16
+bash scripts/run_training.sh 1 16   # GPU 1, LoRA rank=16, alpha=32
+```
+
+### 7. 单元测试
+
+| 脚本 | 测试对象 |
+|------|----------|
+| `test_fix_function.py` | 修复函数单元测试 |
+| `test_fix_quotes.py` | 引号修复逻辑测试 |
+| `test_json_parse.py` | JSON 解析容错测试 |
+| `test_actual_file.py` | 实际文件处理测试 |
+
+---
+
+## 配置文件
+
+| 文件 | 用途 | 关键参数 |
+|------|------|----------|
+| `classify_config.yaml` | `classify_jokes.py` 配置 | system_prompt（8 类分类 + 思考过程）、files_to_process、API 参数 |
+| `classify_cqia_config.yaml` | `classify_cqia.py` 配置 | 简化输出格式，适配 CQIA 数据结构 |
+| `classify_cqia_updated_config.yaml` | `classify_cqia_updated.py` 配置 | system_prompt 对齐贴吧版、`max_workers: 4`、`temperature: 0.3`、`max_tokens: 1500` |
+
+---
+
+## 依赖
+
+| 包名 | 用途 |
+|------|------|
+| `openai` | LLM API 调用（兼容 OpenAI 接口） |
+| `tenacity` | API 调用重试（指数退避） |
+| `tqdm` | 进度条显示 |
+| `pyyaml` | YAML 配置文件解析 |
+| `python-dotenv` | `.env` 环境变量加载 |

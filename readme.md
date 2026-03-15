@@ -36,87 +36,62 @@
 │
 ├── crawler/                           # 🕷️ 数据爬取
 │   ├── keaixiaojiycw-tieba-post-crawler/  # 基于 aiotieba 的异步贴吧爬虫
-│   │   ├── readme.md
-│   │   └── todo.md
 │   ├── processing_scripts/            # 爬取后处理脚本
-│   │   ├── check_missing.py           #   检查缺失帖子
-│   │   ├── extract_all_years.py       #   批量提取所有年份数据
-│   │   ├── extract_posts.py           #   从原始页面提取帖子内容
-│   │   └── README.md
-│   └── threads/                       # 爬取的原始帖子数据
-│       ├── index.json                 #   帖子索引
-│       ├── 目录.txt                    #   帖子目录说明
-│       ├── tieba.baidu.com_cookies.txt
-│       ├── 10354221105_弱智吧2025年度365佳贴/
-│       ├── 9354404050_弱智吧2024年度365佳贴/
-│       ├── 8807455743_弱智吧2023年度365佳贴/
-│       ├── 8202002333_弱智吧2022年度365佳贴/
-│       ├── 7708339765_弱智吧2021年度306佳贴/
-│       ├── 7339397421_弱智吧2020年度365佳贴/
-│       └── 10130417881_盘点弱智吧最出圈的100条段子/
+│   └── threads/                       # 爬取的原始帖子数据 (2018-2025)
 │
 ├── data/                              # 📦 整理后的数据集
-│   ├── readme.md                      #   数据说明
-│   ├── catogory_ideas.md              #   分类体系设计笔记
-│   ├── init_ideas.md                  #   初期构思
-│   ├── tieba/                         #   贴吧年度佳帖数据 (2018-2025)
-│   │   ├── best365_2025.json          #     原始提取数据
-│   │   ├── best365_2025_classified.json #   LLM 分类后数据
-│   │   ├── best365_2024.json / _classified.json
-│   │   ├── best365_2023.json / _classified.json
-│   │   ├── best365_2022.json / _classified.json
-│   │   ├── best365_2020.json / _classified.json
-│   │   ├── best306_2021_2H.json / _classified.json
-│   │   ├── best295_2021_1H.json / _classified.json
-│   │   ├── best336_2019.json          #     (2018-2019 年暂未分类)
-│   │   ├── best176_2018.json
-│   │   ├── best100_all.json           #     按类别组织的经典 100 条
-│   │   └── readme.md
-│   ├── CQIA/                          #   COIG-CQIA 弱智吧子集
-│   │   ├── ruozhiba_ruozhiba.jsonl    #     原始 JSONL (240 条)
-│   │   ├── ruozhiba_cqia_cleaned.json #     清洗后 JSON
-│   │   ├── ruozhiba_cqia_classified.json #  LLM 分类后
-│   │   ├── ruozhiba_cqia_test.json    #     测试集
-│   │   └── ruozhiba_cqia_test_classified.json
-│   └── ruozhiba/                      #   GitHub 弱智吧语料
-│       ├── README.md
+│   ├── readme.md                      #   数据目录说明
+│   ├── dedup_report.json              #   去重报告
+│   ├── tieba/                         #   贴吧年度佳帖 (2018-2025, 含分类/去重版本)
+│   ├── CQIA/                          #   COIG-CQIA 弱智吧子集 (240 条, 测试集)
+│   ├── ruozhiba/                      #   GitHub 弱智吧语料 (1361 条)
+│   └── LLaMA-Factory/                 #   SFT 训练数据备份
 │       └── data/
-│           ├── ruozhiba-post-annual.json           # 1361 条年度精选
-│           ├── ruozhiba-post-annual-processed.json  # 处理后
-│           ├── ruozhiba-post-annual-processed_filtered.json
-│           ├── ruozhiba-post-annual-processed_exact_matched.json
-│           ├── ruozhiba-post-annual-processed_fuzzy_matched.json
-│           ├── ruozhiba-title-good.json             # 吧主推荐帖
-│           └── ruozhiba-title-norm.json             # 普通帖标题
+│           ├── ruozhiba_all.json      #     全量训练集 (2785 条)
+│           └── ruozhiba_last3.json    #     近三年训练集 (1025 条)
 │
-├── scripts/                           # ⚙️ 数据处理与分类脚本
+├── scripts/                           # ⚙️ 数据处理与训练脚本
 │   ├── readme.md                      #   脚本说明
 │   ├── classify_jokes.py              #   LLM 批量分类 (多线程, 断点续传)
 │   ├── classify_cqia.py               #   CQIA 数据 LLM 分类
-│   ├── classify_config.yaml           #   分类 API 配置
-│   ├── classify_cqia_config.yaml      #   CQIA 分类配置
-│   ├── extract_annual_data.py         #   按时间段提取年度数据
-│   ├── extract_cqia_data.py           #   CQIA JSONL → JSON 转换
-│   ├── process_ruozhiba_past_annual.py #  GitHub 语料预处理
+│   ├── classify_cqia_updated.py       #   CQIA thought_process 补全 (导师蒸馏)
+│   ├── build_sft_data.py              #   去重数据 → ShareGPT 格式转换
+│   ├── dedup_test_vs_train.py         #   测试集 vs 训练集去重
 │   ├── filter_duplicates.py           #   精确 + 模糊去重
-│   ├── check_and_repair.py            #   数据完整性校验与修复
-│   ├── check_and_repair_cqia.py       #   CQIA 数据校验与修复
-│   ├── check_escape.py                #   转义字符检查
-│   ├── fix_quotes.py                  #   引号修复
-│   ├── fix_double_escapes.py          #   双重转义修复
-│   ├── debug_quotes.py                #   引号问题调试
-│   ├── test_*.py                      #   单元测试
-│   └── ...
+│   ├── run_training.sh                #   训练启动脚本 (CLI 覆盖 rank/output_dir)
+│   ├── probe_batch_size.sh            #   Batch Size 动态压测
+│   └── ...                            #   校验/修复/测试脚本
 │
-└── doc/                               # 📝 文档
-    ├── assignment.md                  #   作业要求
-    ├── howto.md                       #   操作指南
-    ├── Lab3_SFT.pdf                   #   实验指导书
-    └── proposal/                      #   项目方案
-        ├── final_proposal_gemini_update.md  # 最终方案
-        ├── final_proposal_gemini.md
-        ├── deepseek.md / gemini.md / qwen.md  # 各模型生成的方案草稿
-        └── my_ideas_qa.md
+├── configs/                           # 🔧 训练与推理配置
+│   ├── readme.md                      #   配置说明
+│   ├── prompts.yaml                   #   统一 system prompt 与分类类别
+│   ├── qwen3_4b_mvp.yaml             #   MVP 训练配置 (rank=8, 3 epochs)
+│   ├── qwen3_4b_base.yaml            #   正式训练基础配置 (7 epochs, BS=16×2)
+│   └── qwen3_4b_merge.yaml           #   LoRA 权重合并配置
+│
+├── models/                            # 🤖 模型权重
+│   ├── Qwen3-4B-Instruct-2507/       #   基座模型
+│   └── Qwen3-4B-Ruozhiba-Merged/     #   合并后的微调模型 (7.6 GB)
+│
+├── LLaMA-Factory/                     # 🏭 LLaMA-Factory 框架 (submodule)
+│   ├── data/                          #   训练数据 + dataset_info.json
+│   └── saves/                         #   训练产物
+│       └── qwen3-4b/lora/
+│           ├── mvp_r8_e3/             #     MVP 训练输出
+│           ├── r8/                    #     正式训练 R8 (7 epoch checkpoints)
+│           └── r16/                   #     正式训练 R16 (7 epoch checkpoints)
+│
+├── doc/                               # 📝 文档
+│   ├── readme.md                      #   文档目录说明
+│   ├── assignment.md                  #   作业要求
+│   ├── dev_plan_0_1.md                #   开发计划 v0.1
+│   ├── changelog.md                   #   变更日志
+│   ├── training_execution.md          #   双卡并行训练执行手册
+│   ├── train_test_eda.md              #   Token 长度 EDA 报告
+│   ├── train_analysis1.md             #   第一批训练日志分析
+│   └── proposal/                      #   项目方案
+│
+└── env_sft/                           # 🐍 Python 虚拟环境
 ```
 
 ---
@@ -321,17 +296,32 @@ crawler/threads/10354221105_弱智吧2025年度365佳贴/
                                         │
                           ┌─────────────▼──────────────┐
                           │  classify_jokes.py         │
-                          │  (LLM 多线程分类，断点续传)   │
+                          │  classify_cqia_updated.py  │
+                          │  (LLM 多线程分类 + 导师蒸馏)  │
                           └─────────────┬──────────────┘
                                         │
                           ┌─────────────▼──────────────┐
                           │  check_and_repair.py       │
-                          │  (数据完整性校验)             │
+                          │  dedup_test_vs_train.py    │
+                          │  (数据校验 + 去重防污染)      │
                           └─────────────┬──────────────┘
                                         │
                           ┌─────────────▼──────────────┐
-                          │  SFT Training Data         │
-                          │  (ShareGPT format)         │
+                          │  build_sft_data.py         │
+                          │  (ShareGPT 格式化)          │
+                          │  → ruozhiba_all.json       │
+                          └─────────────┬──────────────┘
+                                        │
+                          ┌─────────────▼──────────────┐
+                          │  LLaMA-Factory LoRA SFT    │
+                          │  run_training.sh           │
+                          │  R8 + R16 双卡并行 7 epochs  │
+                          └─────────────┬──────────────┘
+                                        │
+                          ┌─────────────▼──────────────┐
+                          │  llamafactory-cli export   │
+                          │  (LoRA → 合并模型)           │
+                          │  → Qwen3-4B-Ruozhiba-Merged│
                           └────────────────────────────┘
 ```
 
@@ -343,7 +333,9 @@ crawler/threads/10354221105_弱智吧2025年度365佳贴/
 - **环境管理**: [uv](https://docs.astral.sh/uv/) (虚拟环境 `env_sft`)
 - **爬虫**: [aiotieba](https://github.com/Starry-OvO/aiotieba) (异步贴吧库)
 - **SFT 微调**: [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) + LoRA + [accelerate](https://github.com/huggingface/accelerate)
-- **基座模型**: Qwen3-8B-Instruct / Qwen3-1.5B-Instruct
+- **基座模型**: Qwen3-4B-Instruct-2507
+- **分类标注模型**: Claude-Opus-4-6（导师蒸馏，生成 `thought_process`）
+- **硬件**: 2× NVIDIA L20Z (80GB VRAM each)
 
 ### 数据处理 & 分类脚本依赖
 
@@ -357,9 +349,42 @@ crawler/threads/10354221105_弱智吧2025年度365佳贴/
 
 标准库: `json`, `re`, `os`, `glob`, `time`, `pathlib`, `typing`, `datetime`, `difflib`, `concurrent.futures`, `multiprocessing`
 
-```
+### 环境搭建
+
+```bash
 uv venv env_sft python 3.12
 source env_sft/bin/activate
 uv pip install 'llamafactory[metrics]' accelerate
 uv pip install openai tenacity tqdm python-dotenv pyyaml
 ```
+
+---
+
+## 训练结果摘要
+
+### 实验矩阵
+
+| Run | GPU | LoRA Rank | Alpha | Epochs | 最优 Eval Loss | 最优 Checkpoint |
+|-----|-----|-----------|-------|--------|----------------|-----------------|
+| MVP | 0 | 8 | 16 | 3 | 0.8820 | step 993 |
+| A (R8) | 0 | 8 | 16 | 7 | 0.8870 | step 500 |
+| **B (R16)** | **1** | **16** | **32** | **7** | **0.8859** | **checkpoint-415 (epoch 5)** |
+
+### 正式训练 Loss 对比
+
+| Eval Step (~Epoch) | R8 Train Loss | R8 Eval Loss | R16 Train Loss | R16 Eval Loss |
+|---|---|---|---|---|
+| 100 (~1.2) | 1.0656 | 1.0295 | 1.0108 | 0.9842 |
+| 200 (~2.4) | 0.9081 | 0.9258 | 0.8634 | 0.9034 |
+| 300 (~3.6) | 0.8327 | 0.8988 | 0.7801 | 0.8886 |
+| 400 (~4.8) | 0.7915 | 0.8885 | 0.7257 | **0.8859** |
+| 500 (~6.0) | 0.7848 | 0.8870 | 0.7035 | 0.8915 |
+
+### 关键发现
+
+- **最优模型**: R16 checkpoint-415 (epoch 5)，全局最低 eval_loss = **0.8859**
+- R16 学习速度更快（train loss 更低），但 epoch 5 后出现轻微过拟合
+- R8 未观察到过拟合，eval loss 持续缓慢下降
+- 合并后模型: `models/Qwen3-4B-Ruozhiba-Merged/` (7.6 GB, 参数量 4,022,468,096)
+
+> 详细训练分析见 `doc/train_analysis1.md`
