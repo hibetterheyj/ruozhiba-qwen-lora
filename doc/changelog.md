@@ -1,5 +1,43 @@
 # Changelog
 
+## 2025-03-15 — Phase 2.5 OOM 修复 — BS=32→16×2 梯度累积
+
+### 问题
+
+双卡并行训练 (Run A: rank=8, Run B: rank=16) 均触发 OOM:
+
+```
+torch.OutOfMemoryError: Tried to allocate 17.39 GiB.
+GPU has 79.11 GiB total, 17.21 GiB free. Process has 61.89 GiB in use.
+```
+
+### 根因
+
+Phase 2.4 压测 (`probe_batch_size.sh`) 使用 `max_steps: 15` 且无 eval/wandb/checkpoint，BS=32 刚好通过。正式训练环境的额外内存开销（eval 步骤、wandb tracking、epoch checkpoint saving）使显存峰值超过 79.11 GiB 约 170 MB。
+
+### 修复
+
+| 参数 | 修复前 | 修复后 | 有效 BS |
+|------|--------|--------|--------|
+| `per_device_train_batch_size` | 32 | 16 | — |
+| `gradient_accumulation_steps` | 1 | 2 | 16×2=32 |
+
+梯度累积保持有效批次大小不变 (32)，训练动态完全一致，峰值激活显存减半。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `configs/qwen3_4b_base.yaml` | BS: 32→16, grad_accum: 1→2 |
+| `doc/training_execution.md` | 更新参数摘要、wandb 状态 |
+
+### 备注
+- 有效 batch size 不变 (32)，学习率/训练步数/收敛行为与原配置等价
+- 错误信息中 Run B 显示 "GPU 0" 是正常行为：`CUDA_VISIBLE_DEVICES=1` 使 GPU 1 在 PyTorch 视角重映射为 device 0
+- wandb 已成功登录并记录了两次失败 run（true-sun-1, fancy-plasma-2），后续成功 run 将自动追加
+
+---
+
 ## 2025-03-15 — Phase 2.5 训练配置与启动
 
 ### 概述

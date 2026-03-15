@@ -17,9 +17,8 @@ python -c "import llamafactory; print('OK')"
 # 3. 确认数据集已注册
 cat /root/code/llm_ruozhiba/LLaMA-Factory/data/dataset_info.json | python -m json.tool | grep ruozhiba
 
-# 4. (可选) 配置 wandb — 当前 report_to: none, 如需启用:
+# 4. wandb 已配置 (report_to: wandb), 确认已登录:
 #    wandb login
-#    然后修改 configs/qwen3_4b_base.yaml 中 report_to: wandb
 ```
 
 ---
@@ -28,7 +27,7 @@ cat /root/code/llm_ruozhiba/LLaMA-Factory/data/dataset_info.json | python -m jso
 
 | 文件 | 用途 |
 |------|------|
-| `configs/qwen3_4b_base.yaml` | 共享基础配置 (BS=32, 7 epochs, seed=42) |
+| `configs/qwen3_4b_base.yaml` | 共享基础配置 (BS=16×2, 7 epochs, seed=42) |
 | `scripts/run_training.sh` | 启动脚本，通过 CLI 参数注入 rank/alpha/output_dir |
 
 ---
@@ -110,7 +109,7 @@ ls -la /root/code/llm_ruozhiba/LLaMA-Factory/saves/qwen3-4b/lora/r16/
 | 方法 | LoRA (target=all) | base.yaml |
 | 数据集 | ruozhiba_all (2645 train / 140 eval) | base.yaml |
 | 模板 | qwen3_nothink | base.yaml |
-| Batch Size | 32 | Phase 2.4 压测结果 |
+| Batch Size | 16 (×2 grad_accum = 有效 32) | Phase 2.4 压测 + OOM 修正 |
 | 学习率 | 1e-4, cosine, warmup=0.1 | base.yaml |
 | Epochs | 7 | base.yaml |
 | Seed | 42 | base.yaml |
