@@ -1,0 +1,245 @@
+{
+  "test_set": {
+    "file": "data/CQIA/ruozhiba_cqia_classified.json",
+    "count": 240
+  },
+  "before": {
+    "total": 2813,
+    "recent_3y": 1035,
+    "per_file": {
+      "best176_2018_classified.json": 170,
+      "best295_2021_1H_classified.json": 286,
+      "best306_2021_2H_classified.json": 306,
+      "best336_2019_classified.json": 333,
+      "best365_2020_classified.json": 353,
+      "best365_2022_classified.json": 330,
+      "best365_2023_classified.json": 322,
+      "best365_2024_classified.json": 352,
+      "best365_2025_classified.json": 361
+    }
+  },
+  "after": {
+    "total": 2786,
+    "recent_3y": 1025,
+    "per_file": {
+      "best176_2018_classified.json": 170,
+      "best295_2021_1H_classified.json": 283,
+      "best306_2021_2H_classified.json": 296,
+      "best336_2019_classified.json": 333,
+      "best365_2020_classified.json": 350,
+      "best365_2022_classified.json": 329,
+      "best365_2023_classified.json": 312,
+      "best365_2024_classified.json": 352,
+      "best365_2025_classified.json": 361
+    }
+  },
+  "removed": {
+    "total": 27,
+    "exact": 18,
+    "fuzzy": 9,
+    "per_file": {
+      "best176_2018_classified.json": 0,
+      "best295_2021_1H_classified.json": 3,
+      "best306_2021_2H_classified.json": 10,
+      "best336_2019_classified.json": 0,
+      "best365_2020_classified.json": 3,
+      "best365_2022_classified.json": 1,
+      "best365_2023_classified.json": 10,
+      "best365_2024_classified.json": 0,
+      "best365_2025_classified.json": 0
+    }
+  },
+  "exact_matches": [
+    {
+      "train_file": "best295_2021_1H_classified.json",
+      "train_text": "有目的地的人生才会迷路，我只是来世界散步。",
+      "test_text": "有目的地的人生才会迷路，我只是来世界散步。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best295_2021_1H_classified.json",
+      "train_text": "人生就像一场游戏，死亡是防沉迷",
+      "test_text": "人生就像一场游戏，死亡是防沉迷",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "心脏手术失败原因是医生没有get到梗在哪",
+      "test_text": "心脏手术失败原因是医生没有get到梗在哪",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "我做了一个1：1的地球仪，你往窗外看就能看见了",
+      "test_text": "我做了一个1：1的地球仪，你往窗外看就能看见了",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "食人族吃我的时候会发现刻在骨子里的孤独吗？",
+      "test_text": "食人族吃我的时候会发现刻在骨子里的孤独吗？",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "王老汉把两台电视机屏幕对在一起，贞子来回爬最终活活累死",
+      "test_text": "王老汉把两台电视机屏幕对在一起，贞子来回爬最终活活累死",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "谁能想到，一向见钱眼开的他，竟然被金钱蒙蔽了双眼？",
+      "test_text": "谁能想到，一向见钱眼开的他，竟然被金钱蒙蔽了双眼？",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "人酸了的时候通常会眼红，会不会眼睛其实是pH试纸？",
+      "test_text": "人酸了的时候通常会眼红，会不会眼睛其实是pH试纸？",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "公司的水太深，所以上班才会摸鱼。",
+      "test_text": "公司的水太深，所以上班才会摸鱼。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "存在的星星不一定都发光，发光的星星不一定还存在。",
+      "test_text": "存在的星星不一定都发光，发光的星星不一定还存在。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2020_classified.json",
+      "train_text": "雨天，我走进水坑里，不小心踩碎了天空。",
+      "test_text": "雨天，我走进水坑里，不小心踩碎了天空。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2020_classified.json",
+      "train_text": "爱是两个人眼睛间不断来回反射的光",
+      "test_text": "爱是两个人眼睛间不断来回反射的光",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2020_classified.json",
+      "train_text": "红萝卜说白了就是白萝卜",
+      "test_text": "红萝卜说白了就是白萝卜",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2022_classified.json",
+      "train_text": "很多人说的看不到未来其实是看到了未来",
+      "test_text": "很多人说的看不到未来其实是看到了未来",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "怕上火，住下水道。",
+      "test_text": "怕上火，住下水道。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "面对歹徒开枪射击，王警官严厉批评其射击姿势不够标准。",
+      "test_text": "面对歹徒开枪射击，王警官严厉批评其射击姿势不够标准。",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "前天还有人祝我生日快乐呢，今天怎么没了？",
+      "test_text": "前天还有人祝我生日快乐呢，今天怎么没了？",
+      "similarity": 1.0,
+      "match_type": "exact"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "偷功德箱里面的钱算不算提现",
+      "test_text": "偷功德箱里面的钱算不算提现",
+      "similarity": 1.0,
+      "match_type": "exact"
+    }
+  ],
+  "fuzzy_matches": [
+    {
+      "train_file": "best295_2021_1H_classified.json",
+      "train_text": "坏掉的东西，还能修好。可是坏掉的感情，岂可修",
+      "test_text": "坏掉的东西，还能修好。可是坏掉的感情，岂可修吗？",
+      "similarity": 0.9565,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "声音的传播需要时间 我们面对着说着话，我在过去，你在未来",
+      "test_text": "声音的传播需要时间我们面对着说着话，我在过去，你在未来",
+      "similarity": 0.9818,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best306_2021_2H_classified.json",
+      "train_text": "“回忆”这个词是不是“迷宫”的近义词啊， 要不然我怎么走不出去",
+      "test_text": "“回忆”这个词是不是“迷宫”的近义词啊，要不然我怎么走不出去",
+      "similarity": 0.9836,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "公交车太可怕了，每次我看它停靠在路边，路边就会有人消失。",
+      "test_text": "公交车太可怕了，每次我看它停靠在路边，路边就会有人消失",
+      "similarity": 0.9818,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "关羽不斩老幼，为什么不派十万老幼去斩杀关羽？",
+      "test_text": "关羽不斩老幼，为什么不派十万老幼去斩杀关羽",
+      "similarity": 0.9767,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "为什么医院床位那么紧张，不弄成上下铺呢?",
+      "test_text": "为什么医院床位那么紧张，不弄成上下铺呢？🤗",
+      "similarity": 0.9268,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "既然高考是看排名的，那大家为什么不都考0分呢？这样人人都有大学上了。",
+      "test_text": "既然高考是看排名的，那大家为什么不都考0分呢?这样人人都有大学上了",
+      "similarity": 0.9552,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "有没有一种可能，情敌其实不是敌人，而是同好",
+      "test_text": "有没有一种可能，情敌其实不是敌人而是同好",
+      "similarity": 0.9756,
+      "match_type": "fuzzy"
+    },
+    {
+      "train_file": "best365_2023_classified.json",
+      "train_text": "既然大学生都喜欢坐后排，为什么老师不在教室后面讲。",
+      "test_text": "既然大学生都喜欢坐后排为什么老师不在教室后面讲",
+      "similarity": 0.9583,
+      "match_type": "fuzzy"
+    }
+  ]
+}
