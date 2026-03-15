@@ -1,5 +1,34 @@
 # Changelog
 
+## 2025-03-15 — run_training.sh 支持自定义配置文件
+
+### 概述
+
+`run_training.sh` 新增可选第 3 参数 `CONFIG_FILE`，支持指定训练配置文件路径。不传则默认使用 `configs/qwen3_4b_base.yaml`，向后兼容。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/run_training.sh` | 新增 `CONFIG_FILE` 参数（第 3 位，可选，默认 `qwen3_4b_base.yaml`） |
+| `doc/training_execution.md` | 更新 ruozhiba_last3 训练章节，说明新参数用法 |
+
+### 用法示例
+
+```bash
+# 默认配置 (qwen3_4b_base.yaml)
+bash scripts/run_training.sh 0 8
+
+# 指定 last3 配置
+bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml
+```
+
+### 备注
+- 向后兼容：原有双参数调用方式不受影响
+- `qwen3_4b_base_last3.yaml` 与 `qwen3_4b_base.yaml` 仅 `dataset` 字段不同（`ruozhiba_last3` vs `ruozhiba_all`）
+
+---
+
 ## 2025-03-15 — Phase 2.6 & 2.7 训练监控 & 权重合并
 
 ### 2.6 训练监控 — Loss 分析

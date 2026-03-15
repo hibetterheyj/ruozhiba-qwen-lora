@@ -68,18 +68,16 @@ bash /root/code/llm_ruozhiba/scripts/run_training.sh 1 16 2>&1 | tee /root/code/
 tmux attach -t train
 ```
 
-### 快速一键启动 (适合直接复制粘贴)
+## 使用 ruozhiba_last3 配置文件进行训练
+
+`run_training.sh` 支持可选的第 3 个参数指定配置文件（默认 `configs/qwen3_4b_base.yaml`）:
 
 ```bash
-# 创建日志目录
-mkdir -p /root/code/llm_ruozhiba/logs
+# GPU 0, rank=8, 近三年数据集
+bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml 2>&1 | tee logs/run_a_r8_last3.log
 
-# 启动 tmux 双窗口训练
-tmux new-session -d -s train \
-  "bash /root/code/llm_ruozhiba/scripts/run_training.sh 0 8 2>&1 | tee /root/code/llm_ruozhiba/logs/run_a_r8.log" \; \
-  split-window -h \
-  "bash /root/code/llm_ruozhiba/scripts/run_training.sh 1 16 2>&1 | tee /root/code/llm_ruozhiba/logs/run_b_r16.log" \; \
-  attach
+# GPU 1, rank=16, 近三年数据集
+bash scripts/run_training.sh 1 16 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml 2>&1 | tee logs/run_b_r16_last3.log
 ```
 
 ---
