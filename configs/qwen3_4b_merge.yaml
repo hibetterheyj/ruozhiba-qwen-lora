@@ -1,0 +1,11 @@
+### model
+model_name_or_path: /root/code/llm_ruozhiba/models/Qwen3-4B-Instruct-2507
+adapter_name_or_path: /root/code/llm_ruozhiba/LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-415
+template: qwen3_nothink
+finetuning_type: lora
+
+### export
+export_dir: /root/code/llm_ruozhiba/models/Qwen3-4B-Ruozhiba-Merged
+export_size: 5
+export_device: auto
+export_legacy_format: false

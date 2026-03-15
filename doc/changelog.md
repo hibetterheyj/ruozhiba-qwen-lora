@@ -1,5 +1,71 @@
 # Changelog
 
+## 2025-03-15 — Phase 2.6 & 2.7 训练监控 & 权重合并
+
+### 2.6 训练监控 — Loss 分析
+
+双卡并行训练已完成 (Run A: rank=8 GPU 0, Run B: rank=16 GPU 1, 各 7 epochs)。
+
+**Loss 曲线摘要:**
+
+| Eval Step (Epoch) | R8 Train Loss | R8 Eval Loss | R16 Train Loss | R16 Eval Loss |
+|---|---|---|---|---|
+| 100 (~1.2) | 1.0656 | 1.0295 | 1.0108 | 0.9842 |
+| 200 (~2.4) | 0.9081 | 0.9258 | 0.8634 | 0.9034 |
+| 300 (~3.6) | 0.8327 | 0.8988 | 0.7801 | 0.8886 |
+| 400 (~4.8) | 0.7915 | 0.8885 | 0.7257 | **0.8859** |
+| 500 (~6.0) | 0.7848 | 0.8870 | 0.7035 | 0.8915 |
+
+**最终结果:**
+
+| 指标 | R8 (rank=8) | R16 (rank=16) |
+|---|---|---|
+| Train Loss (avg) | 0.9567 | 0.8887 |
+| Final Eval Loss | 0.8879 | 0.8962 |
+| Best Eval Loss | 0.8870 (step 500) | **0.8859** (step 400) |
+| Runtime | 1703s (~28min) | 1700s (~28min) |
+
+**分析要点:**
+- 两组 loss 均呈持续下降趋势，训练正常收敛
+- R16 学习更快（更低的 train loss），参数更新空间更大
+- R16 在 epoch ~5 后出现轻微过拟合信号 (eval loss: 0.8859 → 0.8915 → 0.8962)
+- R8 未观察到过拟合，eval loss 持续缓慢下降
+- Warmup 阶段 (前 ~58 步) 表现正常，loss 平稳下降后进入主训练节奏
+- 最优 checkpoint: **R16 checkpoint-415 (epoch 5)**，全局最低 eval_loss = 0.8859
+
+### 2.7 权重合并 (LoRA Merge)
+
+选定 R16 checkpoint-415 (epoch 5) 作为最优 checkpoint，通过 `llamafactory-cli export` 将 LoRA adapter 与基座模型合并:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli export configs/qwen3_4b_merge.yaml
+```
+
+**合并验证:**
+- 输出目录: `models/Qwen3-4B-Ruozhiba-Merged/` (7.6 GB, 2 个 safetensors 分片)
+- 模型参数量: 4,022,468,096 (与基座一致)
+- Smoke test 通过: 加载合并模型成功生成幽默解构分析，输出质量符合预期
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `configs/qwen3_4b_merge.yaml` | LoRA 权重合并配置 (R16 checkpoint-415 → Merged) |
+| `models/Qwen3-4B-Ruozhiba-Merged/` | 合并后的完整模型 (7.6 GB) |
+
+### 训练产物清单
+
+| 路径 | 内容 |
+|------|------|
+| `LLaMA-Factory/saves/qwen3-4b/lora/r8/` | R8 完整训练输出 (7 epoch checkpoints + loss 图) |
+| `LLaMA-Factory/saves/qwen3-4b/lora/r16/` | R16 完整训练输出 (7 epoch checkpoints + loss 图) |
+| `LLaMA-Factory/saves/qwen3-4b/lora/r8/training_loss.png` | R8 训练 loss 曲线 |
+| `LLaMA-Factory/saves/qwen3-4b/lora/r16/training_loss.png` | R16 训练 loss 曲线 |
+| `LLaMA-Factory/saves/qwen3-4b/lora/r8/training_eval_loss.png` | R8 验证 loss 曲线 |
+| `LLaMA-Factory/saves/qwen3-4b/lora/r16/training_eval_loss.png` | R16 验证 loss 曲线 |
+
+---
+
 ## 2025-03-15 — Phase 2.5 OOM 修复 — BS=32→16×2 梯度累积
 
 ### 问题
