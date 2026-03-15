@@ -1,4 +1,5 @@
 LLaMA-Factory/
+!data/LLaMA-Factory/
 *.db
 rules/
 temp*
