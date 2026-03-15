@@ -1,5 +1,54 @@
 # Changelog
 
+## 2025-03-15 — Phase 2.5 训练配置与启动
+
+### 概述
+
+创建正式训练的基础配置和启动脚本，实施 Checkpoint-Based 超参搜索。Rank=8 / Rank=16 双卡并行训练，各 7 epochs，利用 Phase 2.4 压测结论将 batch size 提升至 32。
+
+### 新增
+
+| 文件 | 说明 |
+|------|------|
+| `configs/qwen3_4b_base.yaml` | 4B 实验共享基础配置 (BS=32, 7 epochs, save_strategy=epoch) |
+| `scripts/run_training.sh` | 训练启动脚本 (OmegaConf CLI 覆盖 rank/alpha/output_dir) |
+| `doc/training_execution.md` | tmux 双卡并行训练执行手册 |
+
+### 实验矩阵
+
+| Run | GPU | Rank | Alpha | Epochs | 产出 Checkpoint |
+|-----|-----|------|-------|--------|-----------------|
+| A | 0 | 8 | 16 | 7 | `saves/qwen3-4b/lora/r8/checkpoint-{82..574}` |
+| B | 1 | 16 | 32 | 7 | `saves/qwen3-4b/lora/r16/checkpoint-{82..574}` |
+
+### 关键配置差异 (vs MVP)
+
+| 参数 | MVP (`qwen3_4b_mvp.yaml`) | 正式 (`qwen3_4b_base.yaml`) |
+|------|---------------------------|----------------------------|
+| `per_device_train_batch_size` | 8 | 32 |
+| `num_train_epochs` | 3 | 7 |
+| `lora_rank` | 8 (固定) | 8 / 16 (CLI 覆盖) |
+| `save_total_limit` | (默认) | 0 (保留所有 checkpoint) |
+| `output_dir` | 固定路径 | CLI 动态注入 |
+
+### 执行方式
+
+```bash
+# tmux 双卡并行训练
+tmux new-session -d -s train \
+  "bash scripts/run_training.sh 0 8 2>&1 | tee logs/run_a_r8.log" \; \
+  split-window -h \
+  "bash scripts/run_training.sh 1 16 2>&1 | tee logs/run_b_r16.log" \; \
+  attach
+```
+
+### 备注
+- `report_to: none` — wandb 未登录，训练完成后可通过 `plot_loss: true` 查看 Loss 曲线
+- 启动脚本使用 OmegaConf `key=value` 语法覆盖 YAML 参数（LLaMA-Factory 原生支持）
+- Phase 2.4 压测确认 BS=32 为 L20Z 80GB 安全极限，预计每次训练约 20 分钟完成
+
+---
+
 ## 2026-03-15 — 增加分析，Token 长度 EDA & cutoff_len 分析
 
 ### 概述
