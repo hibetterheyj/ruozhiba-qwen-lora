@@ -1,0 +1,732 @@
+# 弱智吧幽默分类 SFT 微调 — 开发计划 v0.2
+
+> 基于 `dev_plan_0_1.md` 更新。Phase 1 (数据工程) + Phase 2.1-2.6 (训练) 已全部完成。
+>
+> **本版本重点**: 
+> 1. Phase 2.7 全量合并 — 将 R8/R16 × Epoch 3-7 共 10 个 checkpoint 全部合并为独立模型
+> 2. Phase 3 评估 — 对 10 个合并模型 + 1 个 baseline 共 11 组进行定量评估
+> 3. Phase 4 报告 — 基于全量对比结果撰写实验报告
+
+---
+
+## 已完成工作回顾
+
+| Phase | 状态 | 产出 |
+|-------|------|------|
+| 1.1 CQIA thought_process 导师蒸馏 | ✅ 完成 | `data/CQIA/ruozhiba_cqia_classified_v2.json` (240 条) |
+| 1.2 去重防污染 | ✅ 完成 | `data/tieba/best*_classified_dedup.json` (2786 条) |
+| 1.3 数据统计验证 | ✅ 完成 | `data/dedup_report.json` |
+| 2.1 ShareGPT 格式化 | ✅ 完成 | `LLaMA-Factory/data/ruozhiba_all.json` (2785 条) |
+| 2.2 数据集注册 | ✅ 完成 | `dataset_info.json` 已注册 |
+| 2.3 MVP 训练 | ✅ 完成 | `saves/qwen3-4b/lora/mvp_r8_e3/` |
+| 2.4 BS 压测 | ✅ 完成 | BS=16×2 (有效 32) |
+| 2.5 双卡并行训练 | ✅ 完成 | R8 7 epochs + R16 7 epochs |
+| 2.6 训练监控 | ✅ 完成 | 最优 eval_loss: R16 checkpoint-415 (0.8859) |
+| 2.7 单次合并 (旧) | ✅ 完成 | `models/Qwen3-4B-Ruozhiba-Merged/` (仅 R16-E5) |
+
+### 训练产物清单
+
+**Checkpoint → Epoch 映射** (83 steps/epoch):
+
+| Step | Epoch | R8 Eval Loss | R16 Eval Loss |
+|------|-------|-------------|---------------|
+| 83 | 1 | — | — |
+| 166 | 2 | — | — |
+| 249 | 3 | 0.8988 | 0.8886 |
+| 332 | 4 | 0.8885 | **0.8859** |
+| 415 | 5 | **0.8870** | 0.8915 |
+| 498 | 6 | 0.8879 | 0.8962 |
+| 581 | 7 | — | — |
+
+> 注: Eval 每 100 steps 执行一次，上表 eval_loss 取最近 eval step 的值，非精确到 epoch 边界。
+
+---
+
+## Phase 2.7 (更新): 全量 LoRA 权重合并
+
+### 目标
+
+将 R8/R16 × Epoch 3-7 共 **10 个 checkpoint** 全部合并为独立模型，供 Phase 3 统一评估。不再仅合并"最优"单个 checkpoint。
+
+### 合并矩阵
+
+| 编号 | Rank | Epoch | Checkpoint Step | Adapter 路径 | 输出目录 |
+|------|------|-------|-----------------|-------------|----------|
+| 1 | 8 | 3 | 249 | `LLaMA-Factory/saves/qwen3-4b/lora/r8/checkpoint-249` | `models/merged/r8_e3` |
+| 2 | 8 | 4 | 332 | `LLaMA-Factory/saves/qwen3-4b/lora/r8/checkpoint-332` | `models/merged/r8_e4` |
+| 3 | 8 | 5 | 415 | `LLaMA-Factory/saves/qwen3-4b/lora/r8/checkpoint-415` | `models/merged/r8_e5` |
+| 4 | 8 | 6 | 498 | `LLaMA-Factory/saves/qwen3-4b/lora/r8/checkpoint-498` | `models/merged/r8_e6` |
+| 5 | 8 | 7 | 581 | `LLaMA-Factory/saves/qwen3-4b/lora/r8/checkpoint-581` | `models/merged/r8_e7` |
+| 6 | 16 | 3 | 249 | `LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-249` | `models/merged/r16_e3` |
+| 7 | 16 | 4 | 332 | `LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-332` | `models/merged/r16_e4` |
+| 8 | 16 | 5 | 415 | `LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-415` | `models/merged/r16_e5` |
+| 9 | 16 | 6 | 498 | `LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-498` | `models/merged/r16_e6` |
+| 10 | 16 | 7 | 581 | `LLaMA-Factory/saves/qwen3-4b/lora/r16/checkpoint-581` | `models/merged/r16_e7` |
+
+**磁盘预算**: 10 × 7.6 GB = **~76 GB** (磁盘剩余 706 GB，充裕)
+
+**现有合并模型处理**: `models/Qwen3-4B-Ruozhiba-Merged/` (R16-E5) 保留不删除，作为历史参考。新合并模型统一存放在 `models/merged/` 下。
+
+### 合并配置模板
+
+修改 `configs/qwen3_4b_merge.yaml` 为参数化模板，通过脚本动态覆盖 `adapter_name_or_path` 和 `export_dir`:
+
+```yaml
+### model
+model_name_or_path: /root/code/llm_ruozhiba/models/Qwen3-4B-Instruct-2507
+adapter_name_or_path: PLACEHOLDER_ADAPTER_PATH
+template: qwen3_nothink
+finetuning_type: lora
+
+### export
+export_dir: PLACEHOLDER_EXPORT_DIR
+export_size: 5
+export_device: auto
+export_legacy_format: false
+```
+
+### 批量合并脚本: `scripts/batch_merge.sh`
+
+```bash
+#!/bin/bash
+# 批量合并 R8/R16 × Epoch 3-7 共 10 个 checkpoint
+# 用法: bash scripts/batch_merge.sh
+#
+# 串行执行 (每次合并约 3-5 分钟)
+# 总预计耗时: ~30-50 分钟
+
+set -e
+
+PROJECT_ROOT="/root/code/llm_ruozhiba"
+BASE_MODEL="${PROJECT_ROOT}/models/Qwen3-4B-Instruct-2507"
+SAVES_DIR="${PROJECT_ROOT}/LLaMA-Factory/saves/qwen3-4b/lora"
+MERGED_DIR="${PROJECT_ROOT}/models/merged"
+MERGE_CONFIG="${PROJECT_ROOT}/configs/qwen3_4b_merge.yaml"
+
+source "${PROJECT_ROOT}/env_sft/bin/activate"
+
+RANKS=(8 16)
+# Epoch 3-7 对应 checkpoint step 249, 332, 415, 498, 581
+EPOCHS=(3 4 5 6 7)
+STEPS=(249 332 415 498 581)
+
+echo "=== 批量合并: ${#RANKS[@]} ranks × ${#EPOCHS[@]} epochs = $((${#RANKS[@]} * ${#EPOCHS[@]})) 个模型 ==="
+echo "输出目录: ${MERGED_DIR}"
+echo ""
+
+TOTAL=$((${#RANKS[@]} * ${#EPOCHS[@]}))
+COUNT=0
+
+for RANK in "${RANKS[@]}"; do
+    for i in "${!EPOCHS[@]}"; do
+        EPOCH=${EPOCHS[$i]}
+        STEP=${STEPS[$i]}
+        ADAPTER_PATH="${SAVES_DIR}/r${RANK}/checkpoint-${STEP}"
+        EXPORT_DIR="${MERGED_DIR}/r${RANK}_e${EPOCH}"
+        COUNT=$((COUNT + 1))
+
+        echo "[${COUNT}/${TOTAL}] 合并 R${RANK} Epoch ${EPOCH} (checkpoint-${STEP})..."
+
+        if [[ -d "${EXPORT_DIR}" ]] && [[ -f "${EXPORT_DIR}/config.json" ]]; then
+            echo "  ⏭️  已存在，跳过"
+            continue
+        fi
+
+        # 验证 adapter 文件存在
+        if [[ ! -f "${ADAPTER_PATH}/adapter_model.safetensors" ]]; then
+            echo "  ❌ adapter 不存在: ${ADAPTER_PATH}"
+            exit 1
+        fi
+
+        CUDA_VISIBLE_DEVICES=0 llamafactory-cli export \
+            "${MERGE_CONFIG}" \
+            --model_name_or_path "${BASE_MODEL}" \
+            --adapter_name_or_path "${ADAPTER_PATH}" \
+            --export_dir "${EXPORT_DIR}" \
+            2>&1 | tail -3
+
+        echo "  ✅ 完成 → ${EXPORT_DIR}"
+        echo ""
+    done
+done
+
+echo "=== 全部合并完成 (${TOTAL} 个模型) ==="
+ls -ld "${MERGED_DIR}"/r*_e*/
+```
+
+**执行方式**:
+
+```bash
+bash scripts/batch_merge.sh 2>&1 | tee logs/batch_merge.log
+```
+
+**关键设计**:
+- **幂等性**: 检查输出目录是否已存在 `config.json`，跳过已合并的模型，支持中断后重跑
+- **串行执行**: 合并操作是 CPU/IO 密集型（加载 7.6GB 基座 + 合并 LoRA + 写入 7.6GB），GPU 仅用于加速权重计算，串行即可
+- **LLaMA-Factory CLI 覆盖**: 通过命令行参数 `--adapter_name_or_path` / `--export_dir` 动态覆盖 YAML 中的占位符
+
+---
+
+## Phase 3: 评估
+
+### 总览
+
+```
+Phase 3.1  批量推理          ──→  Phase 3.2  定量评估        ──→  Phase 3.3  LLM-as-Judge
+                                                                  (仅 Top 2-3 模型)
+┌────────────────────────┐   ┌──────────────────────────┐   ┌──────────────────────┐
+│ 11 组 sglang 推理      │   │ 11 组两阶段 JSON 评估     │   │ 20 样本 × 双盲评分    │
+│ (10 merged + baseline) │   │ Stage 1: 格式遵循        │   │ 位置互换消除偏置      │
+│ 240 条 × 11 = 2640 次  │   │ Stage 2: 逻辑准确率      │   │ 最终模型选择         │
+│ temperature=0.0        │   │ 混淆矩阵 + 对比总表      │   │                      │
+└────────────────────────┘   └──────────────────────────┘   └──────────────────────┘
+```
+
+### 评估矩阵 (11 组实验)
+
+| 编号 | 模型 | 来源 | 结果文件 |
+|------|------|------|----------|
+| 0 | Qwen3-4B-Instruct-2507 (baseline) | 基座模型 | `results/results_baseline.json` |
+| 1 | R8 Epoch 3 | `models/merged/r8_e3` | `results/results_r8_e3.json` |
+| 2 | R8 Epoch 4 | `models/merged/r8_e4` | `results/results_r8_e4.json` |
+| 3 | R8 Epoch 5 | `models/merged/r8_e5` | `results/results_r8_e5.json` |
+| 4 | R8 Epoch 6 | `models/merged/r8_e6` | `results/results_r8_e6.json` |
+| 5 | R8 Epoch 7 | `models/merged/r8_e7` | `results/results_r8_e7.json` |
+| 6 | R16 Epoch 3 | `models/merged/r16_e3` | `results/results_r16_e3.json` |
+| 7 | R16 Epoch 4 | `models/merged/r16_e4` | `results/results_r16_e4.json` |
+| 8 | R16 Epoch 5 | `models/merged/r16_e5` | `results/results_r16_e5.json` |
+| 9 | R16 Epoch 6 | `models/merged/r16_e6` | `results/results_r16_e6.json` |
+| 10 | R16 Epoch 7 | `models/merged/r16_e7` | `results/results_r16_e7.json` |
+
+---
+
+### 3.1 批量推理脚本
+
+#### 新脚本: `scripts/inference_eval.py`
+
+**核心设计**: 一次加载一个模型，对 240 条测试集进行 sglang 离线批量推理，然后 shutdown 引擎、释放显存，加载下一个模型。脚本支持单模型推理和批量模式。
+
+```
+输入:
+  - 测试集: data/CQIA/ruozhiba_cqia_classified_v2.json (240 条)
+  - 模型路径: 单个模型或模型目录列表
+输出:
+  - results/results_{model_tag}.json (每个模型一个文件)
+```
+
+**命令行接口**:
+
+```bash
+# 单模型推理
+python scripts/inference_eval.py \
+    --model_path models/Qwen3-4B-Instruct-2507 \
+    --tag baseline \
+    --gpu 0
+
+# 批量推理 (所有合并模型)
+python scripts/inference_eval.py \
+    --model_dir models/merged \
+    --gpu 0
+
+# 指定模型列表
+python scripts/inference_eval.py \
+    --model_paths models/merged/r8_e3 models/merged/r16_e5 \
+    --gpu 0
+```
+
+**关键参数**:
+
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| `temperature` | 0.0 | Greedy Decoding，确保确定性输出 |
+| `max_new_tokens` | 1500 | 覆盖 thought_process + top3_categories 完整输出 |
+| `mem_fraction_static` | 0.85 | 为系统保留 15% 显存缓冲 |
+| `tp_size` | 1 | 单卡推理 (4B 模型无需张量并行) |
+
+**运行环境**: 使用 `env_sft` 虚拟环境 (`sglang 0.5.3` 已在 env_sft 中可用)。
+
+```bash
+source env_sft/bin/activate
+python scripts/inference_eval.py --model_dir models/merged --gpu 0
+```
+
+**代码逻辑骨架**:
+
+```python
+import sglang as sgl
+import json, yaml, argparse, time
+from pathlib import Path
+
+def run_inference(model_path: str, test_data: list, system_prompt: str,
+                  tag: str, output_dir: str, gpu_id: int = 0):
+    """对单个模型执行 240 条批量推理"""
+    
+    # 1. 启动引擎
+    engine = sgl.Engine(
+        model_path=model_path,
+        tp_size=1,
+        mem_fraction_static=0.85,
+    )
+
+    # 2. 构造 prompt (apply_chat_template)
+    tokenizer = engine.get_tokenizer()
+    prompts = []
+    for item in test_data:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": item["instruction"]}
+        ]
+        prompt = tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        prompts.append(prompt)
+
+    # 3. 批量推理
+    sampling_params = {"temperature": 0.0, "max_new_tokens": 1500}
+    outputs = engine.generate(prompts, sampling_params)
+
+    # 4. 保存结果
+    results = []
+    for i, out in enumerate(outputs):
+        results.append({
+            "index": i,
+            "instruction": test_data[i]["instruction"],
+            "gold_classification": test_data[i].get("classification"),
+            "model_output": out["text"],
+            "model_tag": tag,
+        })
+
+    output_path = Path(output_dir) / f"results_{tag}.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
+
+    engine.shutdown()
+    return output_path
+```
+
+**推理顺序与显存管理**:
+
+```
+推理顺序:
+  1. baseline (基座模型) — 作为性能基线
+  2. r8_e3 → r8_e4 → r8_e5 → r8_e6 → r8_e7
+  3. r16_e3 → r16_e4 → r16_e5 → r16_e6 → r16_e7
+
+每个模型推理完成后:
+  → engine.shutdown()       # 释放 sglang 引擎
+  → 等待 5 秒               # 确保 GPU 显存完全释放
+  → nvidia-smi 检查         # 确认显存已归零
+  → 加载下一个模型
+```
+
+> **注意**: sglang 引擎 shutdown 后可能有少量显存残留（CUDA context）。若遇到 OOM，在两次推理之间加入 `torch.cuda.empty_cache()` 或使用子进程隔离（`subprocess` 调用自身）。
+
+**预计耗时**: 每个模型 240 条推理约 2-5 分钟（sglang 批量推理），11 个模型总计 ~25-55 分钟。
+
+#### 批量推理封装脚本: `scripts/batch_inference.sh`
+
+```bash
+#!/bin/bash
+# 批量推理: 11 个模型 (baseline + 10 merged)
+# 用法: bash scripts/batch_inference.sh [GPU_ID]
+
+GPU_ID=${1:-0}
+PROJECT_ROOT="/root/code/llm_ruozhiba"
+
+source "${PROJECT_ROOT}/env_sft/bin/activate"
+
+echo "=== 批量推理: GPU ${GPU_ID} ==="
+
+# Baseline
+CUDA_VISIBLE_DEVICES=${GPU_ID} python scripts/inference_eval.py \
+    --model_path "${PROJECT_ROOT}/models/Qwen3-4B-Instruct-2507" \
+    --tag baseline --gpu 0
+
+# 合并模型
+for RANK in 8 16; do
+    for EPOCH in 3 4 5 6 7; do
+        TAG="r${RANK}_e${EPOCH}"
+        MODEL_PATH="${PROJECT_ROOT}/models/merged/${TAG}"
+        
+        if [[ ! -d "${MODEL_PATH}" ]]; then
+            echo "⏭️  跳过 ${TAG}: 模型不存在"
+            continue
+        fi
+
+        echo "--- 推理 ${TAG} ---"
+        CUDA_VISIBLE_DEVICES=${GPU_ID} python scripts/inference_eval.py \
+            --model_path "${MODEL_PATH}" \
+            --tag "${TAG}" --gpu 0
+    done
+done
+
+echo "=== 推理完成 ==="
+```
+
+---
+
+### 3.2 定量评估 — 两阶段 JSON 评估协议
+
+#### 新脚本: `scripts/eval_metrics.py`
+
+```
+输入:
+  - 金标准: data/CQIA/ruozhiba_cqia_classified_v2.json (240 条)
+  - 推理结果: results/results_*.json (11 个文件)
+输出:
+  - 单模型评估: results/eval_{tag}.json
+  - 对比总表: results/eval_comparison.json
+  - 混淆矩阵: results/confusion_matrix_{tag}.png
+  - Rank×Epoch 热力图: results/heatmap_*.png
+```
+
+**命令行接口**:
+
+```bash
+# 评估单个结果文件
+python scripts/eval_metrics.py \
+    --results results/results_r16_e5.json \
+    --gold data/CQIA/ruozhiba_cqia_classified_v2.json
+
+# 批量评估所有结果文件 + 生成对比总表
+python scripts/eval_metrics.py \
+    --results_dir results/ \
+    --gold data/CQIA/ruozhiba_cqia_classified_v2.json \
+    --comparison
+```
+
+#### Stage 1: JSON 格式遵循能力
+
+| 指标 | 计算方式 | 含义 |
+|------|----------|------|
+| `json_strict` | 原始输出直接 `json.loads()` 成功率 | 原生 JSON 遵循能力 |
+| `json_tolerant` | `re.search(r'\{.*\}', text, re.DOTALL)` 提取后解析 | 容错 JSON 提取 |
+| `vsr` (Valid Sample Rate) | 经 `json-repair` 修复后可解析的比例 | 修复后可用率 |
+
+> **VSR 阈值**: VSR < 80% 的模型视为"指令遵循不可用"，在报告中标记。
+
+#### Stage 2: 逻辑准确率
+
+| 指标 | 计算方式 | 含义 |
+|------|----------|------|
+| `top1_accuracy` | 预测 Top-1 == 金标准 Top-1 | 主分类准确率 |
+| `top3_hit_rate` | 金标准 Top-1 ∈ 预测 Top-3 | 广义分类覆盖率 |
+| `confidence_mae` | $\frac{1}{N}\sum\|c_{pred} - c_{gold}\|$ | 置信度校准误差 |
+| `strict_accuracy` | JSON strict 通过 **且** Top-1 正确 | 端到端可靠性 |
+| `repaired_accuracy` | JSON repair 后 Top-1 正确 | 逻辑智能上限 |
+
+**JSON 失效惩罚 (Maximum Penalty)**:
+
+解析失败且修复失败的样本:
+- Top-1 准确率: 计为 $0$
+- 置信度 MAE: 计为 $1.0$
+
+$$\text{MAE}_{\text{final}} = \frac{1}{N} \left( \sum_{i \in \text{valid}} |c_{pred,i} - c_{gold,i}| + \sum_{j \in \text{invalid}} 1.0 \right)$$
+
+$$\text{Format\_Failure\_Penalty\_Impact} = \text{MAE}_{\text{final}} - \text{MAE}_{\text{valid\_only}}$$
+
+#### 置信度校准分析
+
+| 指标 | 含义 |
+|------|------|
+| 正确时平均置信度 | Top-1 命中样本的 `confidence_score` 均值 |
+| 错误时平均置信度 | Top-1 未命中样本的 `confidence_score` 均值 |
+
+> 错误时置信度 > 0.8 → 过度自信; < 0.4 → 具备不确定性感知
+
+#### 混淆矩阵
+
+对每个模型生成 8×8 Top-1 混淆矩阵:
+- `confusion_matrix_{tag}_counts.png` — 原始计数
+- `confusion_matrix_{tag}_normalized.png` — 按行归一化
+
+#### 模型对比总表: `results/eval_comparison.json`
+
+```json
+{
+  "comparison_table": [
+    {
+      "model_tag": "baseline",
+      "rank": null,
+      "epoch": null,
+      "json_strict": 0.55,
+      "json_tolerant": 0.68,
+      "vsr": 0.75,
+      "top1_accuracy": 0.30,
+      "top3_hit_rate": 0.55,
+      "confidence_mae": 0.25,
+      "strict_accuracy": 0.20,
+      "repaired_accuracy": 0.28
+    },
+    {
+      "model_tag": "r8_e3",
+      "rank": 8,
+      "epoch": 3,
+      "json_strict": 0.88,
+      "...": "..."
+    }
+  ],
+  "best_model": {
+    "by_strict_accuracy": "r16_e5",
+    "by_repaired_accuracy": "r16_e4",
+    "by_top3_hit_rate": "r16_e5"
+  }
+}
+```
+
+#### Rank×Epoch 热力图
+
+以 Rank 为行、Epoch 为列，绘制关键指标的热力图可视化:
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 构造 2×5 矩阵 (2 ranks × 5 epochs)
+metrics_to_plot = ["strict_accuracy", "repaired_accuracy", "top1_accuracy",
+                   "top3_hit_rate", "json_strict", "vsr"]
+
+for metric_name in metrics_to_plot:
+    matrix = np.zeros((2, 5))  # R8, R16 × E3, E4, E5, E6, E7
+    for r_idx, rank in enumerate([8, 16]):
+        for e_idx, epoch in enumerate([3, 4, 5, 6, 7]):
+            matrix[r_idx, e_idx] = results[f"r{rank}_e{epoch}"][metric_name]
+    
+    plt.figure(figsize=(8, 3))
+    sns.heatmap(matrix, annot=True, fmt=".3f",
+                xticklabels=["E3", "E4", "E5", "E6", "E7"],
+                yticklabels=["R8", "R16"],
+                cmap="YlOrRd")
+    plt.title(f"{metric_name} — Rank × Epoch")
+    plt.savefig(f"results/heatmap_{metric_name}.png", dpi=150, bbox_inches="tight")
+```
+
+**产出热力图** (6 张):
+- `results/heatmap_strict_accuracy.png`
+- `results/heatmap_repaired_accuracy.png`
+- `results/heatmap_top1_accuracy.png`
+- `results/heatmap_top3_hit_rate.png`
+- `results/heatmap_json_strict.png`
+- `results/heatmap_vsr.png`
+
+---
+
+### 3.3 LLM-as-Judge (定性评估)
+
+#### 新脚本: `scripts/llm_judge.py`
+
+**评估范围**: 仅对 **Top 2-3 最优合并模型** 执行 (由 Phase 3.2 对比总表确定)，不对全部 10 个模型做。
+
+```
+输入:
+  - 推理结果: results/results_{best_tag}.json (Top 2-3 模型)
+  - 金标准: data/CQIA/ruozhiba_cqia_classified_v2.json
+输出:
+  - 评分报告: results/judge_{tag}.json
+  - 汇总: results/judge_summary.json
+```
+
+**评估配置**:
+
+| 参数 | 值 |
+|------|-----|
+| 抽样数量 | 20 条 (从 240 条中随机抽取, seed=42) |
+| 评轮次 | 2 (双盲位置互换) |
+| API 调用总数 | 20 × 2 × Top_K 个模型 |
+| 裁判模型 | DeepSeek / Claude |
+| `temperature` | 0.0 |
+| `top_p` | 0.001 |
+
+**评分维度** (1-10 分):
+
+| 维度 | 说明 |
+|------|------|
+| 逻辑准确度 | 是否正确识别了段子的核心笑点和逻辑机制 |
+| 幽默感捕捉 | 是否理解了段子的幽默内涵而非仅字面分析 |
+| 分析深度 | thought_process 是否深入拆解了多层幽默属性 |
+
+**双盲互换 (Position Swapping)**:
+
+| 轮次 | 分析 A | 分析 B |
+|------|--------|--------|
+| Round 1 | 微调模型输出 | 金标准参考 |
+| Round 2 | 金标准参考 | 微调模型输出 |
+
+最终得分 = (Round 1 对微调模型的评分 + Round 2 对微调模型的评分) / 2
+
+**评分锚点**:
+
+```
+- 1-3 分: 分析完全偏离段子核心, 或仅进行字面翻译, 未触及幽默机制
+- 4-5 分: 识别了表面笑点, 但缺少深层逻辑拆解, 分类有明显偏差
+- 6-7 分: 正确识别主要幽默机制, 分类合理, 但分析深度一般
+- 8-9 分: 精准捕捉多层幽默属性, 分类准确且理由充分, 展现文化理解力
+- 10 分: 分析堪称教科书级别, 兼具语言学深度和文化洞察力
+```
+
+---
+
+### 3.4 Before vs After 对比样本
+
+从 Phase 3.1 推理结果中，选取 **5 条代表性样本** 展示 Before (baseline) vs After (最优模型) 的输出差异。
+
+**选取策略**:
+1. 2 条: baseline 完全错误，微调后正确
+2. 1 条: baseline 格式混乱，微调后 JSON 工整
+3. 1 条: 两者都正确但微调后分析更深入
+4. 1 条: 微调后仍然错误的 failure case (展示诚实分析)
+
+**输出**: `results/before_after_samples.json`
+
+---
+
+## Phase 4: 报告与交付
+
+### 4.1 报告结构 (对照 assignment.md)
+
+| 报告章节 | 内容 | 数据来源 |
+|----------|------|----------|
+| **3.1 SFT Target** | 弱智吧幽默分类: 8 类 Top-3 + thought_process | `configs/prompts.yaml`, 2-4 个 Before/After 示例 |
+| **3.2 Dataset** | 数据来源 (贴吧/CQIA/GitHub)、去重、ShareGPT 格式、2785 train / 240 test | `data/dedup_report.json`, 数据格式示例 |
+| **3.3 Training Setup** | Qwen3-4B-Instruct-2507, LoRA (R8/R16), bf16, 2×L20Z | 训练配置 YAML, 实验矩阵 (10 checkpoint) |
+| **3.4 Loss Curves** | R8/R16 training_loss + eval_loss 对比, warmup 分析 | `saves/qwen3-4b/lora/r{8,16}/training_*.png` |
+| **3.5 Before/After** | 5 条测试集 baseline vs 最优模型对比 | `results/before_after_samples.json` |
+| **附录 A** | 10 模型对比总表 + Rank×Epoch 热力图 | `results/eval_comparison.json`, 热力图 |
+| **附录 B** | 混淆矩阵 (最优模型 + baseline) | `results/confusion_matrix_*.png` |
+| **附录 C** | LLM-as-Judge 评分 | `results/judge_summary.json` |
+
+### 4.2 交付物清单
+
+```
+提交内容:
+├── report.pdf                              # 实验报告
+├── scripts/
+│   ├── classify_cqia_updated.py            # ✅ Phase 1.1 — CQIA thought_process 补全
+│   ├── dedup_test_vs_train.py              # ✅ Phase 1.2 — 去重脚本
+│   ├── build_sft_data.py                   # ✅ Phase 2.1 — ShareGPT 格式化
+│   ├── probe_batch_size.sh                 # ✅ Phase 2.4 — 显存 BS 压测
+│   ├── run_training.sh                     # ✅ Phase 2.5 — 训练启动
+│   ├── batch_merge.sh                      # 🆕 Phase 2.7 — 批量权重合并
+│   ├── inference_eval.py                   # 🆕 Phase 3.1 — sglang 批量推理
+│   ├── batch_inference.sh                  # 🆕 Phase 3.1 — 批量推理封装
+│   ├── eval_metrics.py                     # 🆕 Phase 3.2 — 两阶段评估 + 热力图
+│   └── llm_judge.py                        # 🆕 Phase 3.3 — LLM-as-Judge
+├── configs/
+│   ├── prompts.yaml                        # ✅ 中心化 system prompt
+│   ├── qwen3_4b_mvp.yaml                  # ✅ MVP 配置
+│   ├── qwen3_4b_base.yaml                 # ✅ 正式训练基础配置
+│   ├── qwen3_4b_base_last3.yaml           # ✅ 近三年训练配置
+│   └── qwen3_4b_merge.yaml                # ✅ LoRA 合并配置 (参数化模板)
+├── models/
+│   ├── Qwen3-4B-Instruct-2507/            # 基座模型
+│   ├── Qwen3-4B-Ruozhiba-Merged/          # 历史合并模型 (R16-E5)
+│   └── merged/                             # 🆕 全量合并模型 (10 个)
+│       ├── r8_e3/ ... r8_e7/
+│       └── r16_e3/ ... r16_e7/
+├── results/                                # 🆕 评估产出
+│   ├── results_baseline.json               # Baseline 推理结果
+│   ├── results_r{8,16}_e{3-7}.json        # 10 个合并模型推理结果
+│   ├── eval_comparison.json                # 11 模型对比总表
+│   ├── eval_{tag}.json                     # 各模型详细评估
+│   ├── heatmap_*.png                       # Rank×Epoch 热力图 (6 张)
+│   ├── confusion_matrix_*.png              # 混淆矩阵 (至少 baseline + 最优)
+│   ├── before_after_samples.json           # 5 条 Before/After 对比
+│   └── judge_summary.json                  # LLM-as-Judge 汇总
+└── README.md                               # 复现指南
+```
+
+---
+
+## 依赖
+
+### 已安装 (env_sft)
+
+```
+sglang==0.5.3, transformers==4.57.0, peft==0.17.1, torch==2.8.0
+scikit-learn==1.7.2, numpy==2.3.3, matplotlib==3.10.6
+llamafactory, accelerate, openai, tenacity, tqdm, pyyaml
+```
+
+### 需要安装
+
+```bash
+source env_sft/bin/activate
+uv pip install seaborn json-repair
+```
+
+| 包 | 用途 |
+|---|---|
+| `seaborn` | 热力图 + 混淆矩阵可视化 |
+| `json-repair` | Stage 1 JSON 修复 (VSR 计算) |
+
+---
+
+## 执行顺序 Checklist
+
+### Phase 2.7: 全量合并
+
+- [ ] 安装缺失依赖: `uv pip install seaborn json-repair`
+- [ ] 修改 `configs/qwen3_4b_merge.yaml` 为参数化模板
+- [ ] 编写 `scripts/batch_merge.sh`
+- [ ] 执行批量合并: `bash scripts/batch_merge.sh 2>&1 | tee logs/batch_merge.log`
+- [ ] 验证: `models/merged/` 下 10 个目录均包含 `config.json` + `model*.safetensors`
+- [ ] 磁盘检查: `du -sh models/merged/`
+
+### Phase 3.1: 批量推理
+
+- [ ] 编写 `scripts/inference_eval.py`
+- [ ] 编写 `scripts/batch_inference.sh`
+- [ ] 确认 GPU 空闲: `nvidia-smi`
+- [ ] 执行批量推理: `bash scripts/batch_inference.sh 0 2>&1 | tee logs/batch_inference.log`
+- [ ] 验证: `results/` 下 11 个 `results_*.json` 文件完整
+
+### Phase 3.2: 定量评估
+
+- [ ] 编写 `scripts/eval_metrics.py`
+- [ ] 执行批量评估: `python scripts/eval_metrics.py --results_dir results/ --gold ... --comparison`
+- [ ] 检查对比总表: `results/eval_comparison.json`
+- [ ] 检查热力图: `results/heatmap_*.png` (6 张)
+- [ ] 检查混淆矩阵: `results/confusion_matrix_*.png`
+- [ ] 确定 Top 2-3 最优模型
+
+### Phase 3.3: LLM-as-Judge
+
+- [ ] 编写 `scripts/llm_judge.py`
+- [ ] 对 Top 2-3 模型执行 LLM 评分
+- [ ] 检查评分报告: `results/judge_summary.json`
+
+### Phase 3.4: Before/After
+
+- [ ] 从推理结果中选取 5 条代表性样本
+- [ ] 生成 `results/before_after_samples.json`
+
+### Phase 4: 报告
+
+- [ ] 编写 PDF 报告 (对照 assignment.md 5 个章节)
+- [ ] 更新 README.md 复现指南
+- [ ] 最终检查: 所有脚本可运行、路径正确
+
+---
+
+## 风险与缓解
+
+| 风险 | 缓解措施 |
+|------|----------|
+| sglang 引擎 shutdown 后显存未完全释放 | 使用 `subprocess` 子进程隔离每次推理; `torch.cuda.empty_cache()` 兜底 |
+| 10 个模型合并耗时过长 | 幂等设计，支持中断重跑; 串行约 30-50 min |
+| 部分模型 JSON 输出格式极差 (VSR < 50%) | 报告中如实记录，用 Format Failure Penalty 量化影响 |
+| LLM-as-Judge API 限流 | Top 2-3 模型共 ~80-120 次调用，使用 tenacity 重试 |
+| 磁盘空间不足 | 10 × 7.6 GB ≈ 76 GB，当前剩余 706 GB，充足 |
+
+---
+
+## 待确认事项
+
+> 以下问题需用户确认后可调整计划:
+
+1. **现有 `models/Qwen3-4B-Ruozhiba-Merged/` 是否保留?** 当前计划保留，新合并模型放 `models/merged/` 下。若要节省空间可删除。
+2. **`r8_last3` 训练产物 (仅 2 epoch)**: 当前计划不纳入合并矩阵。如需纳入需先补充训练至 7 epochs。
+3. **LLM-as-Judge 裁判模型**: DeepSeek 或 Claude? 优先推荐 DeepSeek (成本低)，Claude 作为备选。
+4. **热力图是否需要?** 当前计划生成 6 张 Rank×Epoch 热力图。如觉得冗余可精简为 2-3 张核心指标。
+5. **报告语言**: 中文还是英文? (assignment.md 为英文, 但数据和分析均为中文)
