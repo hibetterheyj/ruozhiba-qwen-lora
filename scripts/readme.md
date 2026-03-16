@@ -1,6 +1,6 @@
 # 脚本说明文档
 
-> 本目录包含项目全流程中的数据处理、LLM 分类、SFT 数据构建、去重防污染、训练启动等脚本。
+> 本目录包含项目全流程中的数据处理、LLM 分类、SFT 数据构建、去重防污染、训练、推理、评估等脚本。
 
 ---
 
@@ -81,12 +81,13 @@
 |------|------|------|
 | `build_sft_data.py` | 将去重后贴吧分类数据转换为 LLaMA-Factory ShareGPT 格式（system/human/gpt 三轮对话） | `LLaMA-Factory/data/ruozhiba_all.json` (2785 条), `ruozhiba_last3.json` (1025 条) |
 
-### 6. 训练与压测
+### 6. 训练与合并
 
 | 脚本 | 功能 | 说明 |
 |------|------|------|
 | `run_training.sh` | 训练启动脚本 | 通过 CLI 参数注入 `CUDA_VISIBLE_DEVICES`、`lora_rank`、`lora_alpha`、`output_dir` |
 | `probe_batch_size.sh` | Batch Size 动态压测 | `max_steps: 15` 小步快跑，自动激活 venv，自动清理临时文件 |
+| `batch_merge.sh` | 批量 LoRA 权重合并 | 串行合并 4 组训练 × Epoch 3-7 共 20 个 checkpoint 至 `models/merged/` |
 
 **`run_training.sh` 使用方式:**
 
@@ -96,7 +97,37 @@ bash scripts/run_training.sh 0 8    # GPU 0, LoRA rank=8, alpha=16
 bash scripts/run_training.sh 1 16   # GPU 1, LoRA rank=16, alpha=32
 ```
 
-### 7. 单元测试
+### 7. 推理与评估
+
+| 脚本 | 功能 | 产出 |
+|------|------|------|
+| `inference_eval.py` | vLLM 离线批量推理（单模型/批量/多模型三种模式） | `results/results_{tag}.json` |
+| `batch_inference.sh` | 批量推理封装（21 个模型串行） | 21 个推理结果文件 |
+| `eval_metrics.py` | 两阶段 JSON 评估（格式遵循 + 逻辑准确率）+ 可视化 | `results/json/` + `results/heatmaps/` + `results/confusion_matrices/` + `results/charts/` |
+| `gen_before_after.py` | Before/After 对比样本自动选取 | `results/before_after_samples.json` |
+
+**推理用法:**
+
+```bash
+# 批量推理 21 个模型
+bash scripts/batch_inference.sh 0    # GPU 0
+
+# 单模型推理
+python scripts/inference_eval.py \
+    --model_path models/Qwen3-4B-Instruct-2507 --tag baseline --gpu 0
+```
+
+**评估用法:**
+
+```bash
+# 批量评估 + 对比总表 + 可视化
+python scripts/eval_metrics.py \
+    --results_dir results/ \
+    --gold data/CQIA/ruozhiba_cqia_classified_v2.json \
+    --comparison
+```
+
+### 8. 单元测试
 
 | 脚本 | 测试对象 |
 |------|----------|
@@ -126,3 +157,8 @@ bash scripts/run_training.sh 1 16   # GPU 1, LoRA rank=16, alpha=32
 | `tqdm` | 进度条显示 |
 | `pyyaml` | YAML 配置文件解析 |
 | `python-dotenv` | `.env` 环境变量加载 |
+| `vllm` | 离线批量推理引擎 |
+| `json-repair` | JSON 修复解析（容错评估） |
+| `matplotlib` | 图表可视化 |
+| `seaborn` | 热力图/混淆矩阵可视化 |
+| `numpy` | 数值计算 |

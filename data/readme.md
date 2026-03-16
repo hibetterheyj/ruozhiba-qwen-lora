@@ -85,7 +85,7 @@ data/
 
 | 数据集 | 条数 | 说明 |
 |--------|------|------|
-| CQIA 弱智吧 | 240 | instruction/output 对，已补全 `thought_process`（v2） |
+| CQIA 弱智吧 | 240 | instruction/output 对，已补全 `thought_process`（v2），用于推理评估 |
 
 ### SFT 训练数据（ShareGPT 格式）
 
@@ -93,6 +93,7 @@ data/
 |------|------|----------|
 | `ruozhiba_all.json` | 2,785 | 2018-2025 全量（跳过 1 条缺失 thought_process） |
 | `ruozhiba_last3.json` | 1,025 | 2023-2025 近三年 |
+| `dataset_info.json` | — | LLaMA-Factory 数据集注册配置（ShareGPT 格式 role/tag 映射） |
 
 ---
 

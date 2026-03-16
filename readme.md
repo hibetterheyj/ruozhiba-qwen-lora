@@ -10,8 +10,8 @@
 
 1. **数据采集** — 从贴吧年度帖、GitHub 已有语料、Hugging Face COIG-CQIA 数据集三个来源收集约 3000+ 条弱智吧段子
 2. **幽默分类** — 利用 LLM 将每条段子标注为 8 种幽默类型中的 top-3 类别（含置信度）
-3. **SFT 微调** — 基于分类标注数据，使用 LoRA 微调 Qwen3 系列模型
-4. **效果评估** — 定量 (BLEU/ROUGE) + 定性 (前后对比) + 人工评估
+3. **SFT 微调** — 基于分类标注数据，使用 LoRA 微调 Qwen3-4B-Instruct 模型（4 组实验 × 7 epochs）
+4. **效果评估** — 定量评估（Strict Accuracy / Top-3 Hit Rate / JSON 遵循率）+ 定性 Before/After 对比
 
 ### 8 种幽默分类
 
@@ -34,6 +34,14 @@
 .
 ├── readme.md                          # 本文件
 │
+├── upload/                            # 📤 最小化提交包（可独立运行）
+│   ├── readme.md                      #   复现说明
+│   ├── link.md                        #   文件溯源清单
+│   ├── configs/                       #   训练 / 合并 / prompt 配置
+│   ├── scripts/                       #   数据构建 + 训练 + 推理 + 评估脚本
+│   ├── data/                          #   训练集 + 测试集 + dataset_info.json
+│   └── results/                       #   评估 JSON + Before/After 样本
+│
 ├── crawler/                           # 🕷️ 数据爬取
 │   ├── keaixiaojiycw-tieba-post-crawler/  # 基于 aiotieba 的异步贴吧爬虫
 │   ├── processing_scripts/            # 爬取后处理脚本
@@ -50,45 +58,54 @@
 │           ├── ruozhiba_all.json      #     全量训练集 (2785 条)
 │           └── ruozhiba_last3.json    #     近三年训练集 (1025 条)
 │
-├── scripts/                           # ⚙️ 数据处理与训练脚本
+├── scripts/                           # ⚙️ 数据处理、训练、推理与评估脚本
 │   ├── readme.md                      #   脚本说明
-│   ├── classify_jokes.py              #   LLM 批量分类 (多线程, 断点续传)
-│   ├── classify_cqia.py               #   CQIA 数据 LLM 分类
-│   ├── classify_cqia_updated.py       #   CQIA thought_process 补全 (导师蒸馏)
 │   ├── build_sft_data.py              #   去重数据 → ShareGPT 格式转换
-│   ├── dedup_test_vs_train.py         #   测试集 vs 训练集去重
-│   ├── filter_duplicates.py           #   精确 + 模糊去重
 │   ├── run_training.sh                #   训练启动脚本 (CLI 覆盖 rank/output_dir)
-│   ├── probe_batch_size.sh            #   Batch Size 动态压测
-│   └── ...                            #   校验/修复/测试脚本
+│   ├── batch_merge.sh                 #   批量 LoRA 权重合并
+│   ├── inference_eval.py              #   vLLM 离线批量推理
+│   ├── batch_inference.sh             #   批量推理封装 (21 模型)
+│   ├── eval_metrics.py                #   两阶段评估 + 可视化
+│   ├── gen_before_after.py            #   Before/After 对比样本生成
+│   └── ...                            #   分类/校验/去重/测试脚本
 │
 ├── configs/                           # 🔧 训练与推理配置
 │   ├── readme.md                      #   配置说明
 │   ├── prompts.yaml                   #   统一 system prompt 与分类类别
-│   ├── qwen3_4b_mvp.yaml             #   MVP 训练配置 (rank=8, 3 epochs)
-│   ├── qwen3_4b_base.yaml            #   正式训练基础配置 (7 epochs, BS=16×2)
-│   └── qwen3_4b_merge.yaml           #   LoRA 权重合并配置
+│   ├── qwen3_4b_base.yaml             #   正式训练配置 — 全量数据 (7 epochs)
+│   ├── qwen3_4b_base_last3.yaml       #   正式训练配置 — 近三年数据
+│   ├── qwen3_4b_merge.yaml            #   LoRA 权重合并配置模板
+│   └── qwen3_4b_mvp.yaml             #   MVP 训练配置 (rank=8, 3 epochs)
 │
 ├── models/                            # 🤖 模型权重
 │   ├── Qwen3-4B-Instruct-2507/       #   基座模型
-│   └── Qwen3-4B-Ruozhiba-Merged/     #   合并后的微调模型 (7.6 GB)
+│   └── merged/                        #   20 个合并后的 LoRA 微调模型 (每个 7.6 GB)
 │
-├── LLaMA-Factory/                     # 🏭 LLaMA-Factory 框架 (submodule)
+├── results/                           # 📊 推理与评估产物
+│   ├── results_*.json                 #   21 个模型推理结果 (240 条/文件)
+│   ├── before_after_samples.json      #   5 条 Before/After 对比样本
+│   ├── json/                          #   评估 JSON (eval_*.json + eval_comparison.json)
+│   ├── confusion_matrices/            #   混淆矩阵 (9 张)
+│   ├── heatmaps/                      #   Rank×Epoch 热力图 (14 张)
+│   └── charts/                        #   趋势/对比图表 (8 张)
+│
+├── LLaMA-Factory/                     # 🏭 LLaMA-Factory 框架
 │   ├── data/                          #   训练数据 + dataset_info.json
 │   └── saves/                         #   训练产物
 │       └── qwen3-4b/lora/
 │           ├── mvp_r8_e3/             #     MVP 训练输出
-│           ├── r8/                    #     正式训练 R8 (7 epoch checkpoints)
-│           └── r16/                   #     正式训练 R16 (7 epoch checkpoints)
+│           ├── r8/                    #     正式训练 R8 全量 (7 epoch checkpoints)
+│           ├── r16/                   #     正式训练 R16 全量 (7 epoch checkpoints)
+│           ├── r8_last3/              #     正式训练 R8 近三年
+│           └── r16_last3/             #     正式训练 R16 近三年
 │
 ├── doc/                               # 📝 文档
 │   ├── readme.md                      #   文档目录说明
 │   ├── assignment.md                  #   作业要求
-│   ├── dev_plan_0_1.md                #   开发计划 v0.1
 │   ├── changelog.md                   #   变更日志
-│   ├── training_execution.md          #   双卡并行训练执行手册
-│   ├── train_test_eda.md              #   Token 长度 EDA 报告
-│   ├── train_analysis1.md             #   第一批训练日志分析
+│   ├── report/                        #   实验报告
+│   │   ├── lab3_report.md             #     英文实验报告 (含嵌入图片)
+│   │   └── media/                     #     报告图片 (fig1–fig8)
 │   └── proposal/                      #   项目方案
 │
 └── env_sft/                           # 🐍 Python 虚拟环境
@@ -320,8 +337,29 @@ crawler/threads/10354221105_弱智吧2025年度365佳贴/
                                         │
                           ┌─────────────▼──────────────┐
                           │  llamafactory-cli export   │
-                          │  (LoRA → 合并模型)           │
-                          │  → Qwen3-4B-Ruozhiba-Merged│
+                          │  batch_merge.sh            │
+                          │  → models/merged/ (20 个)   │
+                          └─────────────┬──────────────┘
+                                        │
+                          ┌─────────────▼──────────────┐
+                          │  vLLM 批量推理              │
+                          │  inference_eval.py         │
+                          │  batch_inference.sh        │
+                          │  → results/results_*.json  │
+                          └─────────────┬──────────────┘
+                                        │
+                          ┌─────────────▼──────────────┐
+                          │  两阶段评估 + 可视化         │
+                          │  eval_metrics.py           │
+                          │  → json/ + heatmaps/ +     │
+                          │    confusion_matrices/ +   │
+                          │    charts/                 │
+                          └─────────────┬──────────────┘
+                                        │
+                          ┌─────────────▼──────────────┐
+                          │  Before/After 对比          │
+                          │  gen_before_after.py       │
+                          │  → before_after_samples.json│
                           └────────────────────────────┘
 ```
 
@@ -356,21 +394,24 @@ uv venv env_sft python 3.12
 source env_sft/bin/activate
 uv pip install 'llamafactory[metrics]' accelerate
 uv pip install openai tenacity tqdm python-dotenv pyyaml
+# 推理 & 评估
+uv pip install vllm json-repair seaborn matplotlib
 ```
 
 ---
 
 ## 训练结果摘要
 
-### 实验矩阵
+### 实验矩阵 (4 组 × 7 Epochs)
 
-| Run | GPU | LoRA Rank | Alpha | Epochs | 最优 Eval Loss | 最优 Checkpoint |
-|-----|-----|-----------|-------|--------|----------------|-----------------|
-| MVP | 0 | 8 | 16 | 3 | 0.8820 | step 993 |
-| A (R8) | 0 | 8 | 16 | 7 | 0.8870 | step 500 |
-| **B (R16)** | **1** | **16** | **32** | **7** | **0.8859** | **checkpoint-415 (epoch 5)** |
+| Experiment | Dataset | LoRA Rank | Alpha | Train Samples | Steps/Epoch |
+|------------|---------|-----------|-------|---------------|-------------|
+| R8         | all (2,785) | 8  | 16 | 2,645 | 83 |
+| R16        | all (2,785) | 16 | 32 | 2,645 | 83 |
+| R8_last3   | last3 (1,025) | 8  | 16 | 973 | 31 |
+| R16_last3  | last3 (1,025) | 16 | 32 | 973 | 31 |
 
-### 正式训练 Loss 对比
+### 正式训练 Loss 对比 (全量数据)
 
 | Eval Step (~Epoch) | R8 Train Loss | R8 Eval Loss | R16 Train Loss | R16 Eval Loss |
 |---|---|---|---|---|
@@ -380,11 +421,103 @@ uv pip install openai tenacity tqdm python-dotenv pyyaml
 | 400 (~4.8) | 0.7915 | 0.8885 | 0.7257 | **0.8859** |
 | 500 (~6.0) | 0.7848 | 0.8870 | 0.7035 | 0.8915 |
 
+---
+
+## 评估结果摘要
+
+### 最优模型: `r16_e5` (R16, 全量数据, Epoch 5)
+
+| 指标 | Baseline | r16_e5 (最优) | 提升 |
+|------|----------|-------------|------|
+| Strict Accuracy | 0.233 | **0.613** | +163% |
+| Top-3 Hit Rate | 0.588 | **0.883** | +50% |
+| JSON Strict Parse | 0.996 | **1.000** | — |
+| Valid Sample Rate | 1.000 | 1.000 | — |
+
 ### 关键发现
 
-- **最优模型**: R16 checkpoint-415 (epoch 5)，全局最低 eval_loss = **0.8859**
-- R16 学习速度更快（train loss 更低），但 epoch 5 后出现轻微过拟合
-- R8 未观察到过拟合，eval loss 持续缓慢下降
-- 合并后模型: `models/Qwen3-4B-Ruozhiba-Merged/` (7.6 GB, 参数量 4,022,468,096)
+- **最优模型**: R16 checkpoint-415 (epoch 5)，eval_loss = **0.8859**，strict_accuracy = **0.613**
+- 全量数据 (2,785 条) 一致性优于近三年 (1,025 条)，平均 +9.1% strict_accuracy
+- R16 在 9/10 组对比中优于 R8，平均 +4.5%
+- 所有 21 个模型 VSR = 100%，JSON 格式遵循完美
+- eval_loss 最低点精确对应 downstream accuracy 最优 checkpoint
+- R16 epoch 5 后出现轻微过拟合（eval_loss 从 0.8859 升至 0.8915）
 
-> 详细训练分析见 `doc/train_analysis1.md`
+> 详细分析见 `doc/report/lab3_report.md` 和 `doc/test_analysis1.md`
+
+---
+
+## 复现指南
+
+### 前提条件
+
+- Python 3.12 + CUDA 12.x
+- NVIDIA GPU (≥ 24 GB VRAM; 训练使用 80 GB L20Z)
+- 基座模型 `Qwen3-4B-Instruct-2507` 已下载至 `models/`
+
+### Step 1: 环境搭建
+
+```bash
+uv venv env_sft python 3.12
+source env_sft/bin/activate
+uv pip install 'llamafactory[metrics]' accelerate
+uv pip install vllm json-repair seaborn matplotlib pyyaml
+```
+
+### Step 2: 准备训练数据
+
+训练数据已在 `data/LLaMA-Factory/data/` 中构建完成：
+- `ruozhiba_all.json` (2,785 条, ShareGPT 格式)
+- `ruozhiba_last3.json` (1,025 条)
+
+将训练数据和注册配置复制到 LLaMA-Factory：
+
+```bash
+cp data/LLaMA-Factory/data/ruozhiba_*.json LLaMA-Factory/data/
+cp data/LLaMA-Factory/data/dataset_info.json LLaMA-Factory/data/
+```
+
+如需从头构建训练数据：
+
+```bash
+python scripts/build_sft_data.py
+```
+
+### Step 3: LoRA 微调
+
+```bash
+# 双卡并行 (tmux 两个 pane)
+bash scripts/run_training.sh 0 8                                         # GPU 0, R8
+bash scripts/run_training.sh 1 16                                        # GPU 1, R16
+
+# 近三年数据
+bash scripts/run_training.sh 0 8  configs/qwen3_4b_base_last3.yaml last3  # GPU 0, R8_last3
+bash scripts/run_training.sh 1 16 configs/qwen3_4b_base_last3.yaml last3  # GPU 1, R16_last3
+```
+
+### Step 4: LoRA 权重合并
+
+```bash
+bash scripts/batch_merge.sh   # 合并 20 个 checkpoint → models/merged/
+```
+
+### Step 5: 批量推理
+
+```bash
+bash scripts/batch_inference.sh 0   # GPU 0, 21 个模型串行推理
+```
+
+### Step 6: 评估 + 可视化
+
+```bash
+python scripts/eval_metrics.py \
+    --results_dir results/ \
+    --gold data/CQIA/ruozhiba_cqia_classified_v2.json \
+    --comparison
+```
+
+### Step 7: Before/After 对比
+
+```bash
+python scripts/gen_before_after.py
+```
