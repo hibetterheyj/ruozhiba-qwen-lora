@@ -1,5 +1,39 @@
 # Changelog
 
+## 2025-03-16 — Phase 2.7 全量 LoRA 权重合并 (20 checkpoint)
+
+### 概述
+
+将 4 组训练实验 (R8/R16 × all/last3) × Epoch 3-7 共 **20 个 LoRA checkpoint** 全部合并为独立模型，存入 `models/merged/`。旧的单次合并产物 `models/Qwen3-4B-Ruozhiba-Merged/` (仅 R16-E5) 已删除。
+
+### 修改/新增文件
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/batch_merge.sh` | **新增** — 批量合并脚本，串行调用 `llamafactory-cli export` + OmegaConf CLI 覆盖 |
+| `models/Qwen3-4B-Ruozhiba-Merged/` | **已删除** — 旧单次合并模型 (回收 7.6 GB) |
+| `models/merged/` | **新增** — 20 个合并模型输出目录 |
+
+### 合并矩阵 (20 个模型)
+
+**全量数据 (ruozhiba_all) — 10 个**: r8_e3 ~ r8_e7, r16_e3 ~ r16_e7
+**近三年数据 (ruozhiba_last3) — 10 个**: r8_last3_e3 ~ r8_last3_e7, r16_last3_e3 ~ r16_last3_e7
+
+### 结果摘要
+
+- 每个模型 7.6 GB，总计 **151 GB**
+- 合并耗时 ~16 分钟 (04:15 ~ 04:31)，平均每模型约 48 秒
+- 所有 20 个模型均验证通过 (config.json + tokenizer_config.json 存在)
+- 脚本支持幂等重跑 (已存在则跳过)
+
+### 技术细节
+
+- LLaMA-Factory CLI 覆盖语法: OmegaConf `key=value` 格式 (非 `--key value`)
+- 使用 `set -eo pipefail` 确保管道中的错误被正确捕获
+- 合并配置模板: `configs/qwen3_4b_merge.yaml`
+
+---
+
 ## 2025-03-16 — Phase 2.8.1 last3 实验重跑 (eval_strategy: epoch)
 
 ### 背景
