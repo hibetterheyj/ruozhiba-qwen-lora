@@ -1,5 +1,42 @@
 # Changelog
 
+## 2025-03-16 — Phase 3.4 Before/After + Phase 4 报告 v0.1
+
+### 概述
+
+完成 Phase 3.4 Before/After 对比样本生成和 Phase 4 英文实验报告初稿，覆盖 assignment.md 全部 5 个 section。新建 `dev_plan_0_5.md` 整理最新开发状态。
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `scripts/gen_before_after.py` | Before/After 样本自动选取脚本 — 从 baseline 和 r16_e5 推理结果中按策略选取 5 条代表性样本 (2 baseline错→SFT对, 1 格式改进, 1 均正确深度对比, 1 SFT失败) |
+| `results/before_after_samples.json` | 5 条 Before/After 对比样本数据 |
+| `doc/lab3_report_v0_1.md` | 英文实验报告 v0.1 — 含 SFT Target、Dataset、Training Setup、Loss Curves、Before/After 共 7 节 + 2 附录 |
+| `doc/dev_plan_0_5.md` | 开发计划 v0.5 — 反映 Phase 3.4 完成、Phase 3.3 LLM-as-Judge 跳过、Phase 4 报告 v0.1 完成 |
+
+### 报告内容 vs Assignment 要求
+
+| Assignment Section | Report Section | 状态 |
+|-------------------|---------------|------|
+| 3.1 SFT Target Description | §1 (3 examples) | ✅ |
+| 3.2 Dataset Source and Preprocessing | §2 (sources, modifications, format, split) | ✅ |
+| 3.3 Training Setup | §3 (model, LoRA, hyperparams, hardware) | ✅ |
+| 3.4 Loss Curves / Training Signals | §4 (eval loss table, overfitting analysis) | ✅ |
+| 3.5 Before vs. After Comparison | §5 (5 qualitative examples) | ✅ |
+
+### Before/After 样本摘要
+
+| # | 类型 | 结果 |
+|---|------|------|
+| 1 | baseline 错→SFT 对 | 弱智科学家→奇怪提问 ✅ |
+| 2 | baseline 错→SFT 对 | 地狱笑话→奇怪提问 ✅ |
+| 3 | 格式改进 | string list → dict list with confidence ✅ |
+| 4 | 均正确, 分析更深 | 文字游戏 ✅ + SFT 附带 confidence/reason |
+| 5 | SFT 失败 | 文艺弱智 误判为 文字游戏 ❌ |
+
+---
+
 ## 2025-03-16 — Phase 3.2 可视化优化
 
 ### 概述
