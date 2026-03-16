@@ -1,5 +1,45 @@
 # Changelog
 
+## 2025-03-16 — Phase 2.8.1 last3 实验重跑 (eval_strategy: epoch)
+
+### 背景
+
+Phase 2.8 的 last3 实验使用 `eval_strategy: steps, eval_steps: 100`，总步数仅 217，导致只有 2 个 eval 采样点 (step 100, 200)，无法精确定位过拟合拐点，也不足以生成 epoch 级别热力图。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `configs/qwen3_4b_base_last3.yaml` | `eval_strategy: steps` → `eval_strategy: epoch`，注释原 `eval_steps: 100` |
+| `doc/train_analysis1.md` | 更新 Section 8-10：用 v2 (7 个 epoch 级 eval 点) 替换 v1 (2 个 step 级 eval 点) 的结果与分析 |
+
+### 结果摘要
+
+v2 重跑产生 7 个 epoch 级 eval 采样点（vs v1 的 2 个），train loss 与 v1 几乎完全一致（Δ<0.001，同 seed=42）。
+
+**Eval Loss 对比 (v2):**
+
+| Epoch | R8_last3 | R16_last3 |
+|-------|----------|-----------|
+| 1 | 1.3292 | 1.2457 |
+| 2 | 1.1234 | 1.0626 |
+| 3 | 1.0434 | 0.9985 |
+| 4 | 1.0058 | 0.9705 |
+| 5 | 0.9923 | 0.9643 |
+| 6 | 0.9856 | **0.9637** |
+| 7 | **0.9844** | 0.9639 |
+
+**关键发现:**
+- **R16_last3 过拟合确认**: epoch 6→7 eval_loss 从 0.9637 回升至 0.9639，与全量 R16（epoch 5→7 过拟合）行为一致。v1 因 eval 采样不足未能捕获
+- **R8_last3 无过拟合**: eval_loss 单调下降至 epoch 7 (0.9844)
+- **最优 checkpoint**: R16_last3 checkpoint-186 (epoch 6, eval_loss=0.9637)
+
+### 备注
+- v2 训练时长 ~10m 39s，与 v1 (~10m 30s) 基本一致
+- 训练产物已覆盖 v1，保存于 `LLaMA-Factory/saves/qwen3-4b/lora/{r8,r16}_last3/`
+
+---
+
 ## 2025-03-15 — run_training.sh 支持自定义配置文件
 
 ### 概述
