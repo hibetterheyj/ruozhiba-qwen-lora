@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-03-16 — Phase 5 README 更新 + 最小化提交包
+
+### 概述
+
+更新全部 5 个 README（root / configs / data / doc / scripts），反映 Phase 3-4 完成状态，新增复现指南和评估结果摘要。创建 `upload/` 最小化提交包（17 个文件，12 MB），包含可独立运行的全流程脚本、配置、数据和评估结果。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `readme.md` | 更新项目结构树（新增 upload/、results/ 子目录、doc/report/）；更新评估描述（移除 BLEU/ROUGE，反映实际指标）；新增「评估结果摘要」节；新增「复现指南」7 步完整流程；更新环境搭建增加推理依赖 |
+| `configs/readme.md` | 新增 `qwen3_4b_base_last3.yaml` 描述；更新 merge 配置为批量合并模板说明；更新配置继承关系图 |
+| `data/readme.md` | 新增 `dataset_info.json` 说明 |
+| `doc/readme.md` | 新增 dev_plan v0.2-v0.5、test_analysis1.md、report/ 子目录及 8 张 Figure 清单；更新项目进度至全部完成 |
+| `scripts/readme.md` | 标题更新；新增「推理与评估」章节（inference_eval.py / batch_inference.sh / eval_metrics.py / gen_before_after.py）；训练章节增加 batch_merge.sh；依赖列表增加 vllm / json-repair / matplotlib / seaborn / numpy |
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `upload/readme.md` | 最小化提交包复现说明（环境搭建 → 7 步复现 → 关键结果 → 路径配置表） |
+| `upload/link.md` | 文件溯源清单（17 个文件的原始路径和用途） |
+| `upload/configs/prompts.yaml` | ← `configs/prompts.yaml` |
+| `upload/configs/qwen3_4b_base.yaml` | ← `configs/qwen3_4b_base.yaml` |
+| `upload/configs/qwen3_4b_base_last3.yaml` | ← `configs/qwen3_4b_base_last3.yaml` |
+| `upload/configs/qwen3_4b_merge.yaml` | ← `configs/qwen3_4b_merge.yaml` |
+| `upload/scripts/build_sft_data.py` | ← `scripts/build_sft_data.py` |
+| `upload/scripts/run_training.sh` | ← `scripts/run_training.sh` |
+| `upload/scripts/batch_merge.sh` | ← `scripts/batch_merge.sh` |
+| `upload/scripts/inference_eval.py` | ← `scripts/inference_eval.py` |
+| `upload/scripts/batch_inference.sh` | ← `scripts/batch_inference.sh` |
+| `upload/scripts/eval_metrics.py` | ← `scripts/eval_metrics.py` |
+| `upload/scripts/gen_before_after.py` | ← `scripts/gen_before_after.py` |
+| `upload/data/ruozhiba_all.json` | ← `data/LLaMA-Factory/data/ruozhiba_all.json` (2,785 条) |
+| `upload/data/ruozhiba_last3.json` | ← `data/LLaMA-Factory/data/ruozhiba_last3.json` (1,025 条) |
+| `upload/data/ruozhiba_cqia_classified_v2.json` | ← `data/CQIA/ruozhiba_cqia_classified_v2.json` (240 条测试集) |
+| `upload/data/dataset_info.json` | ← `data/LLaMA-Factory/data/dataset_info.json` (仅含 ruozhiba_all + ruozhiba_last3) |
+| `upload/results/eval_comparison.json` | ← `results/json/eval_comparison.json` |
+| `upload/results/before_after_samples.json` | ← `results/before_after_samples.json` |
+
+### Upload 包统计
+
+- **文件数**: 19 (17 复制 + 2 新建)
+- **总大小**: 12 MB
+- **configs**: 4 文件 (2.5 KB)
+- **scripts**: 7 文件 (66 KB)
+- **data**: 4 文件 (12 MB — 主要为训练集 JSON)
+- **results**: 2 文件 (41 KB)
+
+---
+
 ## 2026-03-16 — Phase 4.2 报告图片嵌入与可视化优化
 
 ### 概述
