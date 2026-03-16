@@ -1,3 +1,4 @@
+env_vllm/
 LLaMA-Factory/
 !data/LLaMA-Factory/
 *.db

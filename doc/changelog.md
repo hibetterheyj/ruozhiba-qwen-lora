@@ -1,5 +1,144 @@
 # Changelog
 
+## 2025-03-16 — Phase 3.2 可视化优化
+
+### 概述
+
+优化 `eval_metrics.py` 的可视化输出：减少混淆矩阵数量 (42→9)、新增 6 种图表类型、文件分子文件夹整理、修复 CJK 中文字体显示。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/eval_metrics.py` | **重写** — 新增 `plot_confusion_grid`/`plot_accuracy_lines`/`plot_eval_loss_lines`/`plot_baseline_vs_best_bar`/`plot_all_vs_last3_delta`/`plot_per_category_accuracy`/`plot_radar_top_models` 7 个图表函数；`main()` 重构为子文件夹输出；CJK 字体全局配置；混淆矩阵仅生成 baseline+top3 |
+| `doc/test_analysis1.md` | **更新** — 可视化产物章节 & 文件清单更新为新目录结构 |
+| `doc/changelog.md` | **更新** — 本条目 |
+
+### 输出目录结构
+
+```
+results/
+├── results_*.json          # 21 个推理结果 (不变)
+├── json/                   # 评估 JSON (22 个)
+│   ├── eval_{tag}.json
+│   └── eval_comparison.json
+├── confusion_matrices/     # 混淆矩阵 (9 个, 原 42 个)
+│   ├── confusion_matrix_{baseline,r16_e5,r16_e7,r8_e7}_{counts,normalized}.png
+│   └── confusion_grid_top_models.png
+├── heatmaps/               # Rank×Epoch 热力图 (14 个)
+│   └── heatmap_{all,last3}_{metric}.png
+└── charts/                 # 新增趋势/对比图表 (8 个)
+    ├── line_{strict_accuracy,top3_hit_rate,top1_accuracy,eval_loss}.png
+    ├── bar_{baseline_vs_top3,all_vs_last3_delta,per_category_recall_r16_e5}.png
+    └── radar_top_models.png
+```
+
+### 环境变更
+
+- 安装 `fonts-noto-cjk-extra` (apt)，matplotlib 使用 "Noto Sans CJK JP" 渲染中文标签
+
+---
+
+## 2025-03-16 — Phase 3.1 & 3.2 批量推理执行 + 定量评估
+
+### 概述
+
+使用 vLLM 0.17.1 (env_sft) 完成 21 组模型的批量推理，并执行两阶段 JSON 评估协议，生成完整可视化和分析报告。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/inference_eval.py` | **重写** — sglang → vLLM 后端 (`vllm.LLM` + `SamplingParams`, `destroy_model_parallel` 显存清理) |
+| `scripts/eval_metrics.py` | **修复** — `get_top1_category` / `get_top1_confidence` / `get_top3_category_names` 支持 string list 和 dict list 两种 `top3_categories` 格式 |
+| `doc/test_analysis1.md` | **新增** — Phase 3 定量评估分析报告 |
+| `doc/changelog.md` | **更新** — 本条目 |
+
+### 新增产出
+
+| 路径 | 数量 | 说明 |
+|------|------|------|
+| `results/results_{tag}.json` | 21 | 推理结果 (240 条/文件) |
+| `results/eval_{tag}.json` | 21 | 各模型评估指标 + per_sample 明细 |
+| `results/eval_comparison.json` | 1 | 对比总表 + 最优模型 + all_vs_last3 配对 |
+| `results/confusion_matrix_*.png` | 42 | 混淆矩阵 (21 模型 × counts/normalized) |
+| `results/heatmap_*.png` | 14 | Rank×Epoch 热力图 (7 指标 × 2 数据集) |
+
+### 评估结果摘要
+
+**最优模型**: `r16_e5` (R16, 全量数据, Epoch 5)
+
+| 指标 | Baseline | r16_e5 (最优) | 提升 |
+|------|----------|-------------|------|
+| Strict Accuracy | 0.233 | **0.613** | +163% |
+| Top-3 Hit Rate | 0.588 | 0.883 | +50% |
+| JSON Strict | 0.996 | 1.000 | — |
+| VSR | 1.000 | 1.000 | — |
+
+**关键发现**:
+- 全量数据 (2785 条) 一致性优于近三年 (1025 条)，平均 +9.1% strict_accuracy
+- R16 在 9/10 组对比中优于 R8，平均 +4.5%
+- 所有模型 VSR = 100%，JSON 遵循完美
+- eval_loss 最低点 (r16_e5) 精确对应 downstream accuracy 最优 checkpoint
+
+### 推理耗时
+
+- 21 模型总推理时间约 30 分钟 (vLLM 0.17.1, 单卡 L20Z 80GB)
+- 每模型约 85 秒 (加载 ~8s + 推理 ~50s + 清理 ~3s + overhead)
+
+---
+
+## 2025-03-16 — Phase 3.1 sglang 推理失败 → 迁移至 vLLM
+
+### 问题
+
+`batch_inference.sh` 启动后，sglang 引擎加载即失败，无法完成任何模型的推理。
+
+**错误信息**:
+
+```
+ImportError: [sgl_kernel] CRITICAL: Could not load any common_ops library!
+
+Error details:
+- ImportError: .../sgl_kernel/sm90/common_ops.abi3.so: undefined symbol: _ZNK3c106SymInt22maybe_as_int_slow_pathEv
+```
+
+### 根因
+
+`sgl_kernel` 的预编译 `.so` 文件与当前环境的 PyTorch ABI 不兼容：
+
+| 组件 | 版本 | 位置 |
+|------|------|------|
+| sglang | 0.5.3 | `/usr/local/lib/python3.12/dist-packages` (系统, 只读) |
+| sgl_kernel | 0.3.21 | 同上 |
+| torch (系统) | 2.8.0+cu129 | 同上 |
+| torch (env_sft) | 2.10.0+cu128 | `env_sft/lib/python3.12/site-packages` |
+
+- `sgl_kernel` 编译时链接的 `c10::SymInt` 符号在 torch 2.8.0 中不存在（该符号在 torch 2.6+ 重构）
+- 若开启 `include-system-site-packages = true`，env_sft 的 torch 2.10 会优先加载，但与 sgl_kernel 的 sm90 编译产物仍不匹配
+- sglang 和 sgl_kernel 安装在系统路径（只读），无法 in-place 升级/降级 torch 来适配
+
+### 决策
+
+**放弃 sglang，迁移至 vLLM**：
+
+1. 创建独立 `env_vllm` 虚拟环境，安装 vllm + 兼容 torch
+2. 重写 `scripts/inference_eval.py` 为 vLLM 后端 (参考 `archive/vllm_rollout.py`)
+3. 评估脚本 `scripts/eval_metrics.py` 无需修改（只消费 JSON 结果）
+4. 更新开发计划为 `doc/dev_plan_0_3.md`
+
+### 影响范围
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/inference_eval.py` | **重写** — sglang → vLLM 后端 |
+| `scripts/batch_inference.sh` | **更新** — 切换至 env_vllm |
+| `scripts/eval_metrics.py` | **不变** — 仅消费 JSON，与推理后端无关 |
+| `doc/dev_plan_0_3.md` | **新增** — vLLM 版开发计划 |
+| `env_vllm/` | **新增** — vLLM 推理环境 |
+
+---
+
 ## 2025-03-16 — Phase 3.1 & 3.2 批量推理 + 定量评估脚本
 
 ### 概述

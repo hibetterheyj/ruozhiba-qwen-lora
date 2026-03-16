@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 3.1 — sglang 离线批量推理脚本.
+"""Phase 3.1 — vLLM 离线批量推理脚本.
 
 对指定模型(或模型目录)在 CQIA 测试集上执行 greedy-decoding 推理，
 逐模型加载→推理→释放显存，输出 results/results_{tag}.json。
@@ -29,9 +29,6 @@ from pathlib import Path
 
 import torch
 import yaml
-
-# 抑制 sglang 底层日志，保持终端清爽
-logging.getLogger("sglang").setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -82,7 +79,9 @@ def run_inference(
     Returns:
         输出文件路径.
     """
-    import sglang as sgl
+    from transformers import AutoTokenizer
+    from vllm import LLM, SamplingParams
+    from vllm.distributed.parallel_state import destroy_model_parallel
 
     output_path = output_dir / f"results_{tag}.json"
 
@@ -94,15 +93,8 @@ def run_inference(
     logger.info("Loading model: %s (tag=%s)", model_path, tag)
     t0 = time.time()
 
-    # 1. 启动引擎
-    engine = sgl.Engine(
-        model_path=model_path,
-        tp_size=1,
-        mem_fraction_static=0.85,
-    )
-
-    # 2. 构造 prompt (apply_chat_template)
-    tokenizer = engine.get_tokenizer()
+    # 1. 加载 tokenizer 构造 prompt
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     prompts = []
     for item in test_data:
         messages = [
@@ -114,10 +106,18 @@ def run_inference(
         )
         prompts.append(prompt)
 
+    # 2. 创建 vLLM 引擎
+    llm = LLM(
+        model=model_path,
+        trust_remote_code=True,
+        gpu_memory_utilization=0.85,
+        max_model_len=2048,
+    )
+
     # 3. 批量推理
-    sampling_params = {"temperature": 0.0, "max_new_tokens": 1500}
+    sampling_params = SamplingParams(temperature=0.0, max_tokens=1500)
     logger.info("Running inference on %d samples...", len(prompts))
-    outputs = engine.generate(prompts, sampling_params)
+    outputs = llm.generate(prompts, sampling_params)
 
     # 4. 保存结果
     results = []
@@ -127,7 +127,7 @@ def run_inference(
                 "index": i,
                 "instruction": test_data[i]["instruction"],
                 "gold_classification": test_data[i].get("classification"),
-                "model_output": out["text"],
+                "model_output": out.outputs[0].text,
                 "model_tag": tag,
             }
         )
@@ -139,9 +139,9 @@ def run_inference(
     elapsed = time.time() - t0
     logger.info("✅ Saved %d results to %s (%.1fs)", len(results), output_path, elapsed)
 
-    # 5. 三重清理 —— 彻底释放 CUDA 显存
-    engine.shutdown()
-    del engine
+    # 5. 显存清理
+    destroy_model_parallel()
+    del llm
     gc.collect()
     torch.cuda.empty_cache()
     time.sleep(3)
@@ -164,7 +164,7 @@ def collect_models_from_dir(model_dir: Path) -> list[tuple[Path, str]]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Phase 3.1 — sglang batch inference")
+    parser = argparse.ArgumentParser(description="Phase 3.1 — vLLM batch inference")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--model_path", type=str, help="单个模型路径")
     group.add_argument("--model_dir", type=str, help="模型目录(扫描所有子目录)")

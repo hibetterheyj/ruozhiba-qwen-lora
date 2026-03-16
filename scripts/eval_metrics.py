@@ -4,11 +4,12 @@
 Stage 1: JSON 格式遵循能力 (json_strict / json_tolerant / vsr)
 Stage 2: 逻辑准确率 (top1_accuracy / top3_hit_rate / confidence_mae / strict_accuracy / repaired_accuracy)
 
-产出:
-  - 单模型评估: results/eval_{tag}.json
-  - 对比总表:   results/eval_comparison.json  (--comparison)
-  - 混淆矩阵:   results/confusion_matrix_{tag}_*.png
-  - 热力图:     results/heatmap_{dataset}_{metric}.png  (--comparison)
+产出目录结构:
+  results/
+    json/           — eval_{tag}.json + eval_comparison.json
+    confusion_matrices/ — baseline + best 模型 + 汇总网格
+    heatmaps/       — Rank×Epoch 热力图
+    charts/         — 折线图、柱状图、雷达图等
 
 用法:
     # 评估单个结果文件
@@ -38,6 +39,10 @@ import seaborn as sns
 from json_repair import repair_json
 
 matplotlib.use("Agg")
+
+# CJK 字体支持
+plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
+plt.rcParams["axes.unicode_minus"] = False
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -132,33 +137,54 @@ def extract_top_categories(parsed: dict | None) -> list[dict] | None:
     return None
 
 
-def get_top1_category(cats: list[dict] | None) -> str | None:
-    """从 top3_categories 中取 rank=1 的 category。"""
-    if cats is None:
+def get_top1_category(cats: list | None) -> str | None:
+    """从 top3_categories 中取 rank=1 的 category。
+
+    支持两种格式:
+      1. [{"rank": 1, "category": "X", ...}, ...]
+      2. ["X", "Y", "Z"]
+    """
+    if cats is None or len(cats) == 0:
         return None
-    # 优先找 rank=1
+    # 字符串列表格式
+    if isinstance(cats[0], str):
+        return cats[0]
+    # 字典列表格式 — 优先找 rank=1
     for c in cats:
-        if c.get("rank") == 1:
+        if isinstance(c, dict) and c.get("rank") == 1:
             return c.get("category")
     # fallback: 取第一个
-    return cats[0].get("category") if cats else None
+    if isinstance(cats[0], dict):
+        return cats[0].get("category")
+    return None
 
 
-def get_top1_confidence(cats: list[dict] | None) -> float | None:
+def get_top1_confidence(cats: list | None) -> float | None:
     """从 top3_categories 中取 rank=1 的 confidence_score。"""
-    if cats is None:
+    if cats is None or len(cats) == 0:
+        return None
+    # 字符串列表格式无置信度
+    if isinstance(cats[0], str):
         return None
     for c in cats:
-        if c.get("rank") == 1:
+        if isinstance(c, dict) and c.get("rank") == 1:
             return c.get("confidence_score")
-    return cats[0].get("confidence_score") if cats else None
+    if isinstance(cats[0], dict):
+        return cats[0].get("confidence_score")
+    return None
 
 
-def get_top3_category_names(cats: list[dict] | None) -> list[str]:
+def get_top3_category_names(cats: list | None) -> list[str]:
     """返回 top3 的 category 名称列表。"""
     if cats is None:
         return []
-    return [c.get("category", "") for c in cats[:3]]
+    result = []
+    for c in cats[:3]:
+        if isinstance(c, str):
+            result.append(c)
+        elif isinstance(c, dict):
+            result.append(c.get("category", ""))
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -344,6 +370,283 @@ def plot_confusion_matrix(
         logger.info("Saved %s", path)
 
 
+def plot_confusion_grid(
+    confusion_dict: dict[str, np.ndarray],
+    tags: list[str],
+    output_dir: Path,
+    filename: str = "confusion_grid.png",
+) -> None:
+    """将多个模型的归一化混淆矩阵绘制在一张网格图中。"""
+    n = len(tags)
+    if n == 0:
+        return
+    cols = min(n, 3)
+    rows = (n + cols - 1) // cols
+    fig, axes = plt.subplots(rows, cols, figsize=(9 * cols, 7 * rows))
+    if n == 1:
+        axes = np.array([axes])
+    axes = axes.flatten()
+
+    for idx, tag in enumerate(tags):
+        ax = axes[idx]
+        confusion = confusion_dict[tag]
+        row_sums = confusion.sum(axis=1, keepdims=True)
+        row_sums = np.where(row_sums == 0, 1, row_sums)
+        data = confusion / row_sums
+        sns.heatmap(
+            data, annot=True, fmt=".2f", cmap="Blues",
+            xticklabels=CATEGORIES, yticklabels=CATEGORIES, ax=ax,
+            cbar=idx == len(tags) - 1,
+        )
+        ax.set_title(tag, fontsize=14, fontweight="bold")
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Gold")
+
+    for idx in range(n, len(axes)):
+        axes[idx].set_visible(False)
+
+    plt.tight_layout()
+    path = output_dir / filename
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+# ---------------------------------------------------------------------------
+# 新增图表: 折线图、柱状图、雷达图
+# ---------------------------------------------------------------------------
+
+def plot_accuracy_lines(
+    all_metrics: dict[str, dict], output_dir: Path
+) -> None:
+    """绘制 Strict Accuracy & Top-3 Hit Rate 随 Epoch 变化的折线图 (4 组实验)。"""
+    epochs = [3, 4, 5, 6, 7]
+    groups = [
+        ("R8 all", "r8", "#1f77b4", "-", "o"),
+        ("R16 all", "r16", "#ff7f0e", "-", "s"),
+        ("R8 last3", "r8_last3", "#1f77b4", "--", "^"),
+        ("R16 last3", "r16_last3", "#ff7f0e", "--", "D"),
+    ]
+
+    for metric_key, ylabel, title_suffix in [
+        ("strict_accuracy", "Strict Accuracy", "Strict Accuracy vs Epoch"),
+        ("top3_hit_rate", "Top-3 Hit Rate", "Top-3 Hit Rate vs Epoch"),
+        ("top1_accuracy", "Top-1 Accuracy", "Top-1 Accuracy vs Epoch"),
+    ]:
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        for label, prefix, color, ls, marker in groups:
+            vals = []
+            for e in epochs:
+                tag = f"{prefix}_e{e}"
+                v = all_metrics.get(tag, {}).get(metric_key)
+                vals.append(v)
+
+            ax.plot(epochs, vals, color=color, linestyle=ls, marker=marker,
+                    label=label, linewidth=2, markersize=7)
+
+        # Baseline horizontal line
+        bl_val = all_metrics.get("baseline", {}).get(metric_key)
+        if bl_val is not None:
+            ax.axhline(y=bl_val, color="gray", linestyle=":", linewidth=1.5,
+                       label=f"Baseline ({bl_val:.3f})")
+
+        ax.set_xlabel("Epoch", fontsize=12)
+        ax.set_ylabel(ylabel, fontsize=12)
+        ax.set_title(title_suffix, fontsize=14)
+        ax.set_xticks(epochs)
+        ax.legend(loc="best", fontsize=10)
+        ax.grid(True, alpha=0.3)
+        ax.set_ylim(0, 1.05)
+
+        fname = f"line_{metric_key}.png"
+        path = output_dir / fname
+        fig.savefig(path, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        logger.info("Saved %s", path)
+
+
+def plot_eval_loss_lines(
+    all_metrics: dict[str, dict], output_dir: Path
+) -> None:
+    """绘制 eval_loss 随 epoch 变化的折线图。"""
+    epochs = [3, 4, 5, 6, 7]
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    line_cfgs = [
+        ("R8 all", "r8", "#1f77b4", "-", "o"),
+        ("R16 all", "r16", "#ff7f0e", "-", "s"),
+        ("R8 last3", "r8_last3", "#1f77b4", "--", "^"),
+        ("R16 last3", "r16_last3", "#ff7f0e", "--", "D"),
+    ]
+
+    for label, prefix, color, ls, marker in line_cfgs:
+        vals = []
+        for e in epochs:
+            tag = f"{prefix}_e{e}"
+            v = all_metrics.get(tag, {}).get("eval_loss")
+            vals.append(v)
+        ax.plot(epochs, vals, color=color, linestyle=ls, marker=marker,
+                label=label, linewidth=2, markersize=7)
+
+    ax.set_xlabel("Epoch", fontsize=12)
+    ax.set_ylabel("Eval Loss", fontsize=12)
+    ax.set_title("Eval Loss vs Epoch", fontsize=14)
+    ax.set_xticks(epochs)
+    ax.legend(loc="best", fontsize=10)
+    ax.grid(True, alpha=0.3)
+    ax.invert_yaxis()
+
+    path = output_dir / "line_eval_loss.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+def plot_baseline_vs_best_bar(
+    all_metrics: dict[str, dict], output_dir: Path
+) -> None:
+    """绘制 baseline vs top-3 模型的多指标分组柱状图。"""
+    # 选 top-3 by strict_accuracy (排除 baseline)
+    non_bl = [(t, m) for t, m in all_metrics.items() if t != "baseline"]
+    non_bl.sort(key=lambda x: x[1].get("strict_accuracy", 0), reverse=True)
+    top_tags = [t for t, _ in non_bl[:3]]
+    tags_to_show = ["baseline"] + top_tags
+
+    metrics_to_show = [
+        ("strict_accuracy", "Strict Acc"),
+        ("top1_accuracy", "Top-1 Acc"),
+        ("top3_hit_rate", "Top-3 Hit"),
+        ("json_strict", "JSON Strict"),
+    ]
+
+    x = np.arange(len(metrics_to_show))
+    width = 0.18
+    colors = ["#999999", "#1f77b4", "#ff7f0e", "#2ca02c"]
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for i, tag in enumerate(tags_to_show):
+        vals = [all_metrics.get(tag, {}).get(m, 0) for m, _ in metrics_to_show]
+        ax.bar(x + i * width, vals, width, label=tag, color=colors[i], alpha=0.85)
+
+    ax.set_xticks(x + width * (len(tags_to_show) - 1) / 2)
+    ax.set_xticklabels([label for _, label in metrics_to_show], fontsize=11)
+    ax.set_ylabel("Score", fontsize=12)
+    ax.set_title("Baseline vs Top-3 Models", fontsize=14)
+    ax.legend(fontsize=10)
+    ax.set_ylim(0, 1.1)
+    ax.grid(True, axis="y", alpha=0.3)
+
+    path = output_dir / "bar_baseline_vs_top3.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+def plot_all_vs_last3_delta(
+    all_metrics: dict[str, dict], output_dir: Path
+) -> None:
+    """绘制 all vs last3 的 strict_accuracy 差值柱状图。"""
+    labels = []
+    deltas = []
+    for rank in [8, 16]:
+        for epoch in [3, 4, 5, 6, 7]:
+            all_tag = f"r{rank}_e{epoch}"
+            last3_tag = f"r{rank}_last3_e{epoch}"
+            if all_tag in all_metrics and last3_tag in all_metrics:
+                labels.append(f"R{rank} E{epoch}")
+                deltas.append(
+                    all_metrics[all_tag]["strict_accuracy"]
+                    - all_metrics[last3_tag]["strict_accuracy"]
+                )
+
+    if not deltas:
+        return
+
+    colors = ["#2ca02c" if d >= 0 else "#d62728" for d in deltas]
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.bar(range(len(labels)), deltas, color=colors, alpha=0.85)
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=10)
+    ax.set_ylabel("Δ Strict Accuracy (all − last3)", fontsize=12)
+    ax.set_title("Full Dataset Advantage over Last-3-Year Subset", fontsize=14)
+    ax.axhline(y=0, color="black", linewidth=0.8)
+    ax.grid(True, axis="y", alpha=0.3)
+
+    path = output_dir / "bar_all_vs_last3_delta.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+def plot_per_category_accuracy(
+    confusion: np.ndarray, tag: str, output_dir: Path
+) -> None:
+    """绘制最优模型的各类别 recall 柱状图。"""
+    row_sums = confusion.sum(axis=1)
+    diag = confusion.diagonal()
+    recall = np.where(row_sums > 0, diag / row_sums, 0)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    bars = ax.bar(range(len(CATEGORIES)), recall, color=sns.color_palette("Set2", len(CATEGORIES)))
+    ax.set_xticks(range(len(CATEGORIES)))
+    ax.set_xticklabels(CATEGORIES, fontsize=11)
+    ax.set_ylabel("Recall", fontsize=12)
+    ax.set_title(f"Per-Category Recall — {tag}", fontsize=14)
+    ax.set_ylim(0, 1.1)
+    ax.grid(True, axis="y", alpha=0.3)
+
+    # 标注数值和样本数
+    for i, (r, n) in enumerate(zip(recall, row_sums)):
+        ax.text(i, r + 0.02, f"{r:.2f}\n(n={int(n)})", ha="center", fontsize=9)
+
+    path = output_dir / f"bar_per_category_recall_{tag}.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+def plot_radar_top_models(
+    all_metrics: dict[str, dict], output_dir: Path
+) -> None:
+    """绘制 top-3 模型 + baseline 的雷达图。"""
+    non_bl = [(t, m) for t, m in all_metrics.items() if t != "baseline"]
+    non_bl.sort(key=lambda x: x[1].get("strict_accuracy", 0), reverse=True)
+    tags_to_show = ["baseline"] + [t for t, _ in non_bl[:3]]
+
+    radar_metrics = [
+        ("strict_accuracy", "Strict Acc"),
+        ("top1_accuracy", "Top-1 Acc"),
+        ("top3_hit_rate", "Top-3 Hit"),
+        ("json_strict", "JSON Strict"),
+        ("vsr", "VSR"),
+    ]
+
+    n_metrics = len(radar_metrics)
+    angles = np.linspace(0, 2 * np.pi, n_metrics, endpoint=False).tolist()
+    angles += angles[:1]
+
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+    colors = ["#999999", "#1f77b4", "#ff7f0e", "#2ca02c"]
+
+    for i, tag in enumerate(tags_to_show):
+        vals = [all_metrics.get(tag, {}).get(m, 0) for m, _ in radar_metrics]
+        vals += vals[:1]
+        ax.plot(angles, vals, color=colors[i], linewidth=2, label=tag)
+        ax.fill(angles, vals, color=colors[i], alpha=0.1)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels([label for _, label in radar_metrics], fontsize=11)
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Radar: Baseline vs Top-3 Models", fontsize=14, pad=20)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=10)
+
+    path = output_dir / "radar_top_models.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
 # ---------------------------------------------------------------------------
 # eval_loss 提取
 # ---------------------------------------------------------------------------
@@ -442,6 +745,7 @@ def plot_heatmaps(
     all_metrics: dict[str, dict], output_dir: Path
 ) -> None:
     """绘制 Rank×Epoch 热力图 (7 指标 × 2 数据集 = 14 张)。"""
+    output_dir.mkdir(parents=True, exist_ok=True)
     for dataset_tag in ["all", "last3"]:
         for metric_name in METRICS_FOR_HEATMAP:
             matrix = np.full((2, 5), np.nan)  # R8, R16 × E3-E7
@@ -603,7 +907,16 @@ def main() -> None:
     output_dir = Path(args.output_dir) if args.output_dir else result_files[0].parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # 子目录
+    json_dir = output_dir / "json"
+    confusion_dir = output_dir / "confusion_matrices"
+    heatmap_dir = output_dir / "heatmaps"
+    chart_dir = output_dir / "charts"
+    for d in [json_dir, confusion_dir, heatmap_dir, chart_dir]:
+        d.mkdir(parents=True, exist_ok=True)
+
     all_metrics: dict[str, dict] = {}
+    all_confusions: dict[str, np.ndarray] = {}
 
     for rf in result_files:
         tag = rf.stem.replace("results_", "")
@@ -618,8 +931,8 @@ def main() -> None:
         eval_loss = get_eval_loss_for_tag(tag)
         metrics["eval_loss"] = eval_loss
 
-        # 保存单模型评估
-        eval_out = output_dir / f"eval_{tag}.json"
+        # 保存单模型评估 JSON
+        eval_out = json_dir / f"eval_{tag}.json"
         with open(eval_out, "w", encoding="utf-8") as f:
             json.dump(
                 {"model_tag": tag, "metrics": metrics, "per_sample": per_sample},
@@ -632,15 +945,42 @@ def main() -> None:
             f"{eval_loss:.4f}" if eval_loss is not None else "N/A",
         )
 
-        # 混淆矩阵
-        plot_confusion_matrix(confusion, tag, output_dir)
-
         all_metrics[tag] = metrics
+        all_confusions[tag] = confusion
 
-    # 对比总表 & 热力图
+    # --- 混淆矩阵 (精选模型) ---
+    # baseline + top-3 by strict_accuracy
+    non_bl = [(t, m) for t, m in all_metrics.items() if t != "baseline"]
+    non_bl.sort(key=lambda x: x[1].get("strict_accuracy", 0), reverse=True)
+    top3_tags = [t for t, _ in non_bl[:3]]
+    cm_tags = []
+    if "baseline" in all_confusions:
+        cm_tags.append("baseline")
+    cm_tags.extend(top3_tags)
+
+    for tag in cm_tags:
+        plot_confusion_matrix(all_confusions[tag], tag, confusion_dir)
+
+    # 混淆矩阵网格 (baseline + top-3 in one figure)
+    if len(cm_tags) > 1:
+        plot_confusion_grid(all_confusions, cm_tags, confusion_dir, "confusion_grid_top_models.png")
+
+    # 最优模型 per-category recall
+    if top3_tags:
+        best_tag = top3_tags[0]
+        plot_per_category_accuracy(all_confusions[best_tag], best_tag, chart_dir)
+
+    # --- 对比总表 & 热力图 & 新图表 ---
     if args.comparison and len(all_metrics) > 1:
-        comparison = build_comparison(all_metrics, output_dir)
-        plot_heatmaps(all_metrics, output_dir)
+        comparison = build_comparison(all_metrics, json_dir)
+        plot_heatmaps(all_metrics, heatmap_dir)
+
+        # 新增图表
+        plot_accuracy_lines(all_metrics, chart_dir)
+        plot_eval_loss_lines(all_metrics, chart_dir)
+        plot_baseline_vs_best_bar(all_metrics, chart_dir)
+        plot_all_vs_last3_delta(all_metrics, chart_dir)
+        plot_radar_top_models(all_metrics, chart_dir)
 
         # 打印摘要
         best = comparison.get("best_model", {})

@@ -1,0 +1,1699 @@
+{
+  "model_tag": "r8_last3_e3",
+  "metrics": {
+    "n_samples": 240,
+    "json_strict": 0.9875,
+    "json_tolerant": 0.9875,
+    "vsr": 1.0,
+    "top1_accuracy": 0.3458333333333333,
+    "top3_hit_rate": 0.6791666666666667,
+    "confidence_mae": 0.1091666666666668,
+    "strict_accuracy": 0.3416666666666667,
+    "repaired_accuracy": 0.3458333333333333,
+    "confidence_when_correct": 0.704819277108434,
+    "confidence_when_wrong": 0.6663461538461546,
+    "eval_loss": 1.0433638095855713
+  },
+  "per_sample": [
+    {
+      "index": 0,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 1,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 2,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 3,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "人生态度",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 4,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 5,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 6,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 7,
+      "gold_top1": "地狱笑话",
+      "pred_top1": null,
+      "json_strict_ok": false,
+      "top1_correct": false
+    },
+    {
+      "index": 8,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 9,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 10,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 11,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 12,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 13,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 14,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 15,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 16,
+      "gold_top1": "人生态度",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 17,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 18,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 19,
+      "gold_top1": "古典弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 20,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 21,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 22,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 23,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 24,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 25,
+      "gold_top1": "人生态度",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 26,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 27,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 28,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 29,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 30,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 31,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 32,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 33,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 34,
+      "gold_top1": "谐音梗",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 35,
+      "gold_top1": "谐音梗",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 36,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 37,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 38,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 39,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 40,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 41,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 42,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 43,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "人生态度",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 44,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 45,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 46,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": false,
+      "top1_correct": true
+    },
+    {
+      "index": 47,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 48,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 49,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 50,
+      "gold_top1": "谐音梗",
+      "pred_top1": "地狱笑话",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 51,
+      "gold_top1": "文字游戏",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 52,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 53,
+      "gold_top1": "文字游戏",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 54,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 55,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 56,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 57,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 58,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 59,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 60,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 61,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 62,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 63,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 64,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 65,
+      "gold_top1": "地狱笑话",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 66,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 67,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 68,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 69,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文艺弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 70,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 71,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 72,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 73,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": false,
+      "top1_correct": false
+    },
+    {
+      "index": 74,
+      "gold_top1": "古典弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 75,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 76,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 77,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 78,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 79,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 80,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 81,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 82,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 83,
+      "gold_top1": "文字游戏",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 84,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 85,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 86,
+      "gold_top1": "人生态度",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 87,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 88,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 89,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 90,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 91,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 92,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 93,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 94,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 95,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 96,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 97,
+      "gold_top1": "谐音梗",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 98,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 99,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 100,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 101,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 102,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 103,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 104,
+      "gold_top1": "人生态度",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 105,
+      "gold_top1": "人生态度",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 106,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 107,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 108,
+      "gold_top1": "古典弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 109,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 110,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 111,
+      "gold_top1": "文字游戏",
+      "pred_top1": "谐音梗",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 112,
+      "gold_top1": "谐音梗",
+      "pred_top1": "谐音梗",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 113,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 114,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 115,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 116,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 117,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 118,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 119,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 120,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 121,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 122,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 123,
+      "gold_top1": "古典弱智",
+      "pred_top1": "谐音梗",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 124,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 125,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 126,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 127,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 128,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "谐音梗",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 129,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 130,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 131,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 132,
+      "gold_top1": "文字游戏",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 133,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 134,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 135,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 136,
+      "gold_top1": "古典弱智",
+      "pred_top1": "地狱笑话",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 137,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 138,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 139,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 140,
+      "gold_top1": "古典弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 141,
+      "gold_top1": "文字游戏",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 142,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 143,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 144,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 145,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 146,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 147,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 148,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 149,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 150,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 151,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 152,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 153,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 154,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 155,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 156,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 157,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 158,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 159,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 160,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 161,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 162,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 163,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 164,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 165,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 166,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 167,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 168,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 169,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 170,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 171,
+      "gold_top1": "古典弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 172,
+      "gold_top1": "谐音梗",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 173,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 174,
+      "gold_top1": "古典弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 175,
+      "gold_top1": "谐音梗",
+      "pred_top1": "谐音梗",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 176,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 177,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 178,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 179,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 180,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 181,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 182,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 183,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 184,
+      "gold_top1": "古典弱智",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 185,
+      "gold_top1": "人生态度",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 186,
+      "gold_top1": "地狱笑话",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 187,
+      "gold_top1": "谐音梗",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 188,
+      "gold_top1": "文字游戏",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 189,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 190,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 191,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 192,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 193,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 194,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 195,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 196,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 197,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 198,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 199,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 200,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 201,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 202,
+      "gold_top1": "地狱笑话",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 203,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 204,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 205,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 206,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 207,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 208,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 209,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 210,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 211,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 212,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 213,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 214,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 215,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 216,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 217,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 218,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 219,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 220,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 221,
+      "gold_top1": "谐音梗",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 222,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 223,
+      "gold_top1": "文字游戏",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 224,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 225,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 226,
+      "gold_top1": "文字游戏",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 227,
+      "gold_top1": "文艺弱智",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 228,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 229,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 230,
+      "gold_top1": "弱智科学家",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 231,
+      "gold_top1": "古典弱智",
+      "pred_top1": "弱智科学家",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 232,
+      "gold_top1": "古典弱智",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 233,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "文字游戏",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 234,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 235,
+      "gold_top1": "谐音梗",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 236,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "奇怪提问",
+      "json_strict_ok": true,
+      "top1_correct": true
+    },
+    {
+      "index": 237,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 238,
+      "gold_top1": "奇怪提问",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    },
+    {
+      "index": 239,
+      "gold_top1": "文字游戏",
+      "pred_top1": "古典弱智",
+      "json_strict_ok": true,
+      "top1_correct": false
+    }
+  ]
+}
