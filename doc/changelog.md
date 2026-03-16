@@ -1,5 +1,45 @@
 # Changelog
 
+## 2025-03-16 — Phase 3.1 & 3.2 批量推理 + 定量评估脚本
+
+### 概述
+
+实现 Phase 3.1 sglang 批量推理管线和 Phase 3.2 两阶段 JSON 评估协议，为 21 组模型 (baseline + 20 merged) 提供端到端推理→评估→可视化工作流。
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `scripts/inference_eval.py` | sglang 离线批量推理脚本，支持单模型/批量/多模型三种模式，含三重显存清理 |
+| `scripts/batch_inference.sh` | 批量推理 shell 封装，按 baseline → all(R8/R16) → last3(R8/R16) 顺序串行推理 |
+| `scripts/eval_metrics.py` | 两阶段评估脚本: Stage 1 JSON 格式遵循 (strict/tolerant/VSR) + Stage 2 逻辑准确率 (top1/top3/MAE/strict/repaired) |
+
+### 依赖
+
+- 新增 `json-repair` 包 (已安装至 env_sft)
+
+### 功能要点
+
+**推理 (inference_eval.py)**:
+- 幂等设计: 已有结果文件时自动跳过
+- 三重显存清理: engine.shutdown() → del → gc.collect() → torch.cuda.empty_cache()
+- 参数: temperature=0.0, max_new_tokens=1500, mem_fraction_static=0.85
+
+**评估 (eval_metrics.py)**:
+- Stage 1 指标: `json_strict` / `json_tolerant` / `vsr` (VSR < 80% 标记为不可用)
+- Stage 2 指标: `top1_accuracy` / `top3_hit_rate` / `confidence_mae` / `strict_accuracy` / `repaired_accuracy`
+- JSON 失效惩罚: 解析失败的样本 MAE 记为 1.0，top1 记为 0
+- eval_loss 自动从 `trainer_log.jsonl` 按 epoch 就近匹配提取
+- 输出: 单模型 eval JSON + 对比总表 + 8×8 混淆矩阵 + 14 张 Rank×Epoch 热力图 (锁定色阶)
+- all vs last3 配对对比纳入 `eval_comparison.json`
+
+### 验证
+
+- 全部函数通过单元测试 (JSON 解析三级、标签解析、eval_loss 查询、evaluate_single、最大惩罚)
+- 20 个 model tag 的 eval_loss 均成功从训练日志提取
+
+---
+
 ## 2025-03-16 — Phase 2.7 全量 LoRA 权重合并 (20 checkpoint)
 
 ### 概述
