@@ -51,6 +51,9 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
+# 全局标题开关: --no_title 时设为 False
+SHOW_TITLE = True
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SAVES_DIR = PROJECT_ROOT / "LLaMA-Factory" / "saves" / "qwen3-4b" / "lora"
 
@@ -362,7 +365,8 @@ def plot_confusion_matrix(
         )
         ax.set_xlabel("Predicted")
         ax.set_ylabel("Gold")
-        ax.set_title(f"Confusion Matrix ({mode}) — {tag}")
+        if SHOW_TITLE:
+            ax.set_title(f"Confusion Matrix ({mode}) — {tag}")
         plt.tight_layout()
         path = output_dir / f"confusion_matrix_{tag}_{mode}.png"
         fig.savefig(path, dpi=150, bbox_inches="tight")
@@ -398,7 +402,8 @@ def plot_confusion_grid(
             xticklabels=CATEGORIES, yticklabels=CATEGORIES, ax=ax,
             cbar=idx == len(tags) - 1,
         )
-        ax.set_title(tag, fontsize=14, fontweight="bold")
+        if SHOW_TITLE:
+            ax.set_title(tag, fontsize=14, fontweight="bold")
         ax.set_xlabel("Predicted")
         ax.set_ylabel("Gold")
 
@@ -453,7 +458,8 @@ def plot_accuracy_lines(
 
         ax.set_xlabel("Epoch", fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
-        ax.set_title(title_suffix, fontsize=14)
+        if SHOW_TITLE:
+            ax.set_title(title_suffix, fontsize=14)
         ax.set_xticks(epochs)
         ax.legend(loc="best", fontsize=10)
         ax.grid(True, alpha=0.3)
@@ -491,7 +497,8 @@ def plot_eval_loss_lines(
 
     ax.set_xlabel("Epoch", fontsize=12)
     ax.set_ylabel("Eval Loss", fontsize=12)
-    ax.set_title("Eval Loss vs Epoch", fontsize=14)
+    if SHOW_TITLE:
+        ax.set_title("Eval Loss vs Epoch", fontsize=14)
     ax.set_xticks(epochs)
     ax.legend(loc="best", fontsize=10)
     ax.grid(True, alpha=0.3)
@@ -532,7 +539,8 @@ def plot_baseline_vs_best_bar(
     ax.set_xticks(x + width * (len(tags_to_show) - 1) / 2)
     ax.set_xticklabels([label for _, label in metrics_to_show], fontsize=11)
     ax.set_ylabel("Score", fontsize=12)
-    ax.set_title("Baseline vs Top-3 Models", fontsize=14)
+    if SHOW_TITLE:
+        ax.set_title("Baseline vs Top-3 Models", fontsize=14)
     ax.legend(fontsize=10)
     ax.set_ylim(0, 1.1)
     ax.grid(True, axis="y", alpha=0.3)
@@ -569,7 +577,8 @@ def plot_all_vs_last3_delta(
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=10)
     ax.set_ylabel("Δ Strict Accuracy (all − last3)", fontsize=12)
-    ax.set_title("Full Dataset Advantage over Last-3-Year Subset", fontsize=14)
+    if SHOW_TITLE:
+        ax.set_title("Full Dataset Advantage over Last-3-Year Subset", fontsize=14)
     ax.axhline(y=0, color="black", linewidth=0.8)
     ax.grid(True, axis="y", alpha=0.3)
 
@@ -592,7 +601,8 @@ def plot_per_category_accuracy(
     ax.set_xticks(range(len(CATEGORIES)))
     ax.set_xticklabels(CATEGORIES, fontsize=11)
     ax.set_ylabel("Recall", fontsize=12)
-    ax.set_title(f"Per-Category Recall — {tag}", fontsize=14)
+    if SHOW_TITLE:
+        ax.set_title(f"Per-Category Recall — {tag}", fontsize=14)
     ax.set_ylim(0, 1.1)
     ax.grid(True, axis="y", alpha=0.3)
 
@@ -638,10 +648,101 @@ def plot_radar_top_models(
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels([label for _, label in radar_metrics], fontsize=11)
     ax.set_ylim(0, 1.05)
-    ax.set_title("Radar: Baseline vs Top-3 Models", fontsize=14, pad=20)
+    if SHOW_TITLE:
+        ax.set_title("Radar: Baseline vs Top-3 Models", fontsize=14, pad=20)
     ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=10)
 
     path = output_dir / "radar_top_models.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+# ---------------------------------------------------------------------------
+# 训练 loss 曲线 (从 trainer_log.jsonl)
+# ---------------------------------------------------------------------------
+
+def plot_training_loss_curves(output_dir: Path) -> None:
+    """从 trainer_log.jsonl 绘制 4 组实验的训练 loss 曲线。"""
+    line_cfgs = [
+        ("R8 all", "r8", "#1f77b4", "-"),
+        ("R16 all", "r16", "#ff7f0e", "-"),
+        ("R8 last3", "r8_last3", "#1f77b4", "--"),
+        ("R16 last3", "r16_last3", "#ff7f0e", "--"),
+    ]
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for label, train_tag, color, ls in line_cfgs:
+        log_path = SAVES_DIR / train_tag / "trainer_log.jsonl"
+        if not log_path.exists():
+            continue
+        steps, losses = [], []
+        with open(log_path, "r", encoding="utf-8") as f:
+            for line in f:
+                entry = json.loads(line.strip())
+                if "loss" in entry and "eval_loss" not in entry:
+                    steps.append(entry["current_steps"])
+                    losses.append(entry["loss"])
+        if steps:
+            ax.plot(steps, losses, color=color, linestyle=ls,
+                    label=label, linewidth=1.5, alpha=0.85)
+
+    ax.set_xlabel("Step", fontsize=12)
+    ax.set_ylabel("Training Loss", fontsize=12)
+    if SHOW_TITLE:
+        ax.set_title("Training Loss vs Step", fontsize=14)
+    ax.legend(loc="best", fontsize=10)
+    ax.grid(True, alpha=0.3)
+
+    path = output_dir / "line_training_loss.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved %s", path)
+
+
+def plot_training_eval_loss_combined(output_dir: Path) -> None:
+    """绘制每组实验的 train loss + eval loss 合并图 (2x2 子图)。"""
+    train_tags = ["r8", "r16", "r8_last3", "r16_last3"]
+    labels = ["R8 all", "R16 all", "R8 last3", "R16 last3"]
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    axes = axes.flatten()
+
+    for idx, (train_tag, label) in enumerate(zip(train_tags, labels)):
+        ax = axes[idx]
+        log_path = SAVES_DIR / train_tag / "trainer_log.jsonl"
+        if not log_path.exists():
+            continue
+
+        train_steps, train_losses = [], []
+        eval_steps, eval_losses = [], []
+        with open(log_path, "r", encoding="utf-8") as f:
+            for line in f:
+                entry = json.loads(line.strip())
+                if "eval_loss" in entry:
+                    eval_steps.append(entry["current_steps"])
+                    eval_losses.append(entry["eval_loss"])
+                elif "loss" in entry:
+                    train_steps.append(entry["current_steps"])
+                    train_losses.append(entry["loss"])
+
+        ax.plot(train_steps, train_losses, color="#1f77b4", linewidth=1.2,
+                alpha=0.7, label="Train Loss")
+        ax.plot(eval_steps, eval_losses, color="#ff7f0e", linewidth=2,
+                marker="o", markersize=5, label="Eval Loss")
+        ax.set_xlabel("Step", fontsize=10)
+        ax.set_ylabel("Loss", fontsize=10)
+        if SHOW_TITLE:
+            ax.set_title(label, fontsize=12, fontweight="bold")
+        else:
+            # 无标题模式下用子图标签区分
+            ax.text(0.02, 0.98, label, transform=ax.transAxes,
+                    fontsize=11, fontweight="bold", va="top")
+        ax.legend(fontsize=9, loc="upper right")
+        ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    path = output_dir / "grid_train_eval_loss.png"
     fig.savefig(path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     logger.info("Saved %s", path)
@@ -775,7 +876,8 @@ def plot_heatmaps(
                 vmin=color["vmin"], vmax=color["vmax"],
                 ax=ax,
             )
-            ax.set_title(f"{metric_name} ({dataset_tag}) — Rank × Epoch")
+            if SHOW_TITLE:
+                ax.set_title(f"{metric_name} ({dataset_tag}) — Rank × Epoch")
             path = output_dir / f"heatmap_{dataset_tag}_{metric_name}.png"
             fig.savefig(path, dpi=150, bbox_inches="tight")
             plt.close(fig)
@@ -882,11 +984,19 @@ def parse_args() -> argparse.Namespace:
         "--output_dir", type=str, default=None,
         help="输出目录(默认与结果文件同目录)",
     )
+    parser.add_argument(
+        "--no_title", action="store_true",
+        help="生成不带标题的图片 (用于报告嵌入)",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
+    global SHOW_TITLE
     args = parse_args()
+
+    if args.no_title:
+        SHOW_TITLE = False
 
     # 加载金标准
     with open(args.gold, "r", encoding="utf-8") as f:
@@ -981,6 +1091,10 @@ def main() -> None:
         plot_baseline_vs_best_bar(all_metrics, chart_dir)
         plot_all_vs_last3_delta(all_metrics, chart_dir)
         plot_radar_top_models(all_metrics, chart_dir)
+
+        # 训练 loss 曲线 (从 trainer_log.jsonl)
+        plot_training_loss_curves(chart_dir)
+        plot_training_eval_loss_combined(chart_dir)
 
         # 打印摘要
         best = comparison.get("best_model", {})

@@ -1,10 +1,44 @@
 # Changelog
 
+## 2026-03-16 — Phase 4.2 报告图片嵌入与可视化优化
+
+### 概述
+
+将实验报告迁移至 `doc/report/`，嵌入 8 张无标题可视化图片（训练 loss 曲线、eval loss 趋势、accuracy 趋势、热力图、混淆矩阵网格、per-category recall、baseline 对比柱状图、all vs last3 差值图），并为每张图添加 Figure 编号和说明文字。移除报告中的脚本/文件路径索引（归入 README）。
+
+### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `scripts/eval_metrics.py` | 新增 `SHOW_TITLE` 全局开关 + `--no_title` CLI 参数；所有 11 个绘图函数的 `ax.set_title()` 改为条件调用；新增 `plot_training_loss_curves()` 和 `plot_training_eval_loss_combined()` 两个函数（从 `trainer_log.jsonl` 绘制训练 loss 曲线） |
+
+### 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `doc/report/lab3_report.md` | 从 `doc/lab3_report_v0_1.md` 复制并更新 — 嵌入 8 张 Figure + caption，移除 Appendix B 文件索引，移除内联文件路径引用 |
+| `doc/report/media/fig1_train_eval_loss.png` | Figure 1: 4 组实验训练+评估 loss 2×2 子图 |
+| `doc/report/media/fig2_eval_loss_trend.png` | Figure 2: Eval loss 随 epoch 变化趋势 |
+| `doc/report/media/fig3_strict_accuracy_trend.png` | Figure 3: Strict accuracy 随 epoch 变化趋势 |
+| `doc/report/media/fig4_heatmap_strict_accuracy.png` | Figure 4: Rank×Epoch strict accuracy 热力图 |
+| `doc/report/media/fig5_confusion_grid.png` | Figure 5: Baseline + top-3 归一化混淆矩阵网格 |
+| `doc/report/media/fig6_per_category_recall.png` | Figure 6: 最优模型各类别 recall 柱状图 |
+| `doc/report/media/fig7_baseline_vs_top3.png` | Figure 7: Baseline vs top-3 多指标分组柱状图 |
+| `doc/report/media/fig8_all_vs_last3.png` | Figure 8: 全量 vs last3 strict accuracy 差值图 |
+
+### 结果分析小结
+
+- 8 张图片均以 `--no_title` 模式重新生成，去除 matplotlib 标题以适配报告排版
+- 新增的训练 loss 曲线图 (`plot_training_loss_curves` / `plot_training_eval_loss_combined`) 直接从 `trainer_log.jsonl` 提取数据绘制，替代 LLaMA-Factory 自动生成的带标题版本
+- 报告中 Appendix B (文件索引) 已移除，避免与 README 复现指南重复
+
+---
+
 ## 2025-03-16 — Phase 3.4 Before/After + Phase 4 报告 v0.1
 
 ### 概述
 
-完成 Phase 3.4 Before/After 对比样本生成和 Phase 4 英文实验报告初稿，覆盖 assignment.md 全部 5 个 section。新建 `dev_plan_0_5.md` 整理最新开发状态。
+完成 Phase 3.4 Before/After 对比样本生成和 Phase 4 英文实验报告初稿，覆盖 assignment.md 全部 5 个 section。新建 `dev_plan_0_4.md` 整理最新开发状态。
 
 ### 新增文件
 
@@ -13,7 +47,7 @@
 | `scripts/gen_before_after.py` | Before/After 样本自动选取脚本 — 从 baseline 和 r16_e5 推理结果中按策略选取 5 条代表性样本 (2 baseline错→SFT对, 1 格式改进, 1 均正确深度对比, 1 SFT失败) |
 | `results/before_after_samples.json` | 5 条 Before/After 对比样本数据 |
 | `doc/lab3_report_v0_1.md` | 英文实验报告 v0.1 — 含 SFT Target、Dataset、Training Setup、Loss Curves、Before/After 共 7 节 + 2 附录 |
-| `doc/dev_plan_0_5.md` | 开发计划 v0.5 — 反映 Phase 3.4 完成、Phase 3.3 LLM-as-Judge 跳过、Phase 4 报告 v0.1 完成 |
+| `doc/dev_plan_0_4.md` | 开发计划 v0.5 — 反映 Phase 3.4 完成、Phase 3.3 LLM-as-Judge 跳过、Phase 4 报告 v0.1 完成 |
 
 ### 报告内容 vs Assignment 要求
 
