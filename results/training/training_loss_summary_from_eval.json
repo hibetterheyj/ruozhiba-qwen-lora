@@ -1,0 +1,34 @@
+[
+  {
+    "train_tag": "r8",
+    "label": "R8 all",
+    "source": "LLaMA-Factory/saves/qwen3-4b/lora/r8/trainer_log.jsonl",
+    "best_eval_loss": 0.8870383501052856,
+    "best_eval_step": 500,
+    "final_train_loss": 0.7631
+  },
+  {
+    "train_tag": "r16",
+    "label": "R16 all",
+    "source": "LLaMA-Factory/saves/qwen3-4b/lora/r16/trainer_log.jsonl",
+    "best_eval_loss": 0.8858684301376343,
+    "best_eval_step": 400,
+    "final_train_loss": 0.6776
+  },
+  {
+    "train_tag": "r8_last3",
+    "label": "R8 last3",
+    "source": "LLaMA-Factory/saves/qwen3-4b/lora/r8_last3/trainer_log.jsonl",
+    "best_eval_loss": 0.9843686819076538,
+    "best_eval_step": 217,
+    "final_train_loss": 0.8892
+  },
+  {
+    "train_tag": "r16_last3",
+    "label": "R16 last3",
+    "source": "LLaMA-Factory/saves/qwen3-4b/lora/r16_last3/trainer_log.jsonl",
+    "best_eval_loss": 0.9637117385864258,
+    "best_eval_step": 186,
+    "final_train_loss": 0.7868
+  }
+]

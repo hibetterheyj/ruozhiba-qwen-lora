@@ -42,6 +42,8 @@
 |:--:|:--:|
 | ![baseline vs top3](doc/report/media/fig7_baseline_vs_top3.png) | ![all vs last3](doc/report/media/fig8_all_vs_last3.png) |
 
+训练过程图现已补全：`results/charts/line_training_loss.pdf` 给出 step-level training loss，`results/charts/grid_train_eval_loss.pdf` 给出四组实验的 train/eval loss 对照，满足 assignment 对 `Training loss over steps` 的要求。
+
 ---
 
 ## 快速复现（极简）
@@ -51,6 +53,8 @@ uv venv env_sft --python 3.12 && source env_sft/bin/activate
 uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matplotlib pyyaml openai tenacity tqdm python-dotenv
 # 数据 → LLaMA-Factory、训练、合并、推理、评估：见 doc/guides/reproduction.md
 ```
+
+若需直接复用已训练出的 loss 曲线与可视化产物，可查看 `results/training/`（由 `LLaMA-Factory/saves/qwen3-4b/lora/*/trainer_log.jsonl` 提取）以及 `results/charts/line_training_loss.pdf`、`results/charts/grid_train_eval_loss.pdf`。
 
 最小可运行提交包说明：[upload/readme.md](upload/readme.md)。`upload/scripts/` 与主仓库在保留的核心子目录上保持同构，不包含 `scripts/tests/` 调试脚本。
 

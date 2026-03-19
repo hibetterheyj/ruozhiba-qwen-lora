@@ -700,6 +700,40 @@ def plot_training_loss_curves(output_dir: Path) -> None:
     plt.close(fig)
     logger.info("Saved %s", path)
 
+    summary_rows = []
+    for label, train_tag, _, _ in line_cfgs:
+        log_path = SAVES_DIR / train_tag / "trainer_log.jsonl"
+        if not log_path.exists():
+            continue
+        best_eval = None
+        best_step = None
+        final_train = None
+        with open(log_path, "r", encoding="utf-8") as f:
+            for line in f:
+                entry = json.loads(line.strip())
+                if "loss" in entry and "eval_loss" not in entry:
+                    final_train = entry["loss"]
+                elif "eval_loss" in entry:
+                    eval_loss = entry["eval_loss"]
+                    if best_eval is None or eval_loss < best_eval:
+                        best_eval = eval_loss
+                        best_step = entry["current_steps"]
+        summary_rows.append({
+            "train_tag": train_tag,
+            "label": label,
+            "source": str(log_path.relative_to(PROJECT_ROOT)),
+            "best_eval_loss": best_eval,
+            "best_eval_step": best_step,
+            "final_train_loss": final_train,
+        })
+
+    if summary_rows:
+        summary_path = output_dir.parent / "training" / "training_loss_summary_from_eval.json"
+        summary_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary_rows, f, ensure_ascii=False, indent=2)
+        logger.info("Saved %s", summary_path)
+
 
 def plot_training_eval_loss_combined(output_dir: Path) -> None:
     """绘制每组实验的 train loss + eval loss 合并图 (2x2 子图)。"""

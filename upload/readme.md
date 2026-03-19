@@ -118,6 +118,7 @@ Generates:
 - `results/confusion_matrices/` — confusion matrix plots
 - `results/heatmaps/` — rank × epoch heatmaps
 - `results/charts/` — trend & comparison charts
+- `results/training/` — extracted step-level training / validation loss summaries from `trainer_log.jsonl`
 
 ### 6. Before/After Comparison
 
@@ -143,6 +144,12 @@ python upload/scripts/viz/gen_before_after.py \
 | Valid Sample Rate | 1.000 | 1.000 | — |
 
 Best model: **R16, full data, epoch 5** (eval_loss = 0.8859).
+
+Training-loss evidence is also available after visualization refresh:
+
+- `results/charts/line_training_loss.pdf` — step-level training loss for all four runs
+- `results/charts/grid_train_eval_loss.pdf` — train/eval loss side-by-side per run
+- `results/training/training_loss_summary.json` — compact numeric summary (`best_eval_loss`, `best_eval_step`, `final_train_loss`)
 
 ---
 

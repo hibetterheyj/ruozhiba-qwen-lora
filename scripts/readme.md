@@ -123,6 +123,13 @@ python scripts/inference/inference_eval.py \
 | `eval_metrics.py` | `results/json/`、`heatmaps/`、`confusion_matrices/`、`charts/` 等 |
 | `gen_before_after.py` | `results/before_after_samples.json` |
 
+其中训练相关可视化现包含：
+
+- `results/training/*.json`：从 `trainer_log.jsonl` 提取的 step-level training / validation loss
+- `results/charts/line_training_loss.*`：四组实验的 training loss over steps
+- `results/charts/grid_train_eval_loss.*`：四组实验的 train/eval loss 联合图
+- `results/before_after_samples_raw_output_case.json`：用于报告展示格式行为改进的原始输出样本
+
 ```bash
 python scripts/viz/eval_metrics.py \
     --results_dir results/ \

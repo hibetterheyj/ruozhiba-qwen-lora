@@ -12,6 +12,66 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LOGGER = logging.getLogger(__name__)
 
 
+def _extract_format_case(
+    baseline: list[dict[str, Any]],
+    candidate: list[dict[str, Any]],
+    preferred_indices: list[int],
+) -> dict[str, Any] | None:
+    """Pick one case that best illustrates baseline-vs-SFT output formatting."""
+    def is_json_like(text: str) -> bool:
+        return text.lstrip().startswith("{") and text.rstrip().endswith("}")
+
+    def has_structured_fields(text: str) -> bool:
+        return all(key in text for key in ["\"rank\"", "\"confidence_score\"", "\"reason\""])
+
+    def has_string_list_top3(text: str) -> bool:
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            try:
+                import json_repair
+                parsed = json_repair.loads(text)
+            except Exception:
+                return False
+        cats = parsed.get("top3_categories", []) if isinstance(parsed, dict) else []
+        return bool(cats) and isinstance(cats[0], str)
+
+    for idx in preferred_indices:
+        base_output = str(baseline[idx].get("model_output", "")).strip()
+        sft_output = str(candidate[idx].get("model_output", "")).strip()
+        if not base_output or not sft_output:
+            continue
+        if (not is_json_like(base_output) and is_json_like(sft_output)) or (
+            has_string_list_top3(base_output) and has_structured_fields(sft_output)
+        ):
+            return {
+                "sample_index": idx,
+                "instruction": baseline[idx].get("instruction", ""),
+                "gold_top1": get_gold_top1(baseline[idx].get("gold_classification", {})),
+                "baseline_output": base_output,
+                "sft_output": sft_output,
+                "baseline_top1": get_top1(base_output),
+                "sft_top1": get_top1(sft_output),
+            }
+
+    for idx in preferred_indices:
+        base_output = str(baseline[idx].get("model_output", "")).strip()
+        sft_output = str(candidate[idx].get("model_output", "")).strip()
+        if not base_output or not sft_output:
+            continue
+        if len(sft_output) >= len(base_output) and has_structured_fields(sft_output):
+            return {
+                "sample_index": idx,
+                "instruction": baseline[idx].get("instruction", ""),
+                "gold_top1": get_gold_top1(baseline[idx].get("gold_classification", {})),
+                "baseline_output": base_output,
+                "sft_output": sft_output,
+                "baseline_top1": get_top1(base_output),
+                "sft_top1": get_top1(sft_output),
+            }
+    return None
+
+
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments for selecting comparison inputs."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -139,6 +199,13 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
+
+    raw_case = _extract_format_case(baseline, best, format_improvement + baseline_wrong_sft_right + both_correct_deeper)
+    if raw_case is not None:
+        raw_case_path = args.output.with_name(f"{args.output.stem}_raw_output_case.json")
+        with open(raw_case_path, "w", encoding="utf-8") as f:
+            json.dump(raw_case, f, ensure_ascii=False, indent=2)
+        LOGGER.info("Saved raw output comparison case to %s", raw_case_path)
 
     LOGGER.info("Saved %s before/after samples to %s", len(output), args.output)
     for s in output:

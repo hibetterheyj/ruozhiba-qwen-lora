@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-03-19 — 补齐 Training/Validation Loss 证据链与报告素材同步
+
+- 已从 `LLaMA-Factory/saves/qwen3-4b/lora/{r8,r16,r8_last3,r16_last3}/trainer_log.jsonl` 提取 step-level training loss 与 validation loss，整理到 `results/training/`：
+	- `r8_loss_curves.json`
+	- `r16_loss_curves.json`
+	- `r8_last3_loss_curves.json`
+	- `r16_last3_loss_curves.json`
+	- `training_loss_summary.json`
+- `scripts/viz/eval_metrics.py` 现会额外写出 `results/training/training_loss_summary_from_eval.json`，并生成：
+	- `results/charts/line_training_loss.{png,pdf}`
+	- `results/charts/grid_train_eval_loss.{png,pdf}`
+- `scripts/viz/gen_before_after.py` 现会额外导出 `results/before_after_samples_raw_output_case.json`，用于报告中直接展示 baseline 的松散输出与 SFT 的 schema 对齐输出。
+- `scripts/viz/update_report_media.py` 已移除本机绝对路径，改为基于仓库根定位，并同步复制新的 loss 图表到 `doc/report/lab3_report_latex/media/`。
+- `doc/report/lab3_report_latex/main.tex` 已将 training loss 与 strict accuracy 改为并排展示，并补充 raw output 对比与更明确的 desired-output 示例。
+
+---
+
 ## 2026-03-19 — Review 备注（结构重组后待收尾项）
 
 > 结论：本次 `scripts/` 分类重组与路径锚点统一整体方向正确，主体实现与目录设计一致；但若以“完全收尾、规范化完成”为标准，仍有若干建议需要单独记录，便于后续继续清理。

@@ -1,16 +1,19 @@
 import shutil
 from pathlib import Path
 
+import json
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
-ROOT = Path('/Users/heyujie/Documents/code/ruozhiba-qwen-lora')
+ROOT = Path(__file__).resolve().parents[2]
 RESULTS_CHARTS = ROOT / 'results' / 'charts'
 RESULTS_HEATMAPS = ROOT / 'results' / 'heatmaps'
-LATEX_MEDIA = ROOT / 'archive' / 'lab3_report_latex' / 'media'
+RESULTS_TRAINING = ROOT / 'results' / 'training'
+LATEX_MEDIA = ROOT / 'doc' / 'report' / 'lab3_report_latex' / 'media'
 
 MORANDI = {
     'blue': '#7C93A6',
@@ -184,14 +187,57 @@ def remake_all_vs_last3_delta_bar() -> None:
     plt.close(fig)
 
 
+def make_training_loss_summary() -> None:
+    summary_path = RESULTS_TRAINING / 'training_loss_summary.json'
+    if not summary_path.exists():
+        return
+
+    with open(summary_path, 'r', encoding='utf-8') as f:
+        summary = json.load(f)
+
+    tag_order = ['r8', 'r16', 'r8_last3', 'r16_last3']
+    labels = ['R8 all', 'R16 all', 'R8 last3', 'R16 last3']
+    best_vals = [summary[tag]['best_eval_loss'] for tag in tag_order if tag in summary]
+    final_vals = [summary[tag]['final_train_loss'] for tag in tag_order if tag in summary]
+    used_labels = [label for tag, label in zip(tag_order, labels) if tag in summary]
+    if not used_labels:
+        return
+
+    x = np.arange(len(used_labels))
+    width = 0.34
+    fig, ax = plt.subplots(figsize=(8.5, 4.5))
+    ax.bar(x - width / 2, best_vals, width=width, color=MORANDI['blue'], label='Best validation loss')
+    ax.bar(x + width / 2, final_vals, width=width, color=MORANDI['rose'], label='Final training loss')
+    ax.set_xticks(x, used_labels)
+    ax.set_ylabel('Loss')
+    ax.grid(True, axis='y', alpha=0.25, linestyle='--')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ymax = max(best_vals + final_vals) if (best_vals and final_vals) else 1.0
+    ax.set_ylim(0, ymax + 0.18)
+    ax.legend(frameon=False, loc='upper left')
+    for xi, val in zip(x - width / 2, best_vals):
+        ax.text(xi, val + 0.01, f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+    for xi, val in zip(x + width / 2, final_vals):
+        ax.text(xi, val + 0.01, f'{val:.3f}', ha='center', va='bottom', fontsize=9)
+    fig.tight_layout()
+    out = RESULTS_CHARTS / 'bar_training_vs_validation_loss.pdf'
+    fig.savefig(out, bbox_inches='tight')
+    fig.savefig(out.with_suffix('.png'), dpi=180, bbox_inches='tight')
+    plt.close(fig)
+
+
 def copy_files() -> None:
     LATEX_MEDIA.mkdir(parents=True, exist_ok=True)
     chart_needed = [
         'dataset_source_donut.pdf',
+        'line_training_loss.pdf',
+        'grid_train_eval_loss.pdf',
         'line_eval_loss.pdf',
         'line_strict_accuracy.pdf',
         'bar_all_vs_last3_delta.pdf',
         'bar_baseline_vs_top3.pdf',
+        'bar_training_vs_validation_loss.pdf',
     ]
     heatmap_needed = ['heatmap_all_strict_accuracy.pdf']
 
@@ -210,4 +256,5 @@ if __name__ == '__main__':
     make_dataset_donut()
     remake_strict_accuracy_heatmap()
     remake_all_vs_last3_delta_bar()
+    make_training_loss_summary()
     copy_files()
