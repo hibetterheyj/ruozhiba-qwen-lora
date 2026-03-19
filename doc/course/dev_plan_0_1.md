@@ -38,7 +38,7 @@ Phase 1  数据工程        ──→  Phase 2  SFT 训练      ──→  Phas
 
 > **导师蒸馏 (Distillation)**: 项目使用 **Claude-Opus-4-6** 作为导师模型生成 `thought_process` 标签。4B 参数量的 Qwen3 在理解弱智吧复杂逻辑谬误时，极度依赖高质量的思维链 (CoT) 数据。通过 Opus 级别模型生成的深度分析，可以强迫小模型学习更高维度的语义特征，突破其本身的认知局限。
 
-#### 新脚本: `scripts/classify_cqia_updated.py`
+#### 新脚本: `scripts/data/classify_cqia_updated.py`
 
 ```
 输入:  data/CQIA/ruozhiba_cqia_classified.json  (240 条, 已有 top3_categories)
@@ -51,7 +51,7 @@ Phase 1  数据工程        ──→  Phase 2  SFT 训练      ──→  Phas
 - 保留原有 `output`, `classification` 字段不变，在 classification 中新增 `thought_process`
 - 复用 `classify_jokes.py` 的鲁棒性优化（ThreadPoolExecutor, 断点续传, 原子写入）
 
-#### 配置文件: `scripts/classify_cqia_updated_config.yaml`
+#### 配置文件: `scripts/data/classify_cqia_updated_config.yaml`
 
 ```yaml
 system_prompt: |
@@ -128,7 +128,7 @@ messages = [
 
 **目标**: 确保 CQIA 测试集 240 条不出现在训练集中，防止数据泄露 (Data Leakage)。
 
-#### 新脚本: `scripts/dedup_test_vs_train.py`
+#### 新脚本: `scripts/data/dedup_test_vs_train.py`
 
 ```
 输入:
@@ -183,7 +183,7 @@ messages = [
 
 ### 2.1 ShareGPT 格式化
 
-#### 新脚本: `scripts/build_sft_data.py`
+#### 新脚本: `scripts/data/build_sft_data.py`
 
 将分类后的数据转换为 LLaMA-Factory 所需的 ShareGPT 格式。
 
@@ -376,12 +376,12 @@ eval_steps: 100
 CUDA_VISIBLE_DEVICES=0 llamafactory-cli train configs/qwen3_4b_mvp.yaml
 
 # 2. 推理 (使用 MVP checkpoint)
-python scripts/inference_eval.py \
+python scripts/inference/inference_eval.py \
   --adapter saves/qwen3-4b/lora/mvp_r8_e3 \
   --output results/results_mvp.json
 
 # 3. 评估 (验证两阶段评估流程)
-python scripts/eval_metrics.py \
+python scripts/viz/eval_metrics.py \
   --results results/results_mvp.json \
   --gold data/CQIA/ruozhiba_cqia_classified_v2.json
 ```
@@ -404,7 +404,7 @@ python scripts/eval_metrics.py \
 
 **压测策略**: 不需要跑完整 Epoch。设置 `max_steps: 15` + `logging_steps: 1`，从保守值逐步上探，每次只跑 15 步即可触发完整前向/反向传播并测出显存峰值。
 
-#### 压测脚本: `scripts/probe_batch_size.sh`
+#### 压测脚本: `scripts/train/probe_batch_size.sh`
 
 ```bash
 #!/bin/bash
@@ -468,7 +468,7 @@ echo "压测流程结束。"
 ```
 
 **操作步骤**:
-1. 运行压测: `bash scripts/probe_batch_size.sh`
+1. 运行压测: `bash scripts/train/probe_batch_size.sh`
 2. 另起终端实时监控: `watch -n 0.5 nvidia-smi`
 3. 测出安全临界值后，配合 `gradient_accumulation_steps` 固定有效批次大小，写入 `configs/qwen3_4b_base.yaml`
 
@@ -573,18 +573,18 @@ eval_strategy: steps
 eval_steps: 100
 ```
 
-#### 启动脚本: `scripts/run_training.sh`
+#### 启动脚本: `scripts/train/run_training.sh`
 
 ```bash
 #!/bin/bash
 # Checkpoint-Based Training: 每个 Rank 训练 7 epochs, 自动保存所有 epoch checkpoint
 # 用法:
-#   bash scripts/run_training.sh 0 8    # GPU 0, rank=8
-#   bash scripts/run_training.sh 1 16   # GPU 1, rank=16
+#   bash scripts/train/run_training.sh 0 8    # GPU 0, rank=8
+#   bash scripts/train/run_training.sh 1 16   # GPU 1, rank=16
 #
 # 并行调度:
-#   终端 1: bash scripts/run_training.sh 0 8
-#   终端 2: bash scripts/run_training.sh 1 16
+#   终端 1: bash scripts/train/run_training.sh 0 8
+#   终端 2: bash scripts/train/run_training.sh 1 16
 
 GPU_ID=${1:?Usage: $0 <GPU_ID> <RANK>}
 RANK=${2:?Usage: $0 <GPU_ID> <RANK>}
@@ -703,7 +703,7 @@ CUDA_VISIBLE_DEVICES=0 llamafactory-cli export configs/qwen3_4b_merge.yaml
 
 ### 3.1 高并发推理脚本 (sglang)
 
-#### 新脚本: `scripts/inference_eval.py`
+#### 新脚本: `scripts/inference/inference_eval.py`
 
 废弃基于 `transformers` + `PeftModel` 的逐条慢速推理方案，改用 `sglang` 的离线批量生成（Offline Batch Generation），利用 PagedAttention 和 RadixAttention 榨干 L20Z 显存带宽。
 
@@ -780,7 +780,7 @@ engine.shutdown()
 
 ### 3.2 定量指标 — 两阶段 JSON 评估协议
 
-#### 新脚本: `scripts/eval_metrics.py`
+#### 新脚本: `scripts/viz/eval_metrics.py`
 
 ```
 输入:
@@ -1031,14 +1031,14 @@ response = client.chat.completions.create(
 
 | 文件 | 用途 |
 |------|------|
-| `scripts/classify_cqia_updated.py` | 为 CQIA 数据补充 thought_process |
-| `scripts/classify_cqia_updated_config.yaml` | 配置文件 |
-| `scripts/dedup_test_vs_train.py` | CQIA vs 贴吧去重 |
-| `scripts/build_sft_data.py` | 数据格式化为 ShareGPT |
-| `scripts/run_training.sh` | Checkpoint-Based 训练启动脚本 |
-| `scripts/probe_batch_size.sh` | 显存水位 Batch Size 压测脚本 |
-| `scripts/inference_eval.py` | sglang 高并发批量推理 |
-| `scripts/eval_metrics.py` | 两阶段 JSON 评估 + 混淆矩阵 |
+| `scripts/data/classify_cqia_updated.py` | 为 CQIA 数据补充 thought_process |
+| `scripts/data/classify_cqia_updated_config.yaml` | 配置文件 |
+| `scripts/data/dedup_test_vs_train.py` | CQIA vs 贴吧去重 |
+| `scripts/data/build_sft_data.py` | 数据格式化为 ShareGPT |
+| `scripts/train/run_training.sh` | Checkpoint-Based 训练启动脚本 |
+| `scripts/train/probe_batch_size.sh` | 显存水位 Batch Size 压测脚本 |
+| `scripts/inference/inference_eval.py` | sglang 高并发批量推理 |
+| `scripts/viz/eval_metrics.py` | 两阶段 JSON 评估 + 混淆矩阵 |
 | `scripts/llm_judge.py` | LLM-as-a-Judge 评估 |
 | `configs/prompts.yaml` | 中心化 SYSTEM_PROMPT (训练/推理/评估共用) |
 | `configs/qwen3_4b_base.yaml` | 4B 基础配置 (checkpoint 搜索共用) |
@@ -1054,9 +1054,9 @@ response = client.chat.completions.create(
 
 ### 不需要修改的文件
 
-- `scripts/classify_jokes.py` — 保持不变
-- `scripts/classify_cqia.py` — 保持不变（新建 _updated 版本）
-- `scripts/filter_duplicates.py` — 保持不变（新建专用去重脚本）
+- `scripts/data/classify_jokes.py` — 保持不变
+- `scripts/data/classify_cqia.py` — 保持不变（新建 _updated 版本）
+- `scripts/data/filter_duplicates.py` — 保持不变（新建专用去重脚本）
 - `data/tieba/best*_classified.json` — 原始数据不修改（去重操作生成新文件）
 - `data/CQIA/ruozhiba_cqia_classified.json` — 原始数据不修改（补全生成 _v2）
 
@@ -1075,7 +1075,7 @@ source env_sft/bin/activate
 `sglang` 已预装在系统环境中，推理脚本 (`inference_eval.py`) 需使用 `/usr/bin/python3` 运行，不使用 `env_sft`。
 
 ```bash
-/usr/bin/python3 scripts/inference_eval.py ...
+/usr/bin/python3 scripts/inference/inference_eval.py ...
 ```
 
 ### 已安装依赖
@@ -1123,13 +1123,13 @@ uv pip install wandb        # 用于训练过程可视化 (Weights & Biases)
 - [ ] **2.3** 创建 `configs/qwen3_4b_mvp.yaml`
 - [ ] **2.3** MVP 训练: `CUDA_VISIBLE_DEVICES=0 llamafactory-cli train configs/qwen3_4b_mvp.yaml`
 - [ ] **2.3** MVP 推理 + 评估: 验证全链路正常
-- [ ] **2.4** 运行 `scripts/probe_batch_size.sh` 压测最大 Batch Size
+- [ ] **2.4** 运行 `scripts/train/probe_batch_size.sh` 压测最大 Batch Size
 - [ ] **2.4** 将压测结果写入 `configs/qwen3_4b_base.yaml`
-- [ ] **2.5** 创建 `configs/qwen3_4b_base.yaml` + `scripts/run_training.sh`
+- [ ] **2.5** 创建 `configs/qwen3_4b_base.yaml` + `scripts/train/run_training.sh`
 - [ ] **2.5** 确认 YAML 中 `seed: 42` 已设置, 保证 `val_size` 切分一致
 - [ ] **2.5** 配置 wandb: `wandb login`
-- [ ] **2.5** 终端 1: `bash scripts/run_training.sh 0 8`
-- [ ] **2.5** 终端 2: `bash scripts/run_training.sh 1 16`
+- [ ] **2.5** 终端 1: `bash scripts/train/run_training.sh 0 8`
+- [ ] **2.5** 终端 2: `bash scripts/train/run_training.sh 1 16`
 - [ ] **2.5** 确认 wandb 上出现两个独立 Run (`Qwen3-4B-Ruozhiba-R8` / `R16`)
 - [ ] **2.6** 观察前 30-50 步 loss，确认 warmup 节奏正常 (必要时切 `warmup_steps: 50`)
 - [ ] **2.6** 检查 2 组 loss 曲线，从 10 个 checkpoint 中确定最优 Rank × Epoch 组合

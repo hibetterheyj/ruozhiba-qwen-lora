@@ -8,64 +8,69 @@
 
 ## 流水线总览
 
+脚本按阶段分目录（均在 `scripts/` 下，详见 [`../../scripts/readme.md`](../../scripts/readme.md)）：`crawl/` 抓取与抽取 · `data/` 清洗/分类/去重/SFT 构建 · `train/` 训练与合并 · `inference/` 批量推理 · `viz/` 评估与图表 · `tests/` 单元测试。
+
 ```
                              ┌──────────────────────┐
                              │  Baidu Tieba Crawl   │
                              │  (aiotieba crawler)  │
                              └──────────┬───────────┘
                                         │
-┌────────────────────┐    ┌─────────────▼──────────────┐    ┌──────────────────┐
-│  COIG-CQIA (HF)   │    │  extract / process scripts │    │  GitHub corpus   │
-│  240 pairs        │───▶│  extract_annual_data.py    │◀───│  1361 posts      │
-└────────────────────┘    │  extract_cqia_data.py      │    └──────────────────┘
-                          │  process_ruozhiba_past_    │
-                          │    annual.py               │
-                          └─────────────┬──────────────┘
+┌────────────────────┐    ┌─────────────▼──────────────────────┐    ┌──────────────────┐
+│  COIG-CQIA (HF)   │    │  scripts/crawl/                    │    │  GitHub corpus   │
+│  240 pairs        │───▶│  extract_annual_data.py            │◀───│  1361 posts      │
+└────────────────────┘    │  extract_cqia_data.py             │    └──────────────────┘
+                          │  process_ruozhiba_past_annual.py   │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  filter_duplicates.py      │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/data/                     │
+                          │  filter_duplicates.py              │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  classify_jokes.py         │
-                          │  classify_cqia_updated.py  │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/data/                     │
+                          │  classify_jokes.py …               │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  check_and_repair.py       │
-                          │  dedup_test_vs_train.py    │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/data/                     │
+                          │  check_and_repair*.py              │
+                          │  dedup_test_vs_train.py            │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  build_sft_data.py         │
-                          │  → ruozhiba_all.json       │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/data/build_sft_data.py    │
+                          │  → ruozhiba_all.json               │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  LLaMA-Factory LoRA SFT    │
-                          │  run_training.sh           │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  LLaMA-Factory LoRA SFT            │
+                          │  scripts/train/run_training.sh     │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  export + batch_merge.sh   │
-                          │  → models/merged/          │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/train/batch_merge.sh      │
+                          │  → models/merged/                  │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  vLLM: inference_eval.py   │
-                          │  batch_inference.sh        │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/inference/                │
+                          │  inference_eval.py + batch_*.sh    │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  eval_metrics.py           │
-                          └─────────────┬──────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/viz/eval_metrics.py       │
+                          └─────────────┬──────────────────────┘
                                         │
-                          ┌─────────────▼──────────────┐
-                          │  gen_before_after.py       │
-                          └────────────────────────────┘
+                          ┌─────────────▼──────────────────────┐
+                          │  scripts/viz/gen_before_after.py   │
+                          └────────────────────────────────────┘
 ```
 
 ## 分步命令
+
+> **工作目录**：以下命令默认在**仓库根目录**执行（保证 `configs/`、`data/`、`models/`、`results/`、`LLaMA-Factory/` 等相对路径正确）。
 
 ### 1. 环境
 
@@ -83,19 +88,19 @@ cp data/LLaMA-Factory/data/dataset_info.json LLaMA-Factory/data/
 从头构建：
 
 ```bash
-python scripts/build_sft_data.py
+python scripts/data/build_sft_data.py
 ```
 
 ### 3. LoRA 训练
 
 ```bash
 # 双卡示例：R8 / R16 并行
-bash scripts/run_training.sh 0 8
-bash scripts/run_training.sh 1 16
+bash scripts/train/run_training.sh 0 8
+bash scripts/train/run_training.sh 1 16
 
 # 近三年子集
-bash scripts/run_training.sh 0 8  configs/qwen3_4b_base_last3.yaml last3
-bash scripts/run_training.sh 1 16 configs/qwen3_4b_base_last3.yaml last3
+bash scripts/train/run_training.sh 0 8  configs/qwen3_4b_base_last3.yaml last3
+bash scripts/train/run_training.sh 1 16 configs/qwen3_4b_base_last3.yaml last3
 ```
 
 更细步骤见 [`../analysis/training_execution.md`](../analysis/training_execution.md)。
@@ -103,19 +108,19 @@ bash scripts/run_training.sh 1 16 configs/qwen3_4b_base_last3.yaml last3
 ### 4. 合并 LoRA
 
 ```bash
-bash scripts/batch_merge.sh
+bash scripts/train/batch_merge.sh
 ```
 
 ### 5. 批量推理
 
 ```bash
-bash scripts/batch_inference.sh 0
+bash scripts/inference/batch_inference.sh 0
 ```
 
 ### 6. 评估与可视化
 
 ```bash
-python scripts/eval_metrics.py \
+python scripts/viz/eval_metrics.py \
     --results_dir results/ \
     --gold data/CQIA/ruozhiba_cqia_classified_v2.json \
     --comparison
@@ -124,7 +129,7 @@ python scripts/eval_metrics.py \
 ### 7. Before / After 样本
 
 ```bash
-python scripts/gen_before_after.py
+python scripts/viz/gen_before_after.py
 ```
 
 ## 最小提交包

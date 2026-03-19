@@ -99,7 +99,7 @@ CUDA_VISIBLE_DEVICES=0 llamafactory-cli export configs/qwen3_4b_merge.yaml
 **批量合并 (20 个 checkpoint):**
 
 ```bash
-bash scripts/batch_merge.sh
+bash scripts/train/batch_merge.sh
 ```
 
 ---

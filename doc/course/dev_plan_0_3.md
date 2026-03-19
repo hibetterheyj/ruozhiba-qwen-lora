@@ -33,7 +33,7 @@ pip install vllm pyyaml json-repair
 
 > **不修改** env_sft 和系统环境。env_vllm 仅用于推理，与训练环境完全隔离。
 
-### 更新脚本: `scripts/inference_eval.py`
+### 更新脚本: `scripts/inference/inference_eval.py`
 
 **核心变更**: `sgl.Engine` → `vllm.LLM` + `SamplingParams`
 
@@ -89,7 +89,7 @@ def run_inference(model_path, test_data, system_prompt, tag, output_dir, gpu_id=
 | 参数命名 | `max_new_tokens` | `max_tokens` |
 | 清理 | `engine.shutdown()` 必须显式调用 | `del llm` 即可 |
 
-### 更新脚本: `scripts/batch_inference.sh`
+### 更新脚本: `scripts/inference/batch_inference.sh`
 
 仅需变更虚拟环境激活路径:
 
@@ -112,13 +112,13 @@ source "${PROJECT_ROOT}/env_vllm/bin/activate"
 
 ## Phase 3.2: 定量评估 (不变)
 
-**无需修改** — `scripts/eval_metrics.py` 仅消费 `results/results_*.json`，与推理后端无关。
+**无需修改** — `scripts/viz/eval_metrics.py` 仅消费 `results/results_*.json`，与推理后端无关。
 
 执行命令不变:
 
 ```bash
 source env_sft/bin/activate  # eval_metrics.py 使用 env_sft (matplotlib/seaborn/json-repair)
-python scripts/eval_metrics.py \
+python scripts/viz/eval_metrics.py \
     --results_dir results/ \
     --gold data/CQIA/ruozhiba_cqia_classified_v2.json \
     --comparison

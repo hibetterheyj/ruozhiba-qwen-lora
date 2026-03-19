@@ -44,7 +44,7 @@
 
 ### 产出
 
-- **脚本**: `scripts/gen_before_after.py` — 从 baseline 和 r16_e5 推理结果中自动选取 5 条代表性样本
+- **脚本**: `scripts/viz/gen_before_after.py` — 从 baseline 和 r16_e5 推理结果中自动选取 5 条代表性样本
 - **数据**: `results/before_after_samples.json`
 
 ### 样本选取策略

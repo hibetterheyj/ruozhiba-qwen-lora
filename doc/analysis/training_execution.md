@@ -28,7 +28,7 @@ cat /root/code/llm_ruozhiba/LLaMA-Factory/data/dataset_info.json | python -m jso
 | 文件 | 用途 |
 |------|------|
 | `configs/qwen3_4b_base.yaml` | 共享基础配置 (BS=16×2, 7 epochs, seed=42) |
-| `scripts/run_training.sh` | 启动脚本，通过 CLI 参数注入 rank/alpha/output_dir |
+| `scripts/train/run_training.sh` | 启动脚本，通过 CLI 参数注入 rank/alpha/output_dir |
 
 ---
 
@@ -55,11 +55,11 @@ saves/qwen3-4b/lora/r16/checkpoint-{82,164,246,328,410,492,574}
 tmux new-session -s train
 
 # 2. 在第一个 pane 启动 Run A (GPU 0, rank=8)
-bash /root/code/llm_ruozhiba/scripts/run_training.sh 0 8 2>&1 | tee /root/code/llm_ruozhiba/logs/run_a_r8.log
+bash /root/code/llm_ruozhiba/scripts/train/run_training.sh 0 8 2>&1 | tee /root/code/llm_ruozhiba/logs/run_a_r8.log
 
 # 3. 分割窗口，启动 Run B (GPU 1, rank=16)
 #    按 Ctrl+B 然后 % (垂直分割) 或 " (水平分割)
-bash /root/code/llm_ruozhiba/scripts/run_training.sh 1 16 2>&1 | tee /root/code/llm_ruozhiba/logs/run_b_r16.log
+bash /root/code/llm_ruozhiba/scripts/train/run_training.sh 1 16 2>&1 | tee /root/code/llm_ruozhiba/logs/run_b_r16.log
 
 # 4. 断开 tmux (训练继续在后台运行)
 #    按 Ctrl+B 然后 d
@@ -74,10 +74,10 @@ tmux attach -t train
 
 ```bash
 # GPU 0, rank=8, 近三年数据集 → saves/qwen3-4b/lora/r8_last3
-bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_a_r8_last3.log
+bash scripts/train/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_a_r8_last3.log
 
 # GPU 1, rank=16, 近三年数据集 → saves/qwen3-4b/lora/r16_last3
-bash scripts/run_training.sh 1 16 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_b_r16_last3.log
+bash scripts/train/run_training.sh 1 16 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3 2>&1 | tee logs/run_b_r16_last3.log
 ```
 
 **产出目录对比:**

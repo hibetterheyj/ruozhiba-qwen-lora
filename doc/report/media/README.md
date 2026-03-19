@@ -4,4 +4,4 @@
 
 - `fig1_train_eval_loss.png` … `fig8_all_vs_last3.png`
 
-生成脚本通常为 `scripts/eval_metrics.py` 等；也可从 `results/` 下对应图表复制至此以便报告与 README 引用。
+生成脚本通常为 `scripts/viz/eval_metrics.py` 等；也可从 `results/` 下对应图表复制至此以便报告与 README 引用。

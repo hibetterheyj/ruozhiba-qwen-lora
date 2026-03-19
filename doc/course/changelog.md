@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-19 — `scripts/` 按阶段分子目录 + `upload/scripts/` 同构
+
+- **`scripts/crawl/`**：`extract_cqia_data.py`、`extract_annual_data.py`、`process_ruozhiba_past_annual.py`（原始语料抽取/预处理；贴吧爬虫数据仍在 `crawler/`）
+- **`scripts/data/`**：去重、分类（含 `*.yaml` 配置）、校验修复、`dedup_test_vs_train.py`、`build_sft_data.py`
+- **`scripts/train/`**：`run_training.sh`、`probe_batch_size.sh`、`batch_merge.sh`（`PROJECT_ROOT` 改为自脚本上溯两级到仓库根）
+- **`scripts/inference/`**：`inference_eval.py`、`batch_inference.sh`（调用绝对路径下的 `inference_eval.py`）
+- **`scripts/viz/`**：`eval_metrics.py`、`gen_before_after.py`
+- **`scripts/tests/`**：`test_*.py`
+- **路径修复**：凡依赖仓库根的 Python 脚本使用 `Path(__file__).resolve().parents[2]`；`data/` 内分类脚本的数据目录改为 `parents[2] / "data"`；`upload/scripts/` 同步拆分子目录，训练/合并/推理以**仓库根**为锚点（修正原先 `cd upload/LLaMA-Factory` 等不一致）
+- **文档**：根 `readme.md`、`doc/readme.md`、`doc/guides/reproduction.md`、`scripts/readme.md`、`upload/readme.md`、`upload/link.md`、`configs/readme.md`、`data/LLaMA-Factory/readme.md` 及 `doc/course/dev_plan_*`、`doc/analysis/*`、`doc/report/*` 中脚本路径已更新
+
 ## 2026-03-19 — `doc/` 子目录整理
 
 - 新建 **`doc/guides/`**：`environment.md`、`data.md`、`reproduction.md`、`results_summary.md`
@@ -41,13 +52,13 @@
 | `upload/configs/qwen3_4b_base.yaml` | ← `configs/qwen3_4b_base.yaml` |
 | `upload/configs/qwen3_4b_base_last3.yaml` | ← `configs/qwen3_4b_base_last3.yaml` |
 | `upload/configs/qwen3_4b_merge.yaml` | ← `configs/qwen3_4b_merge.yaml` |
-| `upload/scripts/build_sft_data.py` | ← `scripts/build_sft_data.py` |
-| `upload/scripts/run_training.sh` | ← `scripts/run_training.sh` |
-| `upload/scripts/batch_merge.sh` | ← `scripts/batch_merge.sh` |
-| `upload/scripts/inference_eval.py` | ← `scripts/inference_eval.py` |
-| `upload/scripts/batch_inference.sh` | ← `scripts/batch_inference.sh` |
-| `upload/scripts/eval_metrics.py` | ← `scripts/eval_metrics.py` |
-| `upload/scripts/gen_before_after.py` | ← `scripts/gen_before_after.py` |
+| `upload/scripts/data/build_sft_data.py` | ← `scripts/data/build_sft_data.py` |
+| `upload/scripts/train/run_training.sh` | ← `scripts/train/run_training.sh` |
+| `upload/scripts/train/batch_merge.sh` | ← `scripts/train/batch_merge.sh` |
+| `upload/scripts/inference/inference_eval.py` | ← `scripts/inference/inference_eval.py` |
+| `upload/scripts/inference/batch_inference.sh` | ← `scripts/inference/batch_inference.sh` |
+| `upload/scripts/viz/eval_metrics.py` | ← `scripts/viz/eval_metrics.py` |
+| `upload/scripts/viz/gen_before_after.py` | ← `scripts/viz/gen_before_after.py` |
 | `upload/data/ruozhiba_all.json` | ← `data/LLaMA-Factory/data/ruozhiba_all.json` (2,785 条) |
 | `upload/data/ruozhiba_last3.json` | ← `data/LLaMA-Factory/data/ruozhiba_last3.json` (1,025 条) |
 | `upload/data/ruozhiba_cqia_classified_v2.json` | ← `data/CQIA/ruozhiba_cqia_classified_v2.json` (240 条测试集) |
@@ -76,7 +87,7 @@
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/eval_metrics.py` | 新增 `SHOW_TITLE` 全局开关 + `--no_title` CLI 参数；所有 11 个绘图函数的 `ax.set_title()` 改为条件调用；新增 `plot_training_loss_curves()` 和 `plot_training_eval_loss_combined()` 两个函数（从 `trainer_log.jsonl` 绘制训练 loss 曲线） |
+| `scripts/viz/eval_metrics.py` | 新增 `SHOW_TITLE` 全局开关 + `--no_title` CLI 参数；所有 11 个绘图函数的 `ax.set_title()` 改为条件调用；新增 `plot_training_loss_curves()` 和 `plot_training_eval_loss_combined()` 两个函数（从 `trainer_log.jsonl` 绘制训练 loss 曲线） |
 
 ### 新增文件
 
@@ -110,7 +121,7 @@
 
 | 文件 | 说明 |
 |------|------|
-| `scripts/gen_before_after.py` | Before/After 样本自动选取脚本 — 从 baseline 和 r16_e5 推理结果中按策略选取 5 条代表性样本 (2 baseline错→SFT对, 1 格式改进, 1 均正确深度对比, 1 SFT失败) |
+| `scripts/viz/gen_before_after.py` | Before/After 样本自动选取脚本 — 从 baseline 和 r16_e5 推理结果中按策略选取 5 条代表性样本 (2 baseline错→SFT对, 1 格式改进, 1 均正确深度对比, 1 SFT失败) |
 | `results/before_after_samples.json` | 5 条 Before/After 对比样本数据 |
 | `doc/lab3_report_v0_1.md` | 英文实验报告 v0.1 — 含 SFT Target、Dataset、Training Setup、Loss Curves、Before/After 共 7 节 + 2 附录 |
 | `doc/dev_plan_0_4.md` | 开发计划 v0.5 — 反映 Phase 3.4 完成、Phase 3.3 LLM-as-Judge 跳过、Phase 4 报告 v0.1 完成 |
@@ -147,7 +158,7 @@
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/eval_metrics.py` | **重写** — 新增 `plot_confusion_grid`/`plot_accuracy_lines`/`plot_eval_loss_lines`/`plot_baseline_vs_best_bar`/`plot_all_vs_last3_delta`/`plot_per_category_accuracy`/`plot_radar_top_models` 7 个图表函数；`main()` 重构为子文件夹输出；CJK 字体全局配置；混淆矩阵仅生成 baseline+top3 |
+| `scripts/viz/eval_metrics.py` | **重写** — 新增 `plot_confusion_grid`/`plot_accuracy_lines`/`plot_eval_loss_lines`/`plot_baseline_vs_best_bar`/`plot_all_vs_last3_delta`/`plot_per_category_accuracy`/`plot_radar_top_models` 7 个图表函数；`main()` 重构为子文件夹输出；CJK 字体全局配置；混淆矩阵仅生成 baseline+top3 |
 | `doc/test_analysis1.md` | **更新** — 可视化产物章节 & 文件清单更新为新目录结构 |
 | `doc/changelog.md` | **更新** — 本条目 |
 
@@ -186,8 +197,8 @@ results/
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/inference_eval.py` | **重写** — sglang → vLLM 后端 (`vllm.LLM` + `SamplingParams`, `destroy_model_parallel` 显存清理) |
-| `scripts/eval_metrics.py` | **修复** — `get_top1_category` / `get_top1_confidence` / `get_top3_category_names` 支持 string list 和 dict list 两种 `top3_categories` 格式 |
+| `scripts/inference/inference_eval.py` | **重写** — sglang → vLLM 后端 (`vllm.LLM` + `SamplingParams`, `destroy_model_parallel` 显存清理) |
+| `scripts/viz/eval_metrics.py` | **修复** — `get_top1_category` / `get_top1_confidence` / `get_top3_category_names` 支持 string list 和 dict list 两种 `top3_categories` 格式 |
 | `doc/test_analysis1.md` | **新增** — Phase 3 定量评估分析报告 |
 | `doc/changelog.md` | **更新** — 本条目 |
 
@@ -260,17 +271,17 @@ Error details:
 **放弃 sglang，迁移至 vLLM**：
 
 1. 创建独立 `env_vllm` 虚拟环境，安装 vllm + 兼容 torch
-2. 重写 `scripts/inference_eval.py` 为 vLLM 后端 (参考 `archive/vllm_rollout.py`)
-3. 评估脚本 `scripts/eval_metrics.py` 无需修改（只消费 JSON 结果）
+2. 重写 `scripts/inference/inference_eval.py` 为 vLLM 后端 (参考 `archive/vllm_rollout.py`)
+3. 评估脚本 `scripts/viz/eval_metrics.py` 无需修改（只消费 JSON 结果）
 4. 更新开发计划为 `doc/dev_plan_0_3.md`
 
 ### 影响范围
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/inference_eval.py` | **重写** — sglang → vLLM 后端 |
-| `scripts/batch_inference.sh` | **更新** — 切换至 env_vllm |
-| `scripts/eval_metrics.py` | **不变** — 仅消费 JSON，与推理后端无关 |
+| `scripts/inference/inference_eval.py` | **重写** — sglang → vLLM 后端 |
+| `scripts/inference/batch_inference.sh` | **更新** — 切换至 env_vllm |
+| `scripts/viz/eval_metrics.py` | **不变** — 仅消费 JSON，与推理后端无关 |
 | `doc/dev_plan_0_3.md` | **新增** — vLLM 版开发计划 |
 | `env_vllm/` | **新增** — vLLM 推理环境 |
 
@@ -286,9 +297,9 @@ Error details:
 
 | 文件 | 说明 |
 |------|------|
-| `scripts/inference_eval.py` | sglang 离线批量推理脚本，支持单模型/批量/多模型三种模式，含三重显存清理 |
-| `scripts/batch_inference.sh` | 批量推理 shell 封装，按 baseline → all(R8/R16) → last3(R8/R16) 顺序串行推理 |
-| `scripts/eval_metrics.py` | 两阶段评估脚本: Stage 1 JSON 格式遵循 (strict/tolerant/VSR) + Stage 2 逻辑准确率 (top1/top3/MAE/strict/repaired) |
+| `scripts/inference/inference_eval.py` | sglang 离线批量推理脚本，支持单模型/批量/多模型三种模式，含三重显存清理 |
+| `scripts/inference/batch_inference.sh` | 批量推理 shell 封装，按 baseline → all(R8/R16) → last3(R8/R16) 顺序串行推理 |
+| `scripts/viz/eval_metrics.py` | 两阶段评估脚本: Stage 1 JSON 格式遵循 (strict/tolerant/VSR) + Stage 2 逻辑准确率 (top1/top3/MAE/strict/repaired) |
 
 ### 依赖
 
@@ -326,7 +337,7 @@ Error details:
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/batch_merge.sh` | **新增** — 批量合并脚本，串行调用 `llamafactory-cli export` + OmegaConf CLI 覆盖 |
+| `scripts/train/batch_merge.sh` | **新增** — 批量合并脚本，串行调用 `llamafactory-cli export` + OmegaConf CLI 覆盖 |
 | `models/Qwen3-4B-Ruozhiba-Merged/` | **已删除** — 旧单次合并模型 (回收 7.6 GB) |
 | `models/merged/` | **新增** — 20 个合并模型输出目录 |
 
@@ -400,17 +411,17 @@ v2 重跑产生 7 个 epoch 级 eval 采样点（vs v1 的 2 个），train loss
 
 | 文件 | 变更 |
 |------|------|
-| `scripts/run_training.sh` | 新增 `CONFIG`（第 3 位）和 `TAG`（第 4 位）可选参数 |
+| `scripts/train/run_training.sh` | 新增 `CONFIG`（第 3 位）和 `TAG`（第 4 位）可选参数 |
 | `doc/training_execution.md` | 更新 ruozhiba_last3 训练章节，说明 TAG 参数和输出目录隔离 |
 
 ### 用法示例
 
 ```bash
 # 默认配置 (qwen3_4b_base.yaml) → saves/qwen3-4b/lora/r8
-bash scripts/run_training.sh 0 8
+bash scripts/train/run_training.sh 0 8
 
 # 指定 last3 配置 + TAG → saves/qwen3-4b/lora/r8_last3
-bash scripts/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3
+bash scripts/train/run_training.sh 0 8 /root/code/llm_ruozhiba/configs/qwen3_4b_base_last3.yaml last3
 ```
 
 ### 备注
@@ -535,7 +546,7 @@ Phase 2.4 压测 (`probe_batch_size.sh`) 使用 `max_steps: 15` 且无 eval/wand
 | 文件 | 说明 |
 |------|------|
 | `configs/qwen3_4b_base.yaml` | 4B 实验共享基础配置 (BS=32, 7 epochs, save_strategy=epoch) |
-| `scripts/run_training.sh` | 训练启动脚本 (OmegaConf CLI 覆盖 rank/alpha/output_dir) |
+| `scripts/train/run_training.sh` | 训练启动脚本 (OmegaConf CLI 覆盖 rank/alpha/output_dir) |
 | `doc/training_execution.md` | tmux 双卡并行训练执行手册 |
 
 ### 实验矩阵
@@ -560,9 +571,9 @@ Phase 2.4 压测 (`probe_batch_size.sh`) 使用 `max_steps: 15` 且无 eval/wand
 ```bash
 # tmux 双卡并行训练
 tmux new-session -d -s train \
-  "bash scripts/run_training.sh 0 8 2>&1 | tee logs/run_a_r8.log" \; \
+  "bash scripts/train/run_training.sh 0 8 2>&1 | tee logs/run_a_r8.log" \; \
   split-window -h \
-  "bash scripts/run_training.sh 1 16 2>&1 | tee logs/run_b_r16.log" \; \
+  "bash scripts/train/run_training.sh 1 16 2>&1 | tee logs/run_b_r16.log" \; \
   attach
 ```
 
@@ -624,7 +635,7 @@ tmux new-session -d -s train \
 通过小步快跑压测法（`max_steps: 15`），在 L20Z 80GB 单卡上逐级上探 `per_device_train_batch_size`，确定正式训练的安全临界值。
 
 ### 新增
-- `scripts/probe_batch_size.sh` — Batch Size 动态压测脚本（自动激活 venv，自动清理临时文件）
+- `scripts/train/probe_batch_size.sh` — Batch Size 动态压测脚本（自动激活 venv，自动清理临时文件）
 
 ### 压测结果 (GPU 1, Qwen3-4B + LoRA rank=8, cutoff_len=2048)
 
@@ -720,7 +731,7 @@ tmux new-session -d -s train \
 
 ### 新增
 - `configs/prompts.yaml` — 中心化 system prompt 与分类类别配置，供训练/推理/评估统一引用
-- `scripts/build_sft_data.py` — 将去重后贴吧数据转换为 LLaMA-Factory ShareGPT 格式
+- `scripts/data/build_sft_data.py` — 将去重后贴吧数据转换为 LLaMA-Factory ShareGPT 格式
 
 ### 修改
 - `LLaMA-Factory/data/dataset_info.json` — 注册 `ruozhiba_last3` 和 `ruozhiba_all` 两个数据集
@@ -787,7 +798,7 @@ tmux new-session -d -s train \
 ## 2025-03-15 — Phase 1.2 去重防污染
 
 ### 新增
-- `scripts/dedup_test_vs_train.py` — CQIA 测试集 vs 贴吧训练集去重脚本
+- `scripts/data/dedup_test_vs_train.py` — CQIA 测试集 vs 贴吧训练集去重脚本
 
 ### 产出
 - `data/dedup_report.json` — 去重报告（精确/模糊命中明细）
@@ -814,8 +825,8 @@ tmux new-session -d -s train \
 
 | 文件 | 说明 |
 |------|------|
-| `scripts/classify_cqia_updated.py` | CQIA 数据补全脚本，复用 `classify_jokes.py` 鲁棒性模式 |
-| `scripts/classify_cqia_updated_config.yaml` | 配置文件，System Prompt 对齐 `classify_config.yaml` |
+| `scripts/data/classify_cqia_updated.py` | CQIA 数据补全脚本，复用 `classify_jokes.py` 鲁棒性模式 |
+| `scripts/data/classify_cqia_updated_config.yaml` | 配置文件，System Prompt 对齐 `classify_config.yaml` |
 | `data/CQIA/ruozhiba_cqia_classified_v2.json` | 输出数据（240 条，含 thought_process） |
 
 ### 技术要点

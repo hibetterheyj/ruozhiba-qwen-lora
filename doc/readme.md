@@ -4,6 +4,8 @@
 
 **[guides/environment.md](guides/environment.md)** → **[guides/data.md](guides/data.md)** → **[guides/reproduction.md](guides/reproduction.md)** → **[guides/results_summary.md](guides/results_summary.md)**。
 
+**脚本入口**：仓库根目录 [`scripts/readme.md`](../scripts/readme.md) — 按 **抓取 (`crawl/`)**、**数据处理 (`data/`)**、**训练与合并 (`train/`)**、**推理 (`inference/`)**、**评估与可视化 (`viz/`)**、**测试 (`tests/`)** 分类；命令均在仓库根目录执行。
+
 ---
 
 ## 目录结构一览

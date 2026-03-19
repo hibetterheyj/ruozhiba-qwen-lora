@@ -2,7 +2,7 @@
 
 此文件夹是 `LLaMA-Factory/data/` 中 SFT 数据集的备份，**非**脚本直接输出目录。
 
-`scripts/build_sft_data.py` 会将去重后的贴吧数据转换为 ShareGPT 格式，输出到 `LLaMA-Factory/data/`，同时在 `LLaMA-Factory/data/dataset_info.json` 中注册数据集。此处的文件由手动复制而来，仅作存档用途。
+`scripts/data/build_sft_data.py` 会将去重后的贴吧数据转换为 ShareGPT 格式，输出到 `LLaMA-Factory/data/`，同时在 `LLaMA-Factory/data/dataset_info.json` 中注册数据集。此处的文件由手动复制而来，仅作存档用途。
 
 ## 文件说明
 

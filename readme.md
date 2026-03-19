@@ -4,12 +4,11 @@
 
 # ruozhiba-qwen-lora
 
-> **CSS5120 计算语言学 Lab3：有监督微调（SFT）**  
 > 基于 **弱智吧** 语料，用 **LoRA** 微调 **Qwen3-4B-Instruct**，完成 8 类幽默结构化分类（`thought_process` + top-3 类别与置信度）。
 
 ---
 
-## 项目在做什么
+## 概览
 
 1. **数据**：贴吧年度帖 / GitHub 语料 / Hugging Face CQIA，去重与分类后构建 ShareGPT 训练集。  
 2. **训练**：LLaMA-Factory，LoRA rank 8/16，全量与近三年子集，多 epoch。  
@@ -19,7 +18,7 @@
 
 ---
 
-## 文档（详细内容已拆到 `doc/`）
+## 文档（详细见 [`doc/](doc/readme.md)）
 
 | 说明 | 链接 |
 |------|------|
@@ -33,9 +32,7 @@
 
 ---
 
-## 报告中的部分可视化
-
-*（请将生成的图放入 `doc/report/media/`，与报告文件名一致；见 [doc/report/media/README.md](doc/report/media/README.md)。）*
+## 实验结果
 
 | Rank×Epoch 热力图（Strict Acc） | Strict Accuracy 随 epoch |
 |:--:|:--:|
@@ -65,7 +62,7 @@ uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matpl
 .
 ├── readme.md
 ├── configs/           # 训练 / prompt
-├── scripts/           # 数据、训练、推理、评估
+├── scripts/           # 分阶段脚本：crawl/ data/ train/ inference/ viz/ tests/（见 scripts/readme.md）
 ├── data/              # 语料与 LLaMA-Factory 数据副本说明见 data/readme.md
 ├── doc/               # 入口 doc/readme.md；guides/ analysis/ course/ report/ proposal/
 ├── LLaMA-Factory/

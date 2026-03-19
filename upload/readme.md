@@ -16,13 +16,17 @@ upload/
 │   ├── qwen3_4b_base_last3.yaml          # Training config — last-3-year dataset (1,025 samples)
 │   └── qwen3_4b_merge.yaml               # LoRA merge config template
 ├── scripts/
-│   ├── build_sft_data.py                  # Build ShareGPT training data from classified jokes
-│   ├── run_training.sh                    # Launch LoRA SFT training (per-GPU)
-│   ├── batch_merge.sh                     # Merge 20 LoRA checkpoints into standalone models
-│   ├── inference_eval.py                  # vLLM offline batch inference
-│   ├── batch_inference.sh                 # Run inference across 21 models
-│   ├── eval_metrics.py                    # Two-stage evaluation + visualization
-│   └── gen_before_after.py                # Generate before/after comparison samples
+│   ├── data/
+│   │   └── build_sft_data.py              # Build ShareGPT training data (needs full data/tieba/)
+│   ├── train/
+│   │   ├── run_training.sh                # Launch LoRA SFT training (per-GPU)
+│   │   └── batch_merge.sh                 # Merge 20 LoRA checkpoints → models/merged/
+│   ├── inference/
+│   │   ├── inference_eval.py              # vLLM offline batch inference
+│   │   └── batch_inference.sh             # Run inference across 21 models
+│   └── viz/
+│       ├── eval_metrics.py                # Two-stage evaluation + visualization
+│       └── gen_before_after.py            # Before/after comparison samples
 ├── data/
 │   ├── ruozhiba_all.json                  # Full training set (2,785 ShareGPT conversations)
 │   ├── ruozhiba_last3.json                # Last-3-year training set (1,025 conversations)
@@ -56,6 +60,8 @@ uv pip install vllm json-repair seaborn matplotlib pyyaml
 
 ## Reproduction Steps
 
+> 在**已克隆完整仓库的根目录**下执行以下命令（与主项目一致，需同级存在 `LLaMA-Factory/`、`models/`、`env_sft/`）。
+
 ### 1. Prepare LLaMA-Factory Data
 
 Copy training data and dataset registry into LLaMA-Factory's data directory:
@@ -72,18 +78,18 @@ cp upload/data/dataset_info.json    LLaMA-Factory/data/
 
 ```bash
 # Full dataset — dual GPU parallel (two tmux panes)
-bash upload/scripts/run_training.sh 0 8                                             # GPU 0, R8
-bash upload/scripts/run_training.sh 1 16                                            # GPU 1, R16
+bash upload/scripts/train/run_training.sh 0 8
+bash upload/scripts/train/run_training.sh 1 16
 
 # Last-3-year dataset
-bash upload/scripts/run_training.sh 0 8  upload/configs/qwen3_4b_base_last3.yaml last3
-bash upload/scripts/run_training.sh 1 16 upload/configs/qwen3_4b_base_last3.yaml last3
+bash upload/scripts/train/run_training.sh 0 8  upload/configs/qwen3_4b_base_last3.yaml last3
+bash upload/scripts/train/run_training.sh 1 16 upload/configs/qwen3_4b_base_last3.yaml last3
 ```
 
 ### 3. Merge LoRA Weights
 
 ```bash
-bash upload/scripts/batch_merge.sh
+bash upload/scripts/train/batch_merge.sh
 ```
 
 This merges 20 LoRA checkpoints (4 experiments × epochs 3–7) into `models/merged/`.
@@ -91,15 +97,16 @@ This merges 20 LoRA checkpoints (4 experiments × epochs 3–7) into `models/mer
 ### 4. Batch Inference
 
 ```bash
-bash upload/scripts/batch_inference.sh 0   # GPU 0
+bash upload/scripts/inference/batch_inference.sh 0   # GPU 0
 ```
 
-Runs greedy-decoding inference on 240 CQIA test samples for all 21 models (baseline + 20 merged).
+Runs greedy-decoding inference on 240 CQIA test samples for all 21 models (baseline + 20 merged).  
+默认将 `results/results_*.json` 写入**仓库根**的 `results/`（与主仓库 `scripts/inference/` 行为对齐）。
 
 ### 5. Evaluation + Visualization
 
 ```bash
-python upload/scripts/eval_metrics.py \
+python upload/scripts/viz/eval_metrics.py \
     --results_dir results/ \
     --gold upload/data/ruozhiba_cqia_classified_v2.json \
     --comparison
@@ -115,7 +122,7 @@ Generates:
 ### 6. Before/After Comparison
 
 ```bash
-python upload/scripts/gen_before_after.py
+python upload/scripts/viz/gen_before_after.py
 ```
 
 ---

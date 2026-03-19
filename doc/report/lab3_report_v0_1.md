@@ -353,11 +353,11 @@ The optimal configuration is **R16 + full dataset + epoch 5**, which achieves th
 
 | File | Description |
 |------|-------------|
-| `scripts/build_sft_data.py` | ShareGPT format conversion |
-| `scripts/dedup_test_vs_train.py` | Test-train deduplication |
-| `scripts/inference_eval.py` | vLLM batch inference |
-| `scripts/eval_metrics.py` | Two-stage evaluation + visualization |
-| `scripts/gen_before_after.py` | Before/after sample generation |
+| `scripts/data/build_sft_data.py` | ShareGPT format conversion |
+| `scripts/data/dedup_test_vs_train.py` | Test-train deduplication |
+| `scripts/inference/inference_eval.py` | vLLM batch inference |
+| `scripts/viz/eval_metrics.py` | Two-stage evaluation + visualization |
+| `scripts/viz/gen_before_after.py` | Before/after sample generation |
 | `configs/qwen3_4b_base.yaml` | Training config (full data) |
 | `configs/qwen3_4b_base_last3.yaml` | Training config (last3 data) |
 | `configs/qwen3_4b_merge.yaml` | LoRA merge config |
