@@ -1,0 +1,5 @@
+{
+  "train_tag": "r8_last3",
+  "source": "LLaMA-Factory/saves/qwen3-4b/lora/r8_last3/trainer_log.jsonl",
+  "note": "Packaged copy from results/training/r8_last3_loss_curves.json for upload bundle; use root results/ for full regenerated artifacts."
+}

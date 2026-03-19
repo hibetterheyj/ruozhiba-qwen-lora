@@ -1,5 +1,5 @@
 #!/bin/bash
-# LLaMA-Factory 动态 Batch Size 压测 (Qwen3-4B on L20Z 80GB)
+# LLaMA-Factory 动态 Batch Size 压测 (Qwen3-4B on H800 80GB)
 # 目的: 探测最大可用 per_device_train_batch_size
 # 用法: bash scripts/train/probe_batch_size.sh [GPU_ID]
 #   默认使用 GPU 1
@@ -27,7 +27,7 @@ if [ -z "${VIRTUAL_ENV:-}" ]; then
 fi
 
 echo "=================================================="
-echo " L20Z 80GB Batch Size 压测"
+echo " H800 80GB Batch Size 压测"
 echo " GPU: ${GPU_ID} | 阶梯: ${BATCH_SIZES[*]}"
 echo " MAX_STEPS: ${MAX_STEPS} | Model: $(basename ${MODEL_PATH})"
 echo "=================================================="

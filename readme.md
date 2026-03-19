@@ -28,7 +28,7 @@
 | 训练/指标摘要 | [doc/guides/results_summary.md](doc/guides/results_summary.md) |
 | **完整文档索引** | [doc/readme.md](doc/readme.md) |
 
-英文实验报告（含嵌入图）：[doc/report/lab3_report.md](doc/report/lab3_report.md)。
+英文实验报告（含嵌入图）：[doc/report/lab3_report.md](doc/report/lab3_report.md)。LaTeX 版源文件位于 `doc/report/lab3_report_latex/`，可直接编译 `main.tex` 生成 PDF 报告。
 
 ---
 
@@ -42,7 +42,7 @@
 |:--:|:--:|
 | ![baseline vs top3](doc/report/media/fig7_baseline_vs_top3.png) | ![all vs last3](doc/report/media/fig8_all_vs_last3.png) |
 
-训练过程图现已补全：`results/charts/line_training_loss.pdf` 给出 step-level training loss，`results/charts/grid_train_eval_loss.pdf` 给出四组实验的 train/eval loss 对照，满足 assignment 对 `Training loss over steps` 的要求。
+训练过程图现已补全：`results/charts/line_training_loss.pdf` 给出 step-level training loss，`results/charts/grid_train_eval_loss.pdf` 给出四组实验的 train/eval loss 对照，满足 assignment 对 `Training loss over steps` 的要求。原始提取结果同步保存在 `results/training/r8_loss_curves.json`、`results/training/r16_loss_curves.json`、`results/training/r8_last3_loss_curves.json`、`results/training/r16_last3_loss_curves.json`。
 
 ---
 
@@ -56,7 +56,7 @@ uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matpl
 
 若需直接复用已训练出的 loss 曲线与可视化产物，可查看 `results/training/`（由 `LLaMA-Factory/saves/qwen3-4b/lora/*/trainer_log.jsonl` 提取）以及 `results/charts/line_training_loss.pdf`、`results/charts/grid_train_eval_loss.pdf`。
 
-最小可运行提交包说明：[upload/readme.md](upload/readme.md)。`upload/scripts/` 与主仓库在保留的核心子目录上保持同构，不包含 `scripts/tests/` 调试脚本。
+最小可运行提交包说明：[upload/readme.md](upload/readme.md)。`upload/scripts/` 与主仓库在保留的核心子目录上保持同构，当前覆盖 `data/`、`train/`、`inference/`、`viz/` 四类核心脚本；不包含 `scripts/tests/` 调试脚本，但 `upload/scripts/viz/` 需要与主仓库 `scripts/viz/` 的保留可视化能力同步维护。
 
 ---
 
@@ -65,15 +65,15 @@ uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matpl
 ```
 .
 ├── readme.md
-├── configs/           # 训练 / prompt
+├── configs/           # 训练 / prompt / merge 配置
 ├── scripts/           # 分阶段脚本：crawl/ data/ train/ inference/ viz/ tests/（其中 tests/ 为调试脚本；见 scripts/readme.md）
-├── data/              # 语料与 LLaMA-Factory 数据副本说明见 data/readme.md
-├── doc/               # 入口 doc/readme.md；guides/ analysis/ course/ report/ proposal/
+├── data/              # 语料、测试集与 LLaMA-Factory 数据副本说明见 data/readme.md
+├── doc/               # 入口 doc/readme.md；guides/ analysis/ course/ report/ proposal/ 与 LaTeX 报告源
 ├── LLaMA-Factory/
 ├── models/            # 基座与 merged（若已生成）
-├── results/           # 推理与评估输出
+├── results/           # 推理、评估、图表与 training loss 提取结果
 ├── media/             # 项目 Logo 等资源
 └── upload/            # 最小提交包
 ```
 
-更完整的树与字段说明见 **[doc/guides/data.md](doc/guides/data.md)** 与历史版结构说明（如需可查阅 `doc/course/changelog.md`）。
+更完整的树与字段说明见 **[doc/guides/data.md](doc/guides/data.md)**、[`scripts/readme.md`](scripts/readme.md)、[`configs/readme.md`](configs/readme.md) 与历史版结构说明（如需可查阅 `doc/course/changelog.md`）。

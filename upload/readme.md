@@ -26,7 +26,8 @@ upload/
 │   │   └── batch_inference.sh             # Run inference across 21 models
 │   └── viz/
 │       ├── eval_metrics.py                # Two-stage evaluation + visualization
-│       └── gen_before_after.py            # Before/after comparison samples (CLI inputs supported)
+│       ├── gen_before_after.py            # Before/after comparison samples (CLI inputs supported)
+│       └── update_report_media.py         # Sync selected figures into LaTeX report media/
 ├── data/
 │   ├── ruozhiba_all.json                  # Full training set (2,785 ShareGPT conversations)
 │   ├── ruozhiba_last3.json                # Last-3-year training set (1,025 conversations)
@@ -34,7 +35,11 @@ upload/
 │   └── dataset_info.json                  # LLaMA-Factory dataset registry (ruozhiba only)
 └── results/
     ├── eval_comparison.json               # 21-model evaluation comparison table
-    └── before_after_samples.json          # 5 representative before/after examples
+    ├── before_after_samples.json          # 5 representative before/after examples
+    ├── r8_loss_curves.json                # Training/eval loss curves for r8 (all)
+    ├── r16_loss_curves.json               # Training/eval loss curves for r16 (all)
+    ├── r8_last3_loss_curves.json          # Training/eval loss curves for r8_last3
+    └── r16_last3_loss_curves.json         # Training/eval loss curves for r16_last3
 ```
 
 ---
@@ -53,7 +58,7 @@ upload/
 uv venv env_sft python 3.12
 source env_sft/bin/activate
 uv pip install 'llamafactory[metrics]' accelerate
-uv pip install vllm json-repair seaborn matplotlib pyyaml
+uv pip install vllm json-repair seaborn matplotlib pyyaml numpy transformers torch
 ```
 
 ---
@@ -120,6 +125,12 @@ Generates:
 - `results/charts/` — trend & comparison charts
 - `results/training/` — extracted step-level training / validation loss summaries from `trainer_log.jsonl`
 
+If you also want the report-facing figure bundle refreshed:
+
+```bash
+python upload/scripts/viz/update_report_media.py
+```
+
 ### 6. Before/After Comparison
 
 ```bash
@@ -150,6 +161,7 @@ Training-loss evidence is also available after visualization refresh:
 - `results/charts/line_training_loss.pdf` — step-level training loss for all four runs
 - `results/charts/grid_train_eval_loss.pdf` — train/eval loss side-by-side per run
 - `results/training/training_loss_summary.json` — compact numeric summary (`best_eval_loss`, `best_eval_step`, `final_train_loss`)
+- `upload/results/r8_loss_curves.json` / `r16_loss_curves.json` / `r8_last3_loss_curves.json` / `r16_last3_loss_curves.json` — packaged raw loss-curve JSON for the four experiment groups
 
 ---
 
@@ -165,6 +177,7 @@ Scripts use `PROJECT_ROOT` relative to their own location. If you move files, up
 | `inference_eval.py` | `UPLOAD_ROOT` | `Path(__file__).resolve().parents[2]` |
 | `eval_metrics.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parents[3]` |
 | `gen_before_after.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parents[3]` |
+| `update_report_media.py` | `ROOT` | `Path(__file__).resolve().parents[2]` |
 | `build_sft_data.py` | `UPLOAD_ROOT` | `Path(__file__).resolve().parents[2]` |
 
-> `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；提交包未包含 `scripts/tests/` 这类调试脚本。
+> `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；当前提交包同步保留 `scripts/viz/` 中用于评估、样本对比与报告媒体刷新的核心脚本，但未包含 `scripts/tests/` 这类调试脚本。

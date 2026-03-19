@@ -50,6 +50,8 @@ data/
         └── dataset_info.json    #   LLaMA-Factory 数据集注册配置
 ```
 
+`upload/data/` 提供最小复现所需的镜像子集：`ruozhiba_all.json`、`ruozhiba_last3.json`、`ruozhiba_cqia_classified_v2.json` 与 `dataset_info.json`。
+
 ---
 
 ## 数据来源

@@ -14,6 +14,8 @@
 | `qwen3_4b_base_last3.yaml` | 近三年数据训练配置 | Phase 2.8 |
 | `qwen3_4b_merge.yaml` | LoRA 权重合并配置模板 | Phase 2.7 |
 
+> `upload/configs/` 当前同步保留以上 4 个核心配置文件，用于最小复现包；与主仓库同名文件保持字段兼容。
+
 ---
 
 ## 配置详解
