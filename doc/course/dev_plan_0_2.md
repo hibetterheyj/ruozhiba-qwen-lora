@@ -802,7 +802,7 @@ def get_judge_score(messages: list[dict]) -> str:
 |---------|---------|-------------|
 | **3.1 SFT Target** | Chinese humor classification: 8-class Top-3 + thought_process | `configs/prompts.yaml`, 2-4 Before/After examples |
 | **3.2 Dataset** | Sources (Tieba/CQIA/GitHub), dedup, ShareGPT format, 2785 train / 240 test, all vs last3 | `data/dedup_report.json`, format examples |
-| **3.3 Training Setup** | Qwen3-4B-Instruct-2507, LoRA (R8/R16 × all/last3), bf16, 2×L20Z | Training YAML configs, 4×7 experiment matrix |
+| **3.3 Training Setup** | Qwen3-4B-Instruct-2507, LoRA (R8/R16 × all/last3), bf16, 2×H800 | Training YAML configs, 4×7 experiment matrix |
 | **3.4 Loss Curves** | 4-run training_loss + eval_loss comparison, warmup + overfitting analysis | `saves/qwen3-4b/lora/*/training_*.png`, `train_analysis1.md` |
 | **3.5 Before/After** | 5 test samples: baseline vs best model | `results/before_after_samples.json` |
 | **Appendix A** | 21-model comparison table + Rank×Epoch heatmaps (3 core) | `results/eval_comparison.json`, heatmaps |

@@ -1,7 +1,7 @@
 # 弱智吧幽默分类 — Phase 3 定量评估分析报告
 
 > 评估日期: 2025-03-16  
-> 推理后端: vLLM 0.17.1 (env_sft, torch 2.10.0, GPU: L20Z 80GB)  
+> 推理后端: vLLM 0.17.1 (env_sft, torch 2.10.0, GPU: H800 80GB)  
 > 评估脚本: `scripts/viz/eval_metrics.py` (两阶段 JSON 评估协议)  
 > 测试集: `data/CQIA/ruozhiba_cqia_classified_v2.json` (240 条)
 

@@ -161,7 +161,7 @@ Training data uses the ShareGPT format:
 
 | Component | Specification |
 |-----------|--------------|
-| GPU | 2× NVIDIA L20Z (80 GB VRAM each) |
+| GPU | 2× NVIDIA H800 (80 GB VRAM each) |
 | Training framework | LLaMA-Factory + Hugging Face Trainer |
 | Inference backend | vLLM 0.17.1 |
 | Virtual environment | `env_sft` (PyTorch 2.10.0 + CUDA 12.8) |

@@ -15,7 +15,7 @@
 | [`guides/`](guides/) | 环境、数据说明、复现流程、结果摘要（**优先读**） |
 | [`analysis/`](analysis/) | 训练执行、训练/测试日志与 EDA 分析 |
 | [`course/`](course/) | 作业要求、开发计划、变更日志、指导书 PDF |
-| [`report/`](report/) | 正式实验报告（英文）与配图 |
+| [`report/`](report/) | 正式实验报告（英文）、配图与 LaTeX 版本源文件 |
 | [`proposal/`](proposal/) | 早期选题与方案草稿 |
 
 ---
@@ -48,6 +48,7 @@
 |------|------|
 | [lab3_report.md](report/lab3_report.md) | 英文正式报告（Figure 1–8） |
 | [lab3_report_v0_1.md](report/lab3_report_v0_1.md) | 报告早期版本 |
+| [lab3_report_latex/](report/lab3_report_latex/) | LaTeX 可编译版本（入口：`main.tex`） |
 | [media/](report/media/) | 报告配图（见该目录 `README.md`） |
 
 ---

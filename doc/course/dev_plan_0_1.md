@@ -6,7 +6,7 @@
 >
 > **作业要求**: CSS5120 Lab3 — 选基座模型 → 定义 SFT 目标 → 数据预处理 → 训练 → Before/After 评估
 >
-> **硬件**: 2× NVIDIA L20Z (80GB VRAM each)
+> **硬件**: 2× NVIDIA H800 (80GB VRAM each)
 
 ---
 
@@ -400,7 +400,7 @@ python scripts/viz/eval_metrics.py \
 
 ### 2.4 显存水位探测 — Batch Size 动态压测
 
-在启动正式训练前，通过**小步快跑压测法**找到 L20Z 80GB 显存的最佳 `per_device_train_batch_size`，目标是将显存峰值控制在 90%（约 72GB）以内。
+在启动正式训练前，通过**小步快跑压测法**找到 H800 80GB 显存的最佳 `per_device_train_batch_size`，目标是将显存峰值控制在 90%（约 72GB）以内。
 
 **压测策略**: 不需要跑完整 Epoch。设置 `max_steps: 15` + `logging_steps: 1`，从保守值逐步上探，每次只跑 15 步即可触发完整前向/反向传播并测出显存峰值。
 
@@ -408,7 +408,7 @@ python scripts/viz/eval_metrics.py \
 
 ```bash
 #!/bin/bash
-# LLaMA-Factory 动态 Batch Size 压测 (Qwen3-4B on L20Z 80GB)
+# LLaMA-Factory 动态 Batch Size 压测 (Qwen3-4B on H800 80GB)
 # 目的: 探测最大可用 per_device_train_batch_size
 
 BATCH_SIZES=(16 24 32 48 64 72 80)
@@ -705,7 +705,7 @@ CUDA_VISIBLE_DEVICES=0 llamafactory-cli export configs/qwen3_4b_merge.yaml
 
 #### 新脚本: `scripts/inference/inference_eval.py`
 
-废弃基于 `transformers` + `PeftModel` 的逐条慢速推理方案，改用 `sglang` 的离线批量生成（Offline Batch Generation），利用 PagedAttention 和 RadixAttention 榨干 L20Z 显存带宽。
+废弃基于 `transformers` + `PeftModel` 的逐条慢速推理方案，改用 `sglang` 的离线批量生成（Offline Batch Generation），利用 PagedAttention 和 RadixAttention 榨干 H800 显存带宽。
 
 > **运行环境**: 使用系统自带的 `/usr/bin/python3`（已预装 `sglang`），而非 `env_sft` 虚拟环境。
 

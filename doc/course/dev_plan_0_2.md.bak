@@ -589,7 +589,7 @@ for metric_name in metrics_to_plot:
 |----------|------|----------|
 | **3.1 SFT Target** | 弱智吧幽默分类: 8 类 Top-3 + thought_process | `configs/prompts.yaml`, 2-4 个 Before/After 示例 |
 | **3.2 Dataset** | 数据来源 (贴吧/CQIA/GitHub)、去重、ShareGPT 格式、2785 train / 240 test | `data/dedup_report.json`, 数据格式示例 |
-| **3.3 Training Setup** | Qwen3-4B-Instruct-2507, LoRA (R8/R16), bf16, 2×L20Z | 训练配置 YAML, 实验矩阵 (10 checkpoint) |
+| **3.3 Training Setup** | Qwen3-4B-Instruct-2507, LoRA (R8/R16), bf16, 2×H800 | 训练配置 YAML, 实验矩阵 (10 checkpoint) |
 | **3.4 Loss Curves** | R8/R16 training_loss + eval_loss 对比, warmup 分析 | `saves/qwen3-4b/lora/r{8,16}/training_*.png` |
 | **3.5 Before/After** | 5 条测试集 baseline vs 最优模型对比 | `results/before_after_samples.json` |
 | **附录 A** | 10 模型对比总表 + Rank×Epoch 热力图 | `results/eval_comparison.json`, 热力图 |

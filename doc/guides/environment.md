@@ -2,7 +2,7 @@
 
 ## 硬件建议
 
-- **训练**：NVIDIA GPU，本项目使用 2× L20Z（各 80GB VRAM）
+- **训练**：NVIDIA GPU，本项目使用 2× H800（各 80GB VRAM）
 - **推理 / 评估**：≥ 24GB VRAM 较稳妥（视 batch 与模型而定）
 - **CUDA**：12.x（与 PyTorch / vLLM 版本匹配即可）
 

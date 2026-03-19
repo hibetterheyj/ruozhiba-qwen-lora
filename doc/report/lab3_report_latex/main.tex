@@ -214,7 +214,7 @@ The base model is \texttt{Qwen3-4B-Instruct-2507}~\cite{Yang2025Qwen3}. LoRA~\ci
 The experiment matrix contains four groups: rank 8 and rank 16 on the full dataset, plus the same two ranks on the recent \texttt{last3} subset. Each configuration was trained for seven epochs, with checkpoints saved by epoch for later comparison.
 
 \subsection{Hardware and Execution}
-Training was run with two NVIDIA L20Z GPUs, each with 80 GB memory. The codebase is organized as a stage-wise pipeline under \texttt{scripts/}, with dedicated subdirectories for crawling, data processing, training, inference, and visualization. The minimal submission package in \texttt{upload/} preserves the core reproducible path while excluding debug-only scripts.
+Training was run with two NVIDIA H800 GPUs, each with 80 GB memory. The codebase is organized as a stage-wise pipeline under \texttt{scripts/}, with dedicated subdirectories for crawling, data processing, training, inference, and visualization. The minimal submission package in \texttt{upload/} preserves the core reproducible path while excluding debug-only scripts.
 
 The training and evaluation flow is operationally straightforward: build the ShareGPT data, launch LoRA jobs with \texttt{run\_training.sh}, merge checkpoints with \texttt{batch\_merge.sh}, run vLLM-based inference~\cite{Kwon2023}, and compute metrics and charts with \texttt{eval\_metrics.py}. This organization makes the final submission reproducible without exposing the full development history.
 

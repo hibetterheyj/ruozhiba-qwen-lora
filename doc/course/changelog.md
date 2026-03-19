@@ -238,7 +238,7 @@ results/
 
 ### 推理耗时
 
-- 21 模型总推理时间约 30 分钟 (vLLM 0.17.1, 单卡 L20Z 80GB)
+- 21 模型总推理时间约 30 分钟 (vLLM 0.17.1, 单卡 H800 80GB)
 - 每模型约 85 秒 (加载 ~8s + 推理 ~50s + 清理 ~3s + overhead)
 
 ---
@@ -587,7 +587,7 @@ tmux new-session -d -s train \
 ### 备注
 - `report_to: none` — wandb 未登录，训练完成后可通过 `plot_loss: true` 查看 Loss 曲线
 - 启动脚本使用 OmegaConf `key=value` 语法覆盖 YAML 参数（LLaMA-Factory 原生支持）
-- Phase 2.4 压测确认 BS=32 为 L20Z 80GB 安全极限，预计每次训练约 20 分钟完成
+- Phase 2.4 压测确认 BS=32 为 H800 80GB 安全极限，预计每次训练约 20 分钟完成
 
 ---
 
@@ -639,7 +639,7 @@ tmux new-session -d -s train \
 
 ### 概述
 
-通过小步快跑压测法（`max_steps: 15`），在 L20Z 80GB 单卡上逐级上探 `per_device_train_batch_size`，确定正式训练的安全临界值。
+通过小步快跑压测法（`max_steps: 15`），在 H800 80GB 单卡上逐级上探 `per_device_train_batch_size`，确定正式训练的安全临界值。
 
 ### 新增
 - `scripts/train/probe_batch_size.sh` — Batch Size 动态压测脚本（自动激活 venv，自动清理临时文件）
@@ -660,7 +660,7 @@ tmux new-session -d -s train \
 - 推荐正式训练配置: `per_device_train_batch_size: 32`, `gradient_accumulation_steps: 1`
 
 ### 备注
-- 压测使用 GPU 1（GPU 0 被 MVP 训练产物占用），结果可复现至任意 L20Z 卡
+- 压测使用 GPU 1（GPU 0 被 MVP 训练产物占用），结果可复现至任意 H800 卡
 - 两次独立运行结果一致，BS=32 稳定通过
 
 ---
@@ -692,7 +692,7 @@ tmux new-session -d -s train \
 | Epochs | 3 |
 | LR | 1e-4 (cosine, warmup=0.1) |
 | 可训练参数 | 16,515,072 (LoRA) |
-| GPU | 单卡 L20Z 80GB (峰值 53.5GB, 65.6%) |
+| GPU | 单卡 H800 80GB (峰值 53.5GB, 65.6%) |
 
 ### 训练结果
 
