@@ -1,0 +1,368 @@
+\documentclass{article}
+
+\usepackage{PRIMEarxiv}
+
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\else
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Menlo}
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+\fi
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\soulregister\cite7
+\soulregister\citep7
+\soulregister\citet7
+\soulregister\ref7
+\soulregister\pageref7
+
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+
+\lstdefinestyle{promptstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    showstringspaces=false,
+    breaklines=true,
+    breakatwhitespace=true,
+    frame=single,
+    columns=fullflexible,
+    xleftmargin=0.5em,
+    xrightmargin=0.5em
+}
+
+\graphicspath{{media/}}
+
+\title{CSS 5120 - Computational Linguistics Lab 3 Report\\
+Chinese Humor Classification via LoRA SFT on Qwen3-4B-2507-Instruct}
+
+\author{
+Yujie He \\
+\texttt{225040114@cuhk.edu.cn}
+}
+
+\begin{document}
+\maketitle
+
+\vspace{-2.5em}
+
+\section{Introduction}
+This report studies supervised fine-tuning for a structured Chinese humor classification task built from Ruozhiba (弱智吧) forum posts. The target behavior is not open-ended chatting, but controlled task specialization: given a post, the model should return a JSON object containing a concise humor analysis and a ranked top-3 category prediction from eight predefined humor classes. The base model is \texttt{Qwen3-4B-Instruct-2507}~\cite{Yang2025Qwen3}, selected because it has strong Chinese instruction-following ability and remains practical for LoRA training on the available hardware.
+
+The central contribution of this work is to turn heterogeneous Ruozhiba-related text resources into a unified structured-output supervision task. Instead of directly fine-tuning on the source corpora in their original form, the project reformulates them as instruction-following examples that require schema-constrained JSON generation, short humor-mechanism analysis, and ranked category prediction. This redesign makes the task substantially closer to controlled semantic classification than to ordinary open-ended generation, and it aligns the training signal with the intended downstream evaluation.
+
+This work focuses on three questions: whether LoRA SFT can substantially improve classification quality over the base instruct model, whether larger LoRA rank is consistently useful, and whether using the full six-year corpus is better than restricting training to the most recent three years. The report follows the assignment requirements by describing the SFT target, the dataset modification pipeline, the training setup, the loss curves, and a before-versus-after comparison.
+
+\section{SFT Target and Data Construction}
+
+\subsection{Target Behavior}
+The fine-tuned model is expected to output two fields:
+\begin{itemize}[leftmargin=1.5em]
+    \item \texttt{thought\_process}: a short analysis of the joke mechanism, such as semantic shift, paradox, wordplay, or pseudo-reasoning;
+    \item \texttt{top3\_categories}: a ranked list of three candidate humor labels with confidence scores and reasons.
+\end{itemize}
+
+The target schema follows the prompt specification used in the project pipeline, and a concrete JSON example is provided in Appendix~\ref{app:json_schema}. The eight candidate labels are summarized in Table~\ref{tab:category_taxonomy}. This target matters because Ruozhiba jokes often depend on implicit cultural knowledge, word-level ambiguity, and deliberately broken logic. A general instruct model can often produce fluent text, but it does not reliably map that text into a fixed analytic schema.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Humor taxonomy used in this work.}
+\label{tab:category_taxonomy}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}p{0.20\textwidth} X}
+\toprule
+Chinese label & English label & Brief description \\
+\midrule
+古典弱智 & Classic Absurdity & Absurd causality, literal-minded execution, or behavior that follows broken common sense. \\
+奇怪提问 & Strange Questions & Questions that appear sensible on the surface but hide semantic loopholes, category errors, or false assumptions. \\
+弱智科学家 & Pseudo-Scientist & Serious scientific or academic framing used to support an obviously absurd conclusion. \\
+人生态度 & Life Philosophy & Self-mocking, defeatist, or oddly optimistic reflections on poverty, hardship, failure, or existence. \\
+文字游戏 & Wordplay & Humor driven by lexical ambiguity, semantic decomposition, sentence segmentation, or character-level reinterpretation. \\
+地狱笑话 & Dark Humor & Humor based on taboo, tragic, or offensive subjects such as death, illness, or disability. \\
+谐音梗 & Homophone Puns & Humor whose main mechanism is sound-based substitution between homophonous or near-homophonous forms. \\
+文艺弱智 & Literary Absurdity & Poetic or lyrical phrasing whose close reading reveals sadness, absurdity, or deliberate logic mismatch. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Dataset Sources and Non-trivial Modifications}
+The training corpus combines three sources: crawled Baidu Tieba annual highlight posts, a historical GitHub Ruozhiba corpus\footnote{Project repository mirror and code release: \url{https://github.com/hibetterheyj/ruozhiba-qwen-lora}.} and the CQIA benchmark subset used as held-out evaluation data. The CQIA-ruozhiba subset comes from the COIG-CQIA dataset release\footnote{COIG-CQIA dataset page: \url{https://huggingface.co/datasets/m-a-p/COIG-CQIA/viewer/ruozhiba}.} and is described in the corresponding paper~\cite{Bai2024COIG-CQIA}. The raw materials do not naturally match the final SFT task, so several transformations were applied.
+
+First, the CQIA subset was converted from plain prompt-answer text into structured supervision by using a stronger teacher model to generate category analysis and ranked outputs. Second, the Tieba and GitHub joke corpora were classified with a multi-stage pipeline, then checked and repaired to enforce schema consistency. Third, train-test contamination was reduced through cross-source deduplication. Finally, all retained samples were rewritten into ShareGPT conversation format for direct use with LLaMA-Factory~\cite{Zheng2024LlamaFactory}. This formulation follows the broader instruction-tuning setup in prior work on instruction-finetuned language models~\cite{Chung2022}.
+
+These changes satisfy the assignment requirement that the dataset cannot be used as-is. The final task is substantially different from the original corpora: it requires structured JSON generation, explicit humor taxonomy prediction, and explanation-oriented outputs.
+
+\subsection{Final Dataset Format}
+The main training split contains 2{,}785 samples from 2020--2025, with 2{,}645 training instances and 140 validation instances. A smaller \texttt{last3} split contains 1{,}025 samples from 2023--2025, with 973 training instances and 52 validation instances. The held-out test set contains 240 CQIA examples.
+
+Each example follows a ShareGPT-style three-turn structure: a system message defining the task and label set, a human message containing the joke text, and a model message containing the target JSON response. Before these splits were finalized, cross-source deduplication was applied to reduce near-duplicate overlap and to lower the risk of train-test leakage.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Training datasets used in the experiments.}
+\label{tab:dataset_splits}
+\begin{tabular}{lcccc}
+\toprule
+Dataset & Year range & Train & Val. & Main sources \\
+\midrule
+All & 2020--2025 & 2645 & 140 & Tieba annual highlights + historical Ruozhiba corpus \\
+Last3 & 2023--2025 & 973 & 52 & Recent Tieba annual highlights + filtered historical pool \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.74\textwidth]{dataset_source_donut.pdf}
+    \caption{Nested source-distribution view of the data used in this report. The inner ring separates training and held-out test usage, while the outer ring shows the major underlying sources. Counts are displayed directly to emphasize the relative contribution of the training mixture and the dedicated CQIA evaluation set.}
+    \label{fig:dataset_donut}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.9cm and 0.55cm,
+    box/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=1.05cm, fill=blue!6},
+    stage/.style={draw, rounded corners, align=center, minimum width=2.65cm, minimum height=1.1cm, fill=green!7},
+    arrow/.style={-{Latex[length=2.5mm]}, thick}
+]
+\node[box] (src1) {Raw humor sources};
+\node[stage, right=of src1] (extract) {Extraction \\\& normalization};
+\node[stage, right=of extract] (dedup) {Deduplication \\\& leakage control};
+\node[stage, right=of dedup] (classify) {Structured labeling \\\& repair};
+\node[stage, right=of classify] (build) {ShareGPT dataset build};
+\node[stage, right=of build] (train) {LoRA training \\\& checkpoint selection};
+\node[stage, right=of train] (eval) {Benchmark inference \\\& evaluation};
+
+\draw[arrow] (src1) -- (extract);
+\draw[arrow] (extract) -- (dedup);
+\draw[arrow] (dedup) -- (classify);
+\draw[arrow] (classify) -- (build);
+\draw[arrow] (build) -- (train);
+\draw[arrow] (train) -- (eval);
+\end{tikzpicture}
+}
+\caption{High-level project workflow. Source texts are collected from benchmark and forum-style humor corpora, normalized into a consistent format, deduplicated to reduce contamination risk, labeled into the target JSON schema, and converted to ShareGPT-style SFT data. LoRA models are then trained under multiple rank and dataset-scope settings and evaluated on the held-out CQIA benchmark with structured-output metrics and qualitative comparison analysis.}
+\label{fig:pipeline}
+\end{figure*}
+
+\section{Training Setup}
+\subsection{Base Model and Fine-Tuning Configuration}
+The base model is \texttt{Qwen3-4B-Instruct-2507}~\cite{Yang2025Qwen3}. LoRA~\cite{Hu2021LoRA} is applied to all linear layers. Two LoRA ranks were tested: 8 and 16. To keep the scaling ratio stable, LoRA alpha was set to 16 for rank 8 and 32 for rank 16. Training used bf16 precision, cosine learning-rate decay with 10\% warmup, maximum sequence length 2048, and AdamW-style optimization inside the LoRA training stack.
+
+The experiment matrix contains four groups: rank 8 and rank 16 on the full dataset, plus the same two ranks on the recent \texttt{last3} subset. Each configuration was trained for seven epochs, with checkpoints saved by epoch for later comparison.
+
+\subsection{Hardware and Execution}
+Training was run with two NVIDIA L20Z GPUs, each with 80 GB memory. The codebase is organized as a stage-wise pipeline under \texttt{scripts/}, with dedicated subdirectories for crawling, data processing, training, inference, and visualization. The minimal submission package in \texttt{upload/} preserves the core reproducible path while excluding debug-only scripts.
+
+The training and evaluation flow is operationally simple: build the ShareGPT data, launch LoRA jobs with \texttt{run\_training.sh}, merge checkpoints with \texttt{batch\_merge.sh}, run vLLM-based inference~\cite{Kwon2023}, and compute metrics and charts with \texttt{eval\_metrics.py}. This organization makes the final submission reproducible without exposing the full development history.
+
+\subsection{Example Prompts and Desired Outputs}
+The target behavior can be illustrated with three short examples.
+\begin{itemize}[leftmargin=1.5em]
+    \item Prompt: \textit{咖啡严格来说是不是也可以叫豆浆？} Desired top-1 label: \textit{Wordplay}. The output should explain the literal decomposition of ``bean'' and ``liquid'' and return a ranked top-3 list.
+    \item Prompt: \textit{石油也是油，为啥没人用它来炒菜？} Desired top-1 label: \textit{Strange Questions}. The output should identify the polysemy of ``oil'' and explain the false analogy.
+    \item Prompt: \textit{失踪是不是丢人的事情？} Desired top-1 label: \textit{Wordplay}. The output should connect the joke to lexical decomposition and still remain valid JSON.
+\end{itemize}
+
+\section{Training Signals and Quantitative Results}
+
+\subsection{Loss Curves}
+Figure~\ref{fig:strict_acc_curve} shows the strict-accuracy trend on the held-out CQIA benchmark. Both rank settings on the full dataset converge well, but their late-epoch behavior differs slightly.
+
+Rank 16 reaches the lowest evaluation loss at epoch 5 ($0.8859$) and then rises mildly, which indicates early overfitting. Rank 8 decreases more gradually and remains stable through later epochs. The difference is small in absolute terms, but it is consistent with the intuition that a larger adapter can fit the task faster while becoming more sensitive to over-training.
+
+Only evaluation-loss plots are available in the current local report package. If the original LLaMA-Factory training logs such as \texttt{trainer\_log.jsonl} are copied back from the training server, the visualization scripts can also render step-level training loss and combined train-versus-eval curves, but the main report focuses on downstream checkpoint quality.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{line_strict_accuracy.pdf}
+    \caption{Held-out strict accuracy across epochs for the four experiment groups. All SFT models outperform the baseline, and the full-data rank-16 setting reaches the best overall checkpoint.}
+    \label{fig:strict_acc_curve}
+\end{figure}
+Figure~\ref{fig:strict_acc_curve} summarizes the held-out strict-accuracy trend on the CQIA benchmark. The full-data settings remain consistently stronger than their recent-only counterparts, and the rank-16 run peaks at epoch 5 before flattening slightly afterward.
+
+\subsection{Main Evaluation Metrics}
+Table~\ref{tab:main_results} summarizes the baseline and representative fine-tuned checkpoints. The baseline already produces mostly parseable JSON, but its actual label quality is weak. The best model, \texttt{r16\_e5}, improves top-1 accuracy from $0.233$ to $0.613$ and top-3 hit rate from $0.588$ to $0.883$ while maintaining perfect valid-sample rate.
+
+For a test set of $N$ samples, let $y_i$ denote the gold top-1 category, let $\hat{y}_i$ denote the parsed prediction, let $S_i^{(3)}$ denote the predicted top-3 set, let $J_i$ indicate strict JSON validity, and let $R_i$ indicate parse success after tolerant extraction or repair. The main metrics are
+\[
+\mathrm{StrictAcc}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[J_i=1 \land \hat{y}_i=y_i],
+\]
+\[
+\mathrm{Top1Acc}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[\hat{y}_i=y_i], \qquad
+\mathrm{Top3Hit}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[y_i \in S_i^{(3)}],
+\]
+\[
+\mathrm{JSONStrict}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[J_i=1], \qquad
+\mathrm{VSR}=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[R_i=1].
+\]
+These definitions match the two-stage evaluation implementation in \texttt{scripts/viz/eval\_metrics.py}.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Main before/after metrics on the 240-sample CQIA test set.}
+\label{tab:main_results}
+\begin{tabular}{lcccc}
+\toprule
+Model & Strict Acc. & Top-1 Acc. & Top-3 Hit & JSON Strict \\
+\midrule
+Baseline & 0.233 & 0.233 & 0.588 & 0.996 \\
+R8, epoch 7 & 0.579 & 0.579 & 0.871 & 0.996 \\
+R16, epoch 5 & \textbf{0.613} & \textbf{0.613} & 0.883 & \textbf{1.000} \\
+R16, epoch 7 & 0.604 & 0.604 & \textbf{0.892} & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The larger picture across all 21 evaluated models supports three conclusions. First, full-data training is better than the recent-only subset on every matched rank comparison. Second, rank 16 usually beats rank 8, although the margin is modest on the full dataset. Third, evaluation loss is a useful checkpoint-selection signal: the lowest validation loss corresponds to the highest downstream strict accuracy.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{heatmap_all_strict_accuracy.pdf}
+    \caption{Strict-accuracy heatmap for the full-data experiments. Darker cells indicate better checkpoints, with the best result at rank 16, epoch 5.}
+    \label{fig:heatmap_strict}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{bar_all_vs_last3_delta.pdf}
+    \caption{Accuracy advantage of full-data training over the \texttt{last3} subset. All bars are positive, showing that data volume matters more than recency in this task.}
+    \label{fig:all_vs_last3}
+\end{figure}
+
+\section{Before-vs-After Behavior}
+The qualitative comparison also shows clear behavior shaping. The base model often returns fluent but weakly grounded category lists. After SFT, the model follows the intended schema more reliably and aligns better with the humor taxonomy.
+
+\subsection{Representative Cases}
+Table~\ref{tab:qualitative_cases} summarizes five held-out examples selected from the exported qualitative comparison CSV. This presentation is intentionally tabular rather than image-based so that the before-versus-after evidence remains compact, searchable, and directly reusable in the report.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Representative before-versus-after examples on held-out CQIA prompts.}
+\label{tab:qualitative_cases}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.34\textwidth} >{\raggedright\arraybackslash}p{0.14\textwidth} >{\raggedright\arraybackslash}p{0.14\textwidth} X}
+\toprule
+Prompt & Baseline Top-1 & SFT Top-1 & Observation \\
+\midrule
+苦行僧以苦为乐，那么他受苦是不是可以说他在奖励自己 & 弱智科学家 & 奇怪提问 & Baseline over-emphasizes pseudo-reasoning; SFT correctly identifies the odd-question framing. \\
+为什么医院床位那么紧张，不弄成上下铺呢？ & 地狱笑话 & 奇怪提问 & SFT corrects a context-driven misclassification and focuses on the naive false solution. \\
+为什么白天能看见月亮，晚上却看不见太阳呢？ & 奇怪提问 & 奇怪提问 & Both are correct, but SFT adds ranked categories, confidence scores, and cleaner schema adherence. \\
+失踪是不是丢人的事情？ & 文字游戏 & 文字游戏 & Both recognize the lexical joke; SFT gives a more explicit explanation of semantic decomposition. \\
+并非无人爱我，病危通知单是死神小姐予我的情书 & 文字游戏 & 文字游戏 & Both miss \textit{Literary Absurdity}, showing a remaining confusion between poetic style and lexical play. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+These cases reveal two main improvements. First, SFT strongly reduces label confusion for \textit{Strange Questions}, a category that dominates the test set and is easy for the baseline to misread as either dark humor or pseudo-scientific logic. Second, the post-SFT outputs consistently satisfy the assignment's structured-output target: ranked predictions, explicit confidence scores, and reason fields are produced with near-perfect validity.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{bar_baseline_vs_top3.pdf}
+    \caption{Comparison between the baseline and the top-performing fine-tuned checkpoints. The largest gains appear in strict accuracy and top-1 accuracy.}
+    \label{fig:baseline_vs_top3}
+\end{figure}
+
+\section{Discussion}
+Several findings stand out. First, this task benefits from explicit task framing more than from general-purpose fluency. The base instruct model is already capable of producing readable Chinese explanations, but it lacks stable alignment to the humor taxonomy. Second, the non-trivial dataset rewriting step is central to the success of the project: without category definitions, teacher-generated rationales, and ShareGPT conversion, the training target would be too underspecified.
+
+Third, the comparison between the full dataset and the recent-only subset suggests that humor-category supervision is data-hungry. In this setting, broader coverage across years is more valuable than restricting training to newer posts. Finally, some difficult categories remain underrepresented, especially \textit{Dark Humor}, \textit{Homophone Puns}, and \textit{Literary Absurdity}. The failure example indicates that richer annotation guidelines or targeted data augmentation would likely help separate poetic absurdity from ordinary wordplay.
+
+\section{Conclusion}
+This report presents a complete LoRA SFT pipeline for structured Chinese humor classification on Ruozhiba data. The project satisfies the assignment requirements by defining a clear SFT target, transforming raw corpora into a new structured dataset, training multiple LoRA configurations, and comparing model behavior before and after fine-tuning.
+
+The main result is straightforward: LoRA SFT substantially improves task performance. The best checkpoint, rank 16 at epoch 5 on the full dataset, raises strict accuracy from $0.233$ to $0.613$ and top-3 hit rate from $0.588$ to $0.883$ while preserving perfect valid-sample rate. The strongest overall lesson is that explicit structured supervision and sufficient dataset coverage matter more than prompt-only control for this humor-analysis task.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\clearpage
+\renewcommand{\thesection}{Appendix \Roman{section}}
+\setcounter{section}{0}
+
+\section{Expected JSON Output Schema}
+\label{app:json_schema}
+
+The expected response format follows the prompting and evaluation pipeline. A compact example is shown below.
+
+\begin{lstlisting}[language=json]
+{
+    "thought_process": "Briefly explain the humor mechanism and why the ranked labels fit.",
+    "top3_categories": [
+        {
+            "rank": 1,
+            "category": "文字游戏",
+            "confidence_score": 0.85,
+            "reason": "Primary humor comes from lexical reinterpretation."
+        },
+        {
+            "rank": 2,
+            "category": "奇怪提问",
+            "confidence_score": 0.10,
+            "reason": "The utterance also resembles a naive but structured question."
+        },
+        {
+            "rank": 3,
+            "category": "弱智科学家",
+            "confidence_score": 0.05,
+            "reason": "A weak pseudo-rational framing remains possible."
+        }
+    ]
+}
+\end{lstlisting}
+
+\section{Prompt Templates for Labeling and Inference}
+
+The main category-definition table has already been provided in the body of the report. For completeness, the actual prompting style used for annotation and inference is summarized below.
+
+\subsection*{Labeling-oriented prompt excerpt}
+\begin{lstlisting}[style=promptstyle]
+你是一个精通中文互联网亚文化、语言学和幽默解构的“弱智吧”资深吧友兼大模型文本分类评估专家。
+请对输入的“弱智吧”风格言论进行深度分析，并选出最贴合该言论特征的 Top 3 类别。
+请严格以 JSON 格式输出 thought_process 和 top3_categories。
+
+可选类别：古典弱智、奇怪提问、弱智科学家、人生态度、文字游戏、地狱笑话、谐音梗、文艺弱智。
+\end{lstlisting}
+
+\subsection*{Inference-time system prompt excerpt}
+\begin{lstlisting}[style=promptstyle]
+你是一个弱智吧幽默解构专家。请对用户输入的段子进行深度分析，识别其幽默机制，
+并输出 Top-3 分类结果。请以 JSON 格式输出，包含 thought_process 和
+top3_categories 两个字段。
+
+可选类别：古典弱智、奇怪提问、弱智科学家、人生态度、文字游戏、地狱笑话、谐音梗、文艺弱智。
+\end{lstlisting}
+
+\end{document}
