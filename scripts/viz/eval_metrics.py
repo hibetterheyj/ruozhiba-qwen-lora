@@ -31,6 +31,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import Iterable
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -53,6 +54,7 @@ logging.basicConfig(
 
 # 全局标题开关: --no_title 时设为 False
 SHOW_TITLE = True
+EXPORT_PDF = False
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SAVES_DIR = PROJECT_ROOT / "LLaMA-Factory" / "saves" / "qwen3-4b" / "lora"
@@ -72,6 +74,26 @@ METRICS_FOR_HEATMAP = [
     "strict_accuracy", "repaired_accuracy", "top1_accuracy",
     "top3_hit_rate", "json_strict", "vsr", "eval_loss",
 ]
+
+
+def save_figure(fig: plt.Figure, path: Path) -> None:
+    """Save figure to PNG and optionally PDF."""
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    logger.info("Saved %s", path)
+    if EXPORT_PDF:
+        pdf_path = path.with_suffix(".pdf")
+        fig.savefig(pdf_path, bbox_inches="tight")
+        logger.info("Saved %s", pdf_path)
+
+
+def hide_spines(ax_or_axes: plt.Axes | Iterable[plt.Axes]) -> None:
+    """Hide top/right spines for cleaner report figures."""
+    if isinstance(ax_or_axes, Iterable) and not isinstance(ax_or_axes, plt.Axes):
+        for axis in ax_or_axes:
+            hide_spines(axis)
+        return
+    ax_or_axes.spines["top"].set_visible(False)
+    ax_or_axes.spines["right"].set_visible(False)
 
 
 # ---------------------------------------------------------------------------
@@ -369,9 +391,8 @@ def plot_confusion_matrix(
             ax.set_title(f"Confusion Matrix ({mode}) — {tag}")
         plt.tight_layout()
         path = output_dir / f"confusion_matrix_{tag}_{mode}.png"
-        fig.savefig(path, dpi=150, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
-        logger.info("Saved %s", path)
 
 
 def plot_confusion_grid(
@@ -412,9 +433,8 @@ def plot_confusion_grid(
 
     plt.tight_layout()
     path = output_dir / filename
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 # ---------------------------------------------------------------------------
@@ -456,6 +476,7 @@ def plot_accuracy_lines(
             ax.axhline(y=bl_val, color="gray", linestyle=":", linewidth=1.5,
                        label=f"Baseline ({bl_val:.3f})")
 
+        hide_spines(ax)
         ax.set_xlabel("Epoch", fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         if SHOW_TITLE:
@@ -467,9 +488,8 @@ def plot_accuracy_lines(
 
         fname = f"line_{metric_key}.png"
         path = output_dir / fname
-        fig.savefig(path, dpi=150, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
-        logger.info("Saved %s", path)
 
 
 def plot_eval_loss_lines(
@@ -495,6 +515,7 @@ def plot_eval_loss_lines(
         ax.plot(epochs, vals, color=color, linestyle=ls, marker=marker,
                 label=label, linewidth=2, markersize=7)
 
+    hide_spines(ax)
     ax.set_xlabel("Epoch", fontsize=12)
     ax.set_ylabel("Eval Loss", fontsize=12)
     if SHOW_TITLE:
@@ -505,9 +526,8 @@ def plot_eval_loss_lines(
     ax.invert_yaxis()
 
     path = output_dir / "line_eval_loss.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 def plot_baseline_vs_best_bar(
@@ -536,6 +556,7 @@ def plot_baseline_vs_best_bar(
         vals = [all_metrics.get(tag, {}).get(m, 0) for m, _ in metrics_to_show]
         ax.bar(x + i * width, vals, width, label=tag, color=colors[i], alpha=0.85)
 
+    hide_spines(ax)
     ax.set_xticks(x + width * (len(tags_to_show) - 1) / 2)
     ax.set_xticklabels([label for _, label in metrics_to_show], fontsize=11)
     ax.set_ylabel("Score", fontsize=12)
@@ -546,9 +567,8 @@ def plot_baseline_vs_best_bar(
     ax.grid(True, axis="y", alpha=0.3)
 
     path = output_dir / "bar_baseline_vs_top3.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 def plot_all_vs_last3_delta(
@@ -574,6 +594,7 @@ def plot_all_vs_last3_delta(
     colors = ["#2ca02c" if d >= 0 else "#d62728" for d in deltas]
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.bar(range(len(labels)), deltas, color=colors, alpha=0.85)
+    hide_spines(ax)
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=10)
     ax.set_ylabel("Δ Strict Accuracy (all − last3)", fontsize=12)
@@ -583,9 +604,8 @@ def plot_all_vs_last3_delta(
     ax.grid(True, axis="y", alpha=0.3)
 
     path = output_dir / "bar_all_vs_last3_delta.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 def plot_per_category_accuracy(
@@ -598,6 +618,7 @@ def plot_per_category_accuracy(
 
     fig, ax = plt.subplots(figsize=(10, 5))
     bars = ax.bar(range(len(CATEGORIES)), recall, color=sns.color_palette("Set2", len(CATEGORIES)))
+    hide_spines(ax)
     ax.set_xticks(range(len(CATEGORIES)))
     ax.set_xticklabels(CATEGORIES, fontsize=11)
     ax.set_ylabel("Recall", fontsize=12)
@@ -611,9 +632,8 @@ def plot_per_category_accuracy(
         ax.text(i, r + 0.02, f"{r:.2f}\n(n={int(n)})", ha="center", fontsize=9)
 
     path = output_dir / f"bar_per_category_recall_{tag}.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 def plot_radar_top_models(
@@ -653,9 +673,8 @@ def plot_radar_top_models(
     ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=10)
 
     path = output_dir / "radar_top_models.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 # ---------------------------------------------------------------------------
@@ -687,6 +706,7 @@ def plot_training_loss_curves(output_dir: Path) -> None:
             ax.plot(steps, losses, color=color, linestyle=ls,
                     label=label, linewidth=1.5, alpha=0.85)
 
+    hide_spines(ax)
     ax.set_xlabel("Step", fontsize=12)
     ax.set_ylabel("Training Loss", fontsize=12)
     if SHOW_TITLE:
@@ -695,9 +715,8 @@ def plot_training_loss_curves(output_dir: Path) -> None:
     ax.grid(True, alpha=0.3)
 
     path = output_dir / "line_training_loss.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 def plot_training_eval_loss_combined(output_dir: Path) -> None:
@@ -730,6 +749,7 @@ def plot_training_eval_loss_combined(output_dir: Path) -> None:
                 alpha=0.7, label="Train Loss")
         ax.plot(eval_steps, eval_losses, color="#ff7f0e", linewidth=2,
                 marker="o", markersize=5, label="Eval Loss")
+        hide_spines(ax)
         ax.set_xlabel("Step", fontsize=10)
         ax.set_ylabel("Loss", fontsize=10)
         if SHOW_TITLE:
@@ -743,9 +763,8 @@ def plot_training_eval_loss_combined(output_dir: Path) -> None:
 
     plt.tight_layout()
     path = output_dir / "grid_train_eval_loss.png"
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    save_figure(fig, path)
     plt.close(fig)
-    logger.info("Saved %s", path)
 
 
 # ---------------------------------------------------------------------------
@@ -879,9 +898,8 @@ def plot_heatmaps(
             if SHOW_TITLE:
                 ax.set_title(f"{metric_name} ({dataset_tag}) — Rank × Epoch")
             path = output_dir / f"heatmap_{dataset_tag}_{metric_name}.png"
-            fig.savefig(path, dpi=150, bbox_inches="tight")
+            save_figure(fig, path)
             plt.close(fig)
-            logger.info("Saved %s", path)
 
 
 # ---------------------------------------------------------------------------
@@ -988,15 +1006,21 @@ def parse_args() -> argparse.Namespace:
         "--no_title", action="store_true",
         help="生成不带标题的图片 (用于报告嵌入)",
     )
+    parser.add_argument(
+        "--export_pdf", action="store_true",
+        help="除 PNG 外额外导出 PDF 版本图片",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
-    global SHOW_TITLE
+    global SHOW_TITLE, EXPORT_PDF
     args = parse_args()
 
     if args.no_title:
         SHOW_TITLE = False
+    if args.export_pdf:
+        EXPORT_PDF = True
 
     # 加载金标准
     with open(args.gold, "r", encoding="utf-8") as f:
