@@ -11,10 +11,11 @@ from typing import Any
 import matplotlib
 import matplotlib.pyplot as plt
 
+from font_utils import configure_matplotlib_cjk_fonts
+
 matplotlib.use("Agg")
 
-plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
-plt.rcParams["axes.unicode_minus"] = False
+configure_matplotlib_cjk_fonts()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOGGER = logging.getLogger(__name__)

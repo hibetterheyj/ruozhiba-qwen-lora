@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
+from font_utils import configure_matplotlib_cjk_fonts
+
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS_CHARTS = ROOT / 'results' / 'charts'
 RESULTS_HEATMAPS = ROOT / 'results' / 'heatmaps'
@@ -31,8 +33,7 @@ HEATMAP_CMAP = LinearSegmentedColormap.from_list(
     ['#234A6B', '#F4EFE8', '#8E2F3F'],
 )
 
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'PingFang SC', 'Noto Sans CJK JP', 'DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False
+configure_matplotlib_cjk_fonts()
 
 
 def make_dataset_donut() -> None:
@@ -235,6 +236,7 @@ def copy_files() -> None:
         'grid_train_eval_loss.pdf',
         'line_eval_loss.pdf',
         'line_strict_accuracy.pdf',
+        'bar_per_category_recall_r16_e5.pdf',
         'bar_all_vs_last3_delta.pdf',
         'bar_baseline_vs_top3.pdf',
         'bar_training_vs_validation_loss.pdf',

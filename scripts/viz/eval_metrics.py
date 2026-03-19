@@ -44,13 +44,18 @@ import seaborn as sns
 from json_repair import repair_json
 from matplotlib.colors import LinearSegmentedColormap
 
+from font_utils import configure_matplotlib_cjk_fonts
+
 matplotlib.use("Agg")
 
 # CJK 字体支持
-plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
-plt.rcParams["axes.unicode_minus"] = False
+_CJK_FONTS = configure_matplotlib_cjk_fonts()
 
-sns.set_theme(style="whitegrid", context="paper")
+sns.set_theme(
+    style="whitegrid",
+    context="paper",
+    rc={"font.family": _CJK_FONTS[0] if _CJK_FONTS else "sans-serif"},
+)
 
 MORANDI = {
     "blue_dark": "#6F8798",

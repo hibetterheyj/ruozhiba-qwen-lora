@@ -12,7 +12,7 @@
 | **`data/`** | 数据处理：去重、LLM 分类、校验修复、测试集去污染、ShareGPT 构建；YAML 配置与分类脚本同目录 |
 | **`train/`** | 训练与合并：LoRA 启动、Batch 压测、`llamafactory-cli export` 批量合并 |
 | **`inference/`** | 推理：`vLLM` 离线批量推理及 21 模型串行封装 |
-| **`viz/`** | 评估与可视化：两阶段 JSON 指标、图表、Before/After 样本选取 |
+| **`viz/`** | 评估与可视化：两阶段 JSON 指标、图表、Before/After 样本选取、报告媒体同步 |
 | **`tests/`** | 单元/调试向的小脚本（引号、JSON 解析等） |
 
 ---
@@ -120,12 +120,14 @@ python scripts/inference/inference_eval.py \
 
 | 脚本 | 产出 |
 |------|------|
-| `eval_metrics.py` | `results/json/`、`heatmaps/`、`confusion_matrices/`、`charts/` 等 |
+| `eval_metrics.py` | `results/json/`、`heatmaps/`、`confusion_matrices/`、`charts/`、`training/` 等 |
 | `gen_before_after.py` | `results/before_after_samples.json` |
+| `update_report_media.py` | `doc/report/lab3_report_latex/media/` 所需图表与汇总素材 |
 
 其中训练相关可视化现包含：
 
 - `results/training/*.json`：从 `trainer_log.jsonl` 提取的 step-level training / validation loss
+- `results/training/r8_loss_curves.json`、`r16_loss_curves.json`、`r8_last3_loss_curves.json`、`r16_last3_loss_curves.json`：四组实验的原始 loss 曲线
 - `results/charts/line_training_loss.*`：四组实验的 training loss over steps
 - `results/charts/grid_train_eval_loss.*`：四组实验的 train/eval loss 联合图
 - `results/before_after_samples_raw_output_case.json`：用于报告展示格式行为改进的原始输出样本
@@ -143,6 +145,8 @@ python scripts/viz/gen_before_after.py \
     --baseline results/results_baseline.json \
     --candidate results/results_r16_e5.json \
     --output results/before_after_samples.json
+
+python scripts/viz/update_report_media.py
 ```
 
 ---
@@ -175,7 +179,7 @@ python scripts/viz/gen_before_after.py \
 - `scripts/tests/` 下 4 个脚本已完成一轮工程化收尾：不再“导入即执行”，统一采用 `main()` + CLI / `logging`。
 - `scripts/crawl/extract_annual_data.py`、`scripts/data/fix_double_escapes.py`、`scripts/viz/gen_before_after.py` 已将残留 `print` 迁移为 `logging`。
 - `scripts/viz/gen_before_after.py` 已支持通过 CLI 参数覆盖 baseline / candidate / output，默认行为保持兼容。
-- `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；`upload/` 不包含 `scripts/tests/`。
+- `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；`upload/` 不包含 `scripts/tests/`，但应同步保留 `viz/` 下需要用于结果复现与报告刷新的脚本。
 
 ---
 
