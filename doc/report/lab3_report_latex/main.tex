@@ -4,17 +4,44 @@
 
 \usepackage{iftex}
 \ifPDFTeX
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
 \else
-\usepackage{fontspec}
-\usepackage{xeCJK}
-\setmainfont{Times New Roman}
-\setsansfont{Arial}
-\setmonofont{Menlo}
-\setCJKmainfont{PingFang SC}
-\setCJKsansfont{PingFang SC}
-\setCJKmonofont{PingFang SC}
+    \usepackage{fontspec}
+    \usepackage{xeCJK}
+    % ==========================================
+    % Western font fallback
+    % ==========================================
+    \IfFontExistsTF{Times New Roman}{
+        \setmainfont{Times New Roman}
+    }{
+        \setmainfont{TeX Gyre Termes}
+    }
+
+    \IfFontExistsTF{Arial}{
+        \setsansfont{Arial}
+    }{
+        \setsansfont{TeX Gyre Heros}
+    }
+
+    \IfFontExistsTF{Menlo}{
+        \setmonofont{Menlo}
+    }{
+        \setmonofont{TeX Gyre Cursor}
+    }
+
+    % ==========================================
+    % CJK font fallback
+    % ==========================================
+    \IfFontExistsTF{PingFang SC}{
+        \setCJKmainfont{PingFang SC}
+        \setCJKsansfont{PingFang SC}
+        \setCJKmonofont{PingFang SC}
+    }{
+        \setCJKmainfont{FandolSong-Regular}
+        \setCJKsansfont{FandolHei-Regular}
+        \setCJKmonofont{FandolFang-Regular}
+    }
 \fi
 \usepackage{hyperref}
 \usepackage{url}
