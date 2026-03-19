@@ -26,7 +26,7 @@ upload/
 │   │   └── batch_inference.sh             # Run inference across 21 models
 │   └── viz/
 │       ├── eval_metrics.py                # Two-stage evaluation + visualization
-│       └── gen_before_after.py            # Before/after comparison samples
+│       └── gen_before_after.py            # Before/after comparison samples (CLI inputs supported)
 ├── data/
 │   ├── ruozhiba_all.json                  # Full training set (2,785 ShareGPT conversations)
 │   ├── ruozhiba_last3.json                # Last-3-year training set (1,025 conversations)
@@ -123,6 +123,12 @@ Generates:
 
 ```bash
 python upload/scripts/viz/gen_before_after.py
+
+# Optional: override comparison inputs
+python upload/scripts/viz/gen_before_after.py \
+    --baseline results/results_baseline.json \
+    --candidate results/results_r16_e5.json \
+    --output results/before_after_samples.json
 ```
 
 ---
@@ -146,9 +152,12 @@ Scripts use `PROJECT_ROOT` relative to their own location. If you move files, up
 
 | Script | Path variable | Default |
 |--------|--------------|---------|
-| `run_training.sh` | `PROJECT_ROOT` | `$(cd "$(dirname "$0")/.." && pwd)` |
-| `batch_inference.sh` | `PROJECT_ROOT` | `/root/code/llm_ruozhiba` |
-| `batch_merge.sh` | `PROJECT_ROOT` | `/root/code/llm_ruozhiba` |
-| `inference_eval.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parent.parent` |
-| `eval_metrics.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parent.parent` |
-| `build_sft_data.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parent.parent` |
+| `run_training.sh` | `REPO_ROOT` | `$(cd "$(dirname "$0")/../../.." && pwd)` |
+| `batch_inference.sh` | `PROJECT_ROOT` | `$(cd "$(dirname "$0")/../../.." && pwd)` |
+| `batch_merge.sh` | `REPO_ROOT` | `$(cd "$(dirname "$0")/../../.." && pwd)` |
+| `inference_eval.py` | `UPLOAD_ROOT` | `Path(__file__).resolve().parents[2]` |
+| `eval_metrics.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parents[3]` |
+| `gen_before_after.py` | `PROJECT_ROOT` | `Path(__file__).resolve().parents[3]` |
+| `build_sft_data.py` | `UPLOAD_ROOT` | `Path(__file__).resolve().parents[2]` |
+
+> `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；提交包未包含 `scripts/tests/` 这类调试脚本。

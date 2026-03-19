@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-03-19 — 重构后收尾修复与文档同步
+
+- **`scripts/tests/`**：4 个调试脚本统一改为 `main()` + `logging`，补充类型标注与说明；`test_actual_file.py` / `test_fix_function.py` 新增 CLI 输入，降低对真实数据文件的硬依赖。
+- **`scripts/viz/gen_before_after.py`**：新增 `--baseline` / `--candidate` / `--output` / `--seed` 参数，默认仍兼容 `results_baseline.json` 与 `results_r16_e5.json`。
+- **日志统一**：`scripts/crawl/extract_annual_data.py`、`scripts/data/fix_double_escapes.py`、`scripts/viz/gen_before_after.py` 迁移到 `logging`。
+- **文档同步**：`readme.md`、`doc/readme.md`、`doc/guides/reproduction.md`、`scripts/readme.md`、`upload/readme.md` 更新为最新脚本定位与参数说明，并将 `upload/scripts/` 表述改为“对保留的核心脚本子目录保持同构”。
+
 ## 2026-03-19 — `scripts/` 按阶段分子目录 + `upload/scripts/` 同构
 
 - **`scripts/crawl/`**：`extract_cqia_data.py`、`extract_annual_data.py`、`process_ruozhiba_past_annual.py`（原始语料抽取/预处理；贴吧爬虫数据仍在 `crawler/`）

@@ -55,6 +55,17 @@
 - 将 `gen_before_after.py` 中硬编码结果文件改为参数化输入。
 - 持续将剩余 `print` 迁移到 `logging`。
 
+### 本次收尾已完成
+
+- `scripts/tests/test_actual_file.py`、`test_fix_function.py`、`test_fix_quotes.py`、`test_json_parse.py` 已统一补充 `main()` 入口，避免导入即执行。
+- 上述 4 个调试脚本已改用 `logging`，并补充类型标注 / docstring；定位明确为 debug / adhoc 诊断脚本。
+- `test_fix_quotes.py` 已直接复用 `scripts/data/fix_quotes.py` 中真实实现，消除“函数名与行为不一致”的误导。
+- `test_json_parse.py` 已移除无效字符串替换逻辑，保留实际有用的 JSON 提取诊断流程。
+- `test_actual_file.py` 与 `test_fix_function.py` 已改为 CLI 可选输入，缺文件时给出可操作错误提示，降低对真实数据文件的硬依赖。
+- `scripts/crawl/extract_annual_data.py`、`scripts/data/fix_double_escapes.py`、`scripts/viz/gen_before_after.py` 已将残留 `print` 迁移为 `logging`。
+- `scripts/viz/gen_before_after.py` 与 `upload/scripts/viz/gen_before_after.py` 已支持 `--baseline` / `--candidate` / `--output` / `--seed` 参数，默认行为保持兼容。
+- 文档中关于 `upload/scripts/` 的表述已收敛为“对保留的核心脚本子目录保持同构”，避免误解为包含 `scripts/tests/`。
+
 ## 2026-03-19 — 按流水线阶段分子目录 + 路径锚点统一
 
 ### 背景

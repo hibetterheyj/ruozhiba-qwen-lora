@@ -52,7 +52,7 @@ uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matpl
 # 数据 → LLaMA-Factory、训练、合并、推理、评估：见 doc/guides/reproduction.md
 ```
 
-最小可运行提交包说明：[upload/readme.md](upload/readme.md)。
+最小可运行提交包说明：[upload/readme.md](upload/readme.md)。`upload/scripts/` 与主仓库在保留的核心子目录上保持同构，不包含 `scripts/tests/` 调试脚本。
 
 ---
 
@@ -62,7 +62,7 @@ uv pip install 'llamafactory[metrics]' accelerate vllm json-repair seaborn matpl
 .
 ├── readme.md
 ├── configs/           # 训练 / prompt
-├── scripts/           # 分阶段脚本：crawl/ data/ train/ inference/ viz/ tests/（见 scripts/readme.md）
+├── scripts/           # 分阶段脚本：crawl/ data/ train/ inference/ viz/ tests/（其中 tests/ 为调试脚本；见 scripts/readme.md）
 ├── data/              # 语料与 LLaMA-Factory 数据副本说明见 data/readme.md
 ├── doc/               # 入口 doc/readme.md；guides/ analysis/ course/ report/ proposal/
 ├── LLaMA-Factory/

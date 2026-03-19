@@ -8,7 +8,7 @@
 
 ## 流水线总览
 
-脚本按阶段分目录（均在 `scripts/` 下，详见 [`../../scripts/readme.md`](../../scripts/readme.md)）：`crawl/` 抓取与抽取 · `data/` 清洗/分类/去重/SFT 构建 · `train/` 训练与合并 · `inference/` 批量推理 · `viz/` 评估与图表 · `tests/` 单元测试。
+脚本按阶段分目录（均在 `scripts/` 下，详见 [`../../scripts/readme.md`](../../scripts/readme.md)）：`crawl/` 抓取与抽取 · `data/` 清洗/分类/去重/SFT 构建 · `train/` 训练与合并 · `inference/` 批量推理 · `viz/` 评估与图表 · `tests/` 调试/诊断脚本。
 
 ```
                              ┌──────────────────────┐
@@ -130,6 +130,12 @@ python scripts/viz/eval_metrics.py \
 
 ```bash
 python scripts/viz/gen_before_after.py
+
+# 可选：覆盖 baseline / 候选结果 / 输出路径
+python scripts/viz/gen_before_after.py \
+    --baseline results/results_baseline.json \
+    --candidate results/results_r16_e5.json \
+    --output results/before_after_samples.json
 ```
 
 ## 最小提交包

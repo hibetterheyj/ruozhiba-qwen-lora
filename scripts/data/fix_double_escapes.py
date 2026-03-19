@@ -1,11 +1,14 @@
 import json
-import re
+import logging
 from pathlib import Path
 
 
-def fix_double_escaped_quotes_in_file(file_path: Path):
+LOGGER = logging.getLogger(__name__)
+
+
+def fix_double_escaped_quotes_in_file(file_path: Path) -> None:
     """Fix double escaped quotes in a JSON file."""
-    print(f"Processing: {file_path.name}")
+    LOGGER.info("Processing: %s", file_path.name)
 
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -40,12 +43,13 @@ def fix_double_escaped_quotes_in_file(file_path: Path):
     if fixed_count > 0:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"  Fixed {fixed_count} double-escaped quotes")
+        LOGGER.info("  Fixed %s double-escaped quotes", fixed_count)
     else:
-        print(f"  No double-escaped quotes found")
+        LOGGER.info("  No double-escaped quotes found")
 
 
-def main():
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     data_dir = Path(__file__).resolve().parents[2] / "data" / "tieba"
 
     files = [

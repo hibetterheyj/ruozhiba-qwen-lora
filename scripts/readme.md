@@ -130,18 +130,26 @@ python scripts/viz/eval_metrics.py \
     --comparison
 
 python scripts/viz/gen_before_after.py
+
+# 自定义对比输入 / 输出
+python scripts/viz/gen_before_after.py \
+    --baseline results/results_baseline.json \
+    --candidate results/results_r16_e5.json \
+    --output results/before_after_samples.json
 ```
 
 ---
 
-## `tests/` — 测试脚本
+## `tests/` — 调试 / 诊断脚本
 
 | 脚本 | 说明 |
 |------|------|
-| `test_fix_function.py` | 修复函数与 JSON 提取调试 |
-| `test_fix_quotes.py` | 引号修复 |
-| `test_json_parse.py` | JSON 解析容错 |
-| `test_actual_file.py` | 指定样本检视（路径相对仓库根 `data/tieba/`） |
+| `test_fix_function.py` | JSON 修复函数调试（`main()` + CLI，可指定文件/样本） |
+| `test_fix_quotes.py` | ASCII → 中文引号转换调试（复用 `scripts/data/fix_quotes.py` 实现） |
+| `test_json_parse.py` | JSON 解析容错诊断（清理损坏替换逻辑，使用 `logging`） |
+| `test_actual_file.py` | 指定样本检视（CLI 指定路径与 `no`，默认相对仓库根 `data/tieba/`） |
+
+> `scripts/tests/` 当前定位为 **debug / adhoc 诊断脚本**，用于手工复核引号修复、JSON 提取与真实样本排查；已统一补充 `main()`、类型标注与 `logging`，但不作为正式自动化测试套件。
 
 ---
 
@@ -155,6 +163,15 @@ python scripts/viz/gen_before_after.py
 
 ---
 
+## 2026-03-19 收尾说明
+
+- `scripts/tests/` 下 4 个脚本已完成一轮工程化收尾：不再“导入即执行”，统一采用 `main()` + CLI / `logging`。
+- `scripts/crawl/extract_annual_data.py`、`scripts/data/fix_double_escapes.py`、`scripts/viz/gen_before_after.py` 已将残留 `print` 迁移为 `logging`。
+- `scripts/viz/gen_before_after.py` 已支持通过 CLI 参数覆盖 baseline / candidate / output，默认行为保持兼容。
+- `upload/scripts/` 与主仓库在**保留的核心脚本子目录**上保持同构；`upload/` 不包含 `scripts/tests/`。
+
+---
+
 ## 最小提交包 `upload/`
 
-精简复现脚本与主仓库**同构子路径**（例如 `upload/scripts/train/run_training.sh`），默认在**完整克隆的仓库根目录**下执行；说明见 [`upload/readme.md`](../upload/readme.md)。
+精简复现脚本与主仓库**保留的核心脚本子路径同构**（例如 `upload/scripts/train/run_training.sh`），默认在**完整克隆的仓库根目录**下执行；说明见 [`upload/readme.md`](../upload/readme.md)。

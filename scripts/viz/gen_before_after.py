@@ -1,9 +1,32 @@
 """Generate before/after comparison samples for lab report Section 3.5."""
+
+import argparse
 import json
+import logging
 import random
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+LOGGER = logging.getLogger(__name__)
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments for selecting comparison inputs."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--baseline", type=Path, default=PROJECT_ROOT / "results" / "results_baseline.json", help="Baseline inference result JSON file.")
+    parser.add_argument("--candidate", type=Path, default=PROJECT_ROOT / "results" / "results_r16_e5.json", help="Fine-tuned model inference result JSON file.")
+    parser.add_argument("--output", type=Path, default=PROJECT_ROOT / "results" / "before_after_samples.json", help="Path to write the selected comparison samples.")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed used when sampling representative cases.")
+    return parser.parse_args()
+
+
+def load_results(file_path: Path) -> list[dict[str, Any]]:
+    """Load a result list from disk with an actionable error if missing."""
+    if not file_path.exists():
+        raise FileNotFoundError(f"Result file not found: {file_path}. Run inference first or override the path via CLI.")
+    with open(file_path, encoding="utf-8") as file:
+        return json.load(file)
 
 def get_top1(model_output: str) -> str | None:
     try:
@@ -24,7 +47,7 @@ def get_top1(model_output: str) -> str | None:
     return None
 
 
-def get_gold_top1(gc: dict) -> str | None:
+def get_gold_top1(gc: dict[str, Any]) -> str | None:
     cats = gc.get("top3_categories", [])
     if not cats:
         return None
@@ -33,11 +56,17 @@ def get_gold_top1(gc: dict) -> str | None:
     return cats[0]
 
 
-def main():
-    with open(PROJECT_ROOT / "results/results_baseline.json") as f:
-        baseline = json.load(f)
-    with open(PROJECT_ROOT / "results/results_r16_e5.json") as f:
-        best = json.load(f)
+def main() -> None:
+    """Select representative baseline-vs-SFT comparison samples."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    args = parse_args()
+    baseline = load_results(args.baseline)
+    best = load_results(args.candidate)
+
+    if len(baseline) != len(best):
+        raise ValueError(
+            f"Input length mismatch: baseline has {len(baseline)} rows, candidate has {len(best)} rows. Use result files generated on the same evaluation set."
+        )
 
     baseline_wrong_sft_right = []
     format_improvement = []  # both correct, baseline string list, SFT dict list
@@ -63,7 +92,7 @@ def main():
         elif not s_correct:
             sft_still_wrong.append(i)
 
-    random.seed(42)
+    random.seed(args.seed)
     samples = []
 
     # 2 cases: baseline wrong, SFT correct
@@ -106,15 +135,13 @@ def main():
             "sft_output": best[i]["model_output"],
         })
 
-    out_path = PROJECT_ROOT / "results/before_after_samples.json"
-    with open(out_path, "w") as f:
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with open(args.output, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"Saved {len(output)} before/after samples to {out_path}")
+    LOGGER.info("Saved %s before/after samples to %s", len(output), args.output)
     for s in output:
-        print(f"  [{s['comparison_type']}] idx={s['sample_index']}: "
-              f"gold={s['gold_top1']} base={s['baseline_top1']} "
-              f"sft={s['sft_top1']}")
+        LOGGER.info("  [%s] idx=%s: gold=%s base=%s sft=%s", s['comparison_type'], s['sample_index'], s['gold_top1'], s['baseline_top1'], s['sft_top1'])
 
 
 if __name__ == "__main__":

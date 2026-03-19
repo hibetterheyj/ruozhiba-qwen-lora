@@ -1,7 +1,15 @@
-import json
-import re
+"""Adhoc debug script for JSON extraction fallback behavior."""
 
-test_raw_response = r'''```json
+import json
+import logging
+import re
+from typing import Any
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+TEST_RAW_RESPONSE = r'''```json
 {
   "thought_process": "这句话的核心笑点在于\"放在眼里\"这个词的双关。日常语境中，\"没把他放在眼里\"意思是不重视某人。但在这个语境中，患者错误使用痔疮膏——痔疮膏被误涂到了眼睛上（或者说本该用在肛门的药膏被用在了眼睛附近），医生说\"你根本就没把他放在眼里\"，字面意思变成了\"你没有把（痔疮膏）放到眼睛里\"，形成了一语双关的效果。这是一个典型的文字游戏，利用\"放在眼里\"的惯用义和字面义之间的错位制造笑点。同时，整个场景设定——医生批评患者错误使用痔疮膏——带有一种荒诞的画面感，属于古典弱智的荒谬情境构建。此外，涉及痔疮、误用药膏等略带身体不适/尴尬的话题，有一点点冒犯性的黑色幽默色彩，但程度较轻。",
   "top3_categories": [
@@ -28,24 +36,20 @@ test_raw_response = r'''```json
 ```'''
 
 def fix_json_string(content: str) -> str:
-    """Fix common JSON issues like Chinese quotes."""
-    content = content.replace('"', '"').replace('"', '"')
-    content = content.replace(''', "'").replace(''', "'")
+    """Fix common punctuation variants in a raw JSON-like string."""
     content = content.replace('，', ',')
     content = content.replace('：', ':')
     content = content.replace('【', '[').replace('】', ']')
     return content
 
-def extract_json_from_response(content: str):
+def extract_json_from_response(content: str) -> dict[str, Any] | None:
     """Try multiple methods to extract valid JSON from response."""
     if not content:
         return None
 
     content = content.strip()
 
-    print("Step 1: Original content:")
-    print(repr(content[:200]))
-    print()
+    LOGGER.info("Step 1: Original content: %r", content[:200])
 
     if content.startswith("```"):
         lines = content.split("\n")
@@ -55,23 +59,18 @@ def extract_json_from_response(content: str):
             lines = lines[:-1]
         content = "\n".join(lines).strip()
 
-    print("Step 2: After removing ```:")
-    print(repr(content[:200]))
-    print()
+    LOGGER.info("Step 2: After removing fences: %r", content[:200])
 
     content = fix_json_string(content)
 
-    print("Step 3: After fixing JSON string:")
-    print(repr(content[:200]))
-    print()
+    LOGGER.info("Step 3: After punctuation cleanup: %r", content[:200])
 
     try:
         result = json.loads(content)
-        print("✓ Success: Direct parse worked!")
+        LOGGER.info("Direct parse succeeded")
         return result
     except json.JSONDecodeError as e:
-        print(f"✗ Direct parse failed: {e}")
-        pass
+        LOGGER.info("Direct parse failed: %s", e)
 
     json_patterns = [
         r'\{[\s\S]*"thought_process"[\s\S]*"top3_categories"[\s\S]*\}',
@@ -79,26 +78,32 @@ def extract_json_from_response(content: str):
     ]
 
     for i, pattern in enumerate(json_patterns):
-        print(f"\nTrying pattern {i}: {pattern}")
         matches = re.findall(pattern, content)
-        print(f"Found {len(matches)} matches")
+        LOGGER.info("Trying pattern %s, found %s matches", i, len(matches))
         for j, match in enumerate(matches):
-            print(f"  Match {j}: {repr(match[:100])}")
+            LOGGER.info("Match %s preview: %r", j, match[:100])
             try:
                 fixed_match = fix_json_string(match)
                 result = json.loads(fixed_match)
-                print(f"  ✓ Success!")
+                LOGGER.info("Pattern %s match %s parse succeeded", i, j)
                 return result
             except json.JSONDecodeError as e:
-                print(f"  ✗ Failed: {e}")
+                LOGGER.info("Pattern %s match %s parse failed: %s", i, j, e)
                 continue
 
     return None
 
-result = extract_json_from_response(test_raw_response)
-print("\n" + "=" * 60)
-print("Final result:")
-if result:
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-else:
-    print("None")
+def main() -> None:
+    """Run the JSON extraction debug flow on an inline sample."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    result = extract_json_from_response(TEST_RAW_RESPONSE)
+    LOGGER.info("%s", "=" * 60)
+    LOGGER.info("Final result:")
+    if result:
+        LOGGER.info("%s", json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        LOGGER.info("None")
+
+
+if __name__ == "__main__":
+    main()

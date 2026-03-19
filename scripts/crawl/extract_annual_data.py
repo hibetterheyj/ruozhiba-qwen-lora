@@ -1,7 +1,11 @@
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def load_json(file_path: str) -> List[Dict]:
@@ -34,7 +38,7 @@ def extract_data(data: List[Dict], time_start: str, time_end: str) -> Tuple[List
                     'no': item['no'],
                     'text': item['text']
                 })
-        except:
+        except ValueError:
             continue
     
     filtered.sort(key=lambda x: x['no'])
@@ -53,27 +57,28 @@ def extract_data(data: List[Dict], time_start: str, time_end: str) -> Tuple[List
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     repo_root = Path(__file__).resolve().parents[2]
     input_path = repo_root / "data" / "ruozhiba" / "data" / "ruozhiba-post-annual-processed_filtered.json"
     output_dir = repo_root / "data" / "tieba"
 
     data = load_json(input_path)
 
-    print("2018 data:")
+    LOGGER.info("2018 data:")
     data_2018, missing_2018 = extract_data(data, "2018-01-01 00:00", "2019-01-01 13:37")
     output_2018 = output_dir / "best176_2018.json"
     save_json(data_2018, output_2018)
-    print(f"- Matched {len(data_2018)} posts")
-    print(f"- Missing numbers: {missing_2018}")
-    print(f"- Saved to {output_2018}")
+    LOGGER.info("- Matched %s posts", len(data_2018))
+    LOGGER.info("- Missing numbers: %s", missing_2018)
+    LOGGER.info("- Saved to %s", output_2018)
     
-    print("\n2019 data:")
+    LOGGER.info("2019 data:")
     data_2019, missing_2019 = extract_data(data, "2019-12-15 23:00", "2020-01-04 19:32")
     output_2019 = output_dir / "best336_2019.json"
     save_json(data_2019, output_2019)
-    print(f"- Matched {len(data_2019)} posts")
-    print(f"- Missing numbers: {missing_2019}")
-    print(f"- Saved to {output_2019}")
+    LOGGER.info("- Matched %s posts", len(data_2019))
+    LOGGER.info("- Missing numbers: %s", missing_2019)
+    LOGGER.info("- Saved to %s", output_2019)
 
 
 if __name__ == '__main__':
