@@ -60,7 +60,7 @@
 | 100 (last3 ~E3.2) | ~3.2 | — | — | 1.0310 | 0.9927 |
 | 200 (last3 ~E6.5) | ~6.5 | — | — | 0.9849 | **0.9623** |
 
-> 详细训练分析见 `doc/train_analysis1.md`。
+> 详细训练分析见 `doc/analysis/train_analysis1.md`。
 
 ---
 

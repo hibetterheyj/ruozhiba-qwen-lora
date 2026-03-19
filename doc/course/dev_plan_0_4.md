@@ -5,7 +5,7 @@
 > **v0.3 → v0.5 变更**:
 > 1. Phase 3.3 LLM-as-Judge **暂时跳过** — 不影响 assignment 核心要求
 > 2. Phase 3.4 Before/After 对比 **已完成** — 5 条代表性样本
-> 3. Phase 4 报告 v0.1 **已完成** — 英文实验报告初稿 `doc/lab3_report_v0_1.md`
+> 3. Phase 4 报告 v0.1 **已完成** — 英文实验报告初稿 `doc/report/lab3_report_v0_1.md`
 
 ---
 
@@ -28,7 +28,7 @@
 | 3.2 定量评估 + 可视化 | ✅ 完成 | 混淆矩阵 (9) + 热力图 (14) + 图表 (8) |
 | 3.3 LLM-as-Judge | ⏭️ 跳过 | — |
 | 3.4 Before/After 对比 | ✅ 完成 | `results/before_after_samples.json` (5 条) |
-| 4.1 英文报告 v0.1 | ✅ 完成 | `doc/lab3_report_v0_1.md` |
+| 4.1 英文报告 v0.1 | ✅ 完成 | `doc/report/lab3_report_v0_1.md` |
 
 ---
 
@@ -63,7 +63,7 @@
 
 ### 4.1 报告文件
 
-`doc/lab3_report_v0_1.md` — 英文实验报告，覆盖 assignment.md 全部 5 个 section:
+`doc/report/lab3_report_v0_1.md` — 英文实验报告，覆盖 assignment.md 全部 5 个 section:
 
 | Assignment Section | Report Section | 状态 |
 |-------------------|---------------|------|
@@ -89,7 +89,7 @@
 
 ```
 提交内容:
-├── doc/lab3_report_v0_1.md             # ✅ 英文实验报告 v0.1
+├── doc/report/lab3_report_v0_1.md      # ✅ 英文实验报告 v0.1
 ├── scripts/
 │   ├── classify_cqia_updated.py        # ✅ Phase 1.1 — CQIA thought_process 补全
 │   ├── dedup_test_vs_train.py          # ✅ Phase 1.2 — 去重脚本

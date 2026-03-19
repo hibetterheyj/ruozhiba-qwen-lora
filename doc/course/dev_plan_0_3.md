@@ -4,7 +4,7 @@
 >
 > **v0.2 → v0.3 变更**: Phase 3.1 推理后端从 **sglang** 迁移至 **vLLM**。
 > 原因: sgl_kernel 与系统 torch (2.8.0+cu129) ABI 不兼容，`common_ops.abi3.so` 加载失败。
-> 详见 `doc/changelog.md` "Phase 3.1 sglang 推理失败" 条目。
+> 详见 `doc/course/changelog.md`（本仓库变更日志）中 "Phase 3.1 sglang 推理失败" 条目。
 >
 > **Phase 3.2 评估脚本 (`eval_metrics.py`) 无需修改** — 仅消费 JSON 结果文件。
 

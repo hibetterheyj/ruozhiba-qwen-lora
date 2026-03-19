@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-03-19 — `doc/` 子目录整理
+
+- 新建 **`doc/guides/`**：`environment.md`、`data.md`、`reproduction.md`、`results_summary.md`
+- 新建 **`doc/analysis/`**：`training_execution.md`、`train_analysis1.md`、`test_analysis1.md`、`train_test_eda.md`
+- 新建 **`doc/course/`**：`assignment.md`、`howto.md`、`dev_plan_0_*.md`、`changelog.md`（本文件）、`Lab3_SFT.pdf`、`dev_plan_0_2.md.bak`
+- **`doc/report/`**：迁入 `lab3_report_v0_1.md`（与 `lab3_report.md` 同目录）
+- 根 `doc/readme.md` 更新为按文件夹分类的索引；各 `guides/` 内文档已修正相互链接
+
+## 2026-03-19 — 文档拆分与项目命名
+
+- 根目录 `readme.md`：项目名改为 **ruozhiba-qwen-lora**，顶部居中插入 `media/project_logo.png`；正文精简，长内容迁至 `doc/`。
+- 新增手册（后迁入 `doc/guides/`）：`environment.md`、`data.md`、`reproduction.md`、`results_summary.md`。
+- `doc/readme.md` 改为分类索引；`doc/report/media/README.md` 说明报告配图放置方式。
+- README 中嵌入 `doc/report/` 报告同款可视化路径（fig3/4/7/8），与 `lab3_report.md` 一致。
+
 ## 2026-03-16 — Phase 5 README 更新 + 最小化提交包
 
 ### 概述
