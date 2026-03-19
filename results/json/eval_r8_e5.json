@@ -12,7 +12,7 @@
     "repaired_accuracy": 0.5583333333333333,
     "confidence_when_correct": 0.6919402985074629,
     "confidence_when_wrong": 0.6492380952380953,
-    "eval_loss": 0.8884994983673096
+    "eval_loss": null
   },
   "per_sample": [
     {

@@ -9,7 +9,11 @@ Stage 2: 逻辑准确率 (top1_accuracy / top3_hit_rate / confidence_mae / stric
     json/           — eval_{tag}.json + eval_comparison.json
     confusion_matrices/ — baseline + best 模型 + 汇总网格
     heatmaps/       — Rank×Epoch 热力图
-    charts/         — 折线图、柱状图、雷达图等
+        charts/         — 折线图、柱状图、雷达图等
+
+训练日志说明:
+    若从训练服务器取回 LLaMA-Factory 生成的 trainer_log.jsonl，脚本可额外绘制 train loss
+    与 train/eval combined curves；若日志缺失，则只导出 eval loss 相关图表。
 
 用法（仓库根目录）:
     # 评估单个结果文件
@@ -38,12 +42,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from json_repair import repair_json
+from matplotlib.colors import LinearSegmentedColormap
 
 matplotlib.use("Agg")
 
 # CJK 字体支持
 plt.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
+
+sns.set_theme(style="whitegrid", context="paper")
+
+MORANDI = {
+    "blue_dark": "#6F8798",
+    "blue_mid": "#8FA7B5",
+    "blue_light": "#B7C7D1",
+    "red_dark": "#B07A7A",
+    "red_mid": "#C79B9B",
+    "red_light": "#DFC0C0",
+    "green_mid": "#98A892",
+    "sand": "#C8B79E",
+    "plum": "#8F7A8A",
+    "gray": "#A7A29A",
+    "cream": "#F5F1EB",
+}
+
+RB_DIVERGING = LinearSegmentedColormap.from_list(
+    "morandi_rb", [MORANDI["blue_light"], MORANDI["cream"], MORANDI["red_mid"]]
+)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -66,8 +91,8 @@ CATEGORIES = [
 
 # 色阶配置: 锁定 vmin/vmax 确保 all 与 last3 同一指标颜色映射一致
 COLOR_SCALE = {
-    "accuracy": {"vmin": 0.0, "vmax": 1.0, "cmap": "YlOrRd"},
-    "loss": {"vmin": 0.5, "vmax": 1.2, "cmap": "YlOrRd_r"},
+    "accuracy": {"vmin": 0.0, "vmax": 1.0, "cmap": RB_DIVERGING},
+    "loss": {"vmin": 0.5, "vmax": 1.2, "cmap": RB_DIVERGING.reversed()},
 }
 
 METRICS_FOR_HEATMAP = [
@@ -382,7 +407,7 @@ def plot_confusion_matrix(
             fmt = "d"
 
         sns.heatmap(
-            data, annot=True, fmt=fmt, cmap="Blues",
+            data, annot=True, fmt=fmt, cmap=RB_DIVERGING,
             xticklabels=CATEGORIES, yticklabels=CATEGORIES, ax=ax,
         )
         ax.set_xlabel("Predicted")
@@ -419,7 +444,7 @@ def plot_confusion_grid(
         row_sums = np.where(row_sums == 0, 1, row_sums)
         data = confusion / row_sums
         sns.heatmap(
-            data, annot=True, fmt=".2f", cmap="Blues",
+            data, annot=True, fmt=".2f", cmap=RB_DIVERGING,
             xticklabels=CATEGORIES, yticklabels=CATEGORIES, ax=ax,
             cbar=idx == len(tags) - 1,
         )
@@ -500,10 +525,10 @@ def plot_eval_loss_lines(
     fig, ax = plt.subplots(figsize=(8, 5))
 
     line_cfgs = [
-        ("R8 all", "r8", "#1f77b4", "-", "o"),
-        ("R16 all", "r16", "#ff7f0e", "-", "s"),
-        ("R8 last3", "r8_last3", "#1f77b4", "--", "^"),
-        ("R16 last3", "r16_last3", "#ff7f0e", "--", "D"),
+        ("R8 all", "r8", MORANDI["red_mid"], "-", "o"),
+        ("R16 all", "r16", MORANDI["blue_dark"], "-", "s"),
+        ("R8 last3", "r8_last3", MORANDI["red_light"], "--", "^"),
+        ("R16 last3", "r16_last3", MORANDI["blue_light"], "--", "D"),
     ]
 
     for label, prefix, color, ls, marker in line_cfgs:
@@ -548,13 +573,13 @@ def plot_baseline_vs_best_bar(
     ]
 
     x = np.arange(len(metrics_to_show))
-    width = 0.18
-    colors = ["#999999", "#1f77b4", "#ff7f0e", "#2ca02c"]
+    width = 0.16
+    colors = [MORANDI["gray"], MORANDI["blue_dark"], MORANDI["red_mid"], MORANDI["green_mid"]]
 
     fig, ax = plt.subplots(figsize=(10, 5))
     for i, tag in enumerate(tags_to_show):
         vals = [all_metrics.get(tag, {}).get(m, 0) for m, _ in metrics_to_show]
-        ax.bar(x + i * width, vals, width, label=tag, color=colors[i], alpha=0.85)
+        ax.bar(x + i * width, vals, width * 0.88, label=tag, color=colors[i], alpha=0.92)
 
     hide_spines(ax)
     ax.set_xticks(x + width * (len(tags_to_show) - 1) / 2)
@@ -591,9 +616,16 @@ def plot_all_vs_last3_delta(
     if not deltas:
         return
 
-    colors = ["#2ca02c" if d >= 0 else "#d62728" for d in deltas]
+    red_series = [MORANDI["red_light"], MORANDI["red_mid"], MORANDI["red_dark"], "#9D6F6F", "#865D5D"]
+    blue_series = [MORANDI["blue_light"], MORANDI["blue_mid"], MORANDI["blue_dark"], "#61798A", "#536878"]
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(range(len(labels)), deltas, color=colors, alpha=0.85)
+    bar_colors = []
+    for label in labels:
+        rank = 8 if label.startswith("R8") else 16
+        epoch = int(label.split("E")[1])
+        idx = min(max(epoch - 3, 0), 4)
+        bar_colors.append(red_series[idx] if rank == 8 else blue_series[idx])
+    ax.bar(range(len(labels)), deltas, color=bar_colors, alpha=0.9, width=0.72)
     hide_spines(ax)
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=10)
@@ -617,7 +649,14 @@ def plot_per_category_accuracy(
     recall = np.where(row_sums > 0, diag / row_sums, 0)
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    bars = ax.bar(range(len(CATEGORIES)), recall, color=sns.color_palette("Set2", len(CATEGORIES)))
+    bars = ax.bar(
+        range(len(CATEGORIES)),
+        recall,
+        color=sns.color_palette([
+            MORANDI["blue_light"], MORANDI["blue_mid"], MORANDI["blue_dark"], MORANDI["green_mid"],
+            MORANDI["sand"], MORANDI["red_light"], MORANDI["red_mid"], MORANDI["plum"]
+        ])
+    )
     hide_spines(ax)
     ax.set_xticks(range(len(CATEGORIES)))
     ax.set_xticklabels(CATEGORIES, fontsize=11)
@@ -657,7 +696,7 @@ def plot_radar_top_models(
     angles += angles[:1]
 
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-    colors = ["#999999", "#1f77b4", "#ff7f0e", "#2ca02c"]
+    colors = [MORANDI["gray"], MORANDI["blue_dark"], MORANDI["red_mid"], MORANDI["green_mid"]]
 
     for i, tag in enumerate(tags_to_show):
         vals = [all_metrics.get(tag, {}).get(m, 0) for m, _ in radar_metrics]

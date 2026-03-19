@@ -1,6 +1,7 @@
 """Generate before/after comparison samples for lab report Section 3.5."""
 
 import argparse
+import csv
 import json
 import logging
 import random
@@ -30,6 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42, help="Random seed used when sampling representative cases.")
     parser.add_argument("--export_pdf", action="store_true", help="Also export a PDF figure for the selected before/after samples.")
     parser.add_argument("--no_title", action="store_true", help="Generate the before/after summary figure without a title.")
+    parser.add_argument("--export_text", action="store_true", help="Also export TXT and CSV summaries for direct report use.")
     return parser.parse_args()
 
 
@@ -99,6 +101,37 @@ def plot_before_after_summary(samples: list[dict[str, Any]], output_json: Path) 
     out_path = output_json.with_suffix(".png")
     save_figure(fig, out_path)
     plt.close(fig)
+
+
+def export_text_summaries(samples: list[dict[str, Any]], output_json: Path) -> None:
+    """Export selected qualitative cases as CSV and TXT summaries."""
+    csv_path = output_json.with_suffix(".csv")
+    txt_path = output_json.with_suffix(".txt")
+
+    with open(csv_path, "w", encoding="utf-8", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["sample_index", "comparison_type", "gold_top1", "baseline_top1", "sft_top1", "instruction"])
+        for sample in samples:
+            writer.writerow([
+                sample.get("sample_index", ""),
+                sample.get("comparison_type", ""),
+                sample.get("gold_top1", ""),
+                sample.get("baseline_top1", ""),
+                sample.get("sft_top1", ""),
+                str(sample.get("instruction", "")).replace("\n", " "),
+            ])
+
+    with open(txt_path, "w", encoding="utf-8") as txt_file:
+        for sample in samples:
+            txt_file.write(f"[sample {sample.get('sample_index', '')}] {sample.get('comparison_type', '')}\n")
+            txt_file.write(f"gold: {sample.get('gold_top1', '')}\n")
+            txt_file.write(f"baseline: {sample.get('baseline_top1', '')}\n")
+            txt_file.write(f"sft: {sample.get('sft_top1', '')}\n")
+            txt_file.write(f"prompt: {sample.get('instruction', '')}\n")
+            txt_file.write("\n")
+
+    LOGGER.info("Saved CSV summary to %s", csv_path)
+    LOGGER.info("Saved TXT summary to %s", txt_path)
 
 
 def load_results(file_path: Path) -> list[dict[str, Any]]:
@@ -223,6 +256,8 @@ def main() -> None:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     plot_before_after_summary(output, args.output)
+    if args.export_text:
+        export_text_summaries(output, args.output)
 
     LOGGER.info("Saved %s before/after samples to %s", len(output), args.output)
     for s in output:

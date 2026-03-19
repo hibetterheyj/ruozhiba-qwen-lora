@@ -1,0 +1,6 @@
+sample_index,comparison_type,gold_top1,baseline_top1,sft_top1,instruction
+180,baseline_wrong_sft_correct,奇怪提问,弱智科学家,奇怪提问,苦行僧以苦为乐，那么他受苦是不是可以说他在奖励自己
+38,baseline_wrong_sft_correct,奇怪提问,地狱笑话,奇怪提问,为什么医院床位那么紧张，不弄成上下铺呢？🤗
+22,format_improvement,奇怪提问,奇怪提问,奇怪提问,为什么白天能看见月亮，晚上却看不见太阳呢？
+134,both_correct_deeper_analysis,文字游戏,文字游戏,文字游戏,失踪是不是丢人的事情？
+67,sft_failure_case,文艺弱智,文字游戏,文字游戏,并非无人爱我，病危通知单是死神小姐予我的情书

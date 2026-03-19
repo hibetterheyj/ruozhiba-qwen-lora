@@ -1,0 +1,30 @@
+[sample 180] baseline_wrong_sft_correct
+gold: 奇怪提问
+baseline: 弱智科学家
+sft: 奇怪提问
+prompt: 苦行僧以苦为乐，那么他受苦是不是可以说他在奖励自己
+
+[sample 38] baseline_wrong_sft_correct
+gold: 奇怪提问
+baseline: 地狱笑话
+sft: 奇怪提问
+prompt: 为什么医院床位那么紧张，不弄成上下铺呢？🤗
+
+[sample 22] format_improvement
+gold: 奇怪提问
+baseline: 奇怪提问
+sft: 奇怪提问
+prompt: 为什么白天能看见月亮，晚上却看不见太阳呢？
+
+[sample 134] both_correct_deeper_analysis
+gold: 文字游戏
+baseline: 文字游戏
+sft: 文字游戏
+prompt: 失踪是不是丢人的事情？
+
+[sample 67] sft_failure_case
+gold: 文艺弱智
+baseline: 文字游戏
+sft: 文字游戏
+prompt: 并非无人爱我，病危通知单是死神小姐予我的情书
+
