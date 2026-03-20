@@ -36,11 +36,11 @@
 
 | Rank×Epoch 热力图（Strict Acc） | Strict Accuracy 随 epoch |
 |:--:|:--:|
-| ![heatmap](doc/report/media/fig4_heatmap_strict_accuracy.png) | ![acc trend](doc/report/media/fig3_strict_accuracy_trend.png) |
+| ![heatmap](results/heatmaps/heatmap_all_strict_accuracy.png) | ![acc trend](results/charts/line_strict_accuracy.png) |
 
 | Baseline vs Top-3 模型 | 全量 vs 近三年 |
 |:--:|:--:|
-| ![baseline vs top3](doc/report/media/fig7_baseline_vs_top3.png) | ![all vs last3](doc/report/media/fig8_all_vs_last3.png) |
+| ![baseline vs top3](results/charts/bar_baseline_vs_top3.png) | ![all vs last3](results/charts/bar_all_vs_last3_delta.png) |
 
 训练过程图现已补全：`results/charts/line_training_loss.pdf` 给出 step-level training loss，`results/charts/grid_train_eval_loss.pdf` 给出四组实验的 train/eval loss 对照，满足 assignment 对 `Training loss over steps` 的要求。原始提取结果同步保存在 `results/training/r8_loss_curves.json`、`results/training/r16_loss_curves.json`、`results/training/r8_last3_loss_curves.json`、`results/training/r16_last3_loss_curves.json`。
 

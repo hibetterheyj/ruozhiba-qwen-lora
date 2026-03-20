@@ -4,4 +4,6 @@
 
 - `fig1_train_eval_loss.png` … `fig8_all_vs_last3.png`
 
-生成脚本通常为 `scripts/viz/eval_metrics.py` 等；也可从 `results/` 下对应图表复制至此以便报告与 README 引用。
+生成脚本通常为 `scripts/viz/eval_metrics.py` 等；`scripts/viz/update_report_media.py` 会按既定映射从 `results/charts/`、`results/heatmaps/`、`results/confusion_matrices/` 复制对应 PNG 到本目录。
+
+当前仓库根目录 `readme.md` 已改为直接引用 `results/.../*.png`，本目录主要保留给报告静态配图使用。

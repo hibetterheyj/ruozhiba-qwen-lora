@@ -13,9 +13,22 @@ from font_utils import configure_matplotlib_cjk_fonts
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS_CHARTS = ROOT / 'results' / 'charts'
+RESULTS_CONFUSION = ROOT / 'results' / 'confusion_matrices'
 RESULTS_HEATMAPS = ROOT / 'results' / 'heatmaps'
 RESULTS_TRAINING = ROOT / 'results' / 'training'
+REPORT_MEDIA = ROOT / 'doc' / 'report' / 'media'
 LATEX_MEDIA = ROOT / 'doc' / 'report' / 'lab3_report_latex' / 'media'
+
+REPORT_MEDIA_PNG_MAP = {
+    'fig1_train_eval_loss.png': RESULTS_CHARTS / 'grid_train_eval_loss.png',
+    'fig2_eval_loss_trend.png': RESULTS_CHARTS / 'line_eval_loss.png',
+    'fig3_strict_accuracy_trend.png': RESULTS_CHARTS / 'line_strict_accuracy.png',
+    'fig4_heatmap_strict_accuracy.png': RESULTS_HEATMAPS / 'heatmap_all_strict_accuracy.png',
+    'fig5_confusion_grid.png': RESULTS_CONFUSION / 'confusion_grid_top_models.png',
+    'fig6_per_category_recall.png': RESULTS_CHARTS / 'bar_per_category_recall_r16_e5.png',
+    'fig7_baseline_vs_top3.png': RESULTS_CHARTS / 'bar_baseline_vs_top3.png',
+    'fig8_all_vs_last3.png': RESULTS_CHARTS / 'bar_all_vs_last3_delta.png',
+}
 
 MORANDI = {
     'blue': '#7C93A6',
@@ -229,6 +242,7 @@ def make_training_loss_summary() -> None:
 
 
 def copy_files() -> None:
+    REPORT_MEDIA.mkdir(parents=True, exist_ok=True)
     LATEX_MEDIA.mkdir(parents=True, exist_ok=True)
     chart_needed = [
         'dataset_source_donut.pdf',
@@ -252,6 +266,10 @@ def copy_files() -> None:
         src = RESULTS_HEATMAPS / name
         if src.exists():
             shutil.copy2(src, LATEX_MEDIA / name)
+
+    for target_name, src in REPORT_MEDIA_PNG_MAP.items():
+        if src.exists():
+            shutil.copy2(src, REPORT_MEDIA / target_name)
 
 
 if __name__ == '__main__':
